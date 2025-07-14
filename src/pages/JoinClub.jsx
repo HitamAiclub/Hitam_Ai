@@ -14,7 +14,8 @@ const JoinClub = () => {
     branch: '',
     year: '',
     section: '',
-    email: ''
+    email: '',
+  
   });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
