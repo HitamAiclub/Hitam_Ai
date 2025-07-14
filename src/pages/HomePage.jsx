@@ -1,0 +1,334 @@
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../firebase';
+import Card from '../components/UI/Card';
+import Button from '../components/UI/Button';
+import { Calendar, Users, Trophy, ArrowRight } from 'lucide-react';
+
+const HomePage = () => {
+  const [committeeMembers, setCommitteeMembers] = useState([]);
+  const [featuredEvent, setFeaturedEvent] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      try {
+        // Fetch committee members
+        const committeeSnapshot = await getDocs(collection(db, 'committeeMembers'));
+        const members = committeeSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setCommitteeMembers(members);
+      } catch (error) {
+        console.warn('Could not fetch committee members:', error.message);
+        setCommitteeMembers([]);
+      }
+
+      try {
+        // Fetch featured event (latest event)
+        const eventsSnapshot = await getDocs(collection(db, 'events'));
+        const events = eventsSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        
+        if (events.length > 0) {
+          const sortedEvents = events.sort((a, b) => 
+            new Date(b.meta?.startDate || 0) - new Date(a.meta?.startDate || 0)
+          );
+          setFeaturedEvent(sortedEvents[0]);
+        }
+      } catch (error) {
+        console.warn('Could not fetch events:', error.message);
+        setFeaturedEvent(null);
+      }
+    } catch (error) {
+      console.warn('General data fetch error:', error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen">
+      {/* Hero Section */}
+      <section className="relative min-h-screen flex items-center justify-center pt-16">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/10 via-purple-900/5 to-teal-900/10 dark:from-blue-900/20 dark:via-purple-900/10 dark:to-teal-900/20"></div>
+        <div className="text-center space-y-8 px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="relative z-10"
+          >
+            <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-teal-600 bg-clip-text text-transparent mb-6">
+              HITAM AI
+            </h1>
+            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+              Empowering the next generation of AI innovators at HITAM
+            </p>
+          </motion.div>
+          
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="flex flex-col sm:flex-row gap-4 justify-center relative z-10"
+          >
+            <Button size="lg" className="group">
+              Explore Events
+              <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </Button>
+            <Button variant="outline" size="lg">
+              Join Our Community
+            </Button>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* About HITAM Section */}
+      <section className="py-20 px-4">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-6">
+              About HITAM
+            </h2>
+            <p className="text-lg text-gray-600 dark:text-gray-300 max-w-4xl mx-auto">
+              Hyderabad Institute of Technology and Management (HITAM) is a premier educational institution 
+              committed to excellence in engineering education and research. Founded with the vision of 
+              nurturing skilled professionals who can contribute to technological advancement and societal development.
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                icon: <Users className="w-8 h-8" />,
+                title: "Expert Faculty",
+                description: "Learn from industry experts and experienced academicians"
+              },
+              {
+                icon: <Trophy className="w-8 h-8" />,
+                title: "Excellence in Education",
+                description: "Recognized for academic excellence and innovative teaching methods"
+              },
+              {
+                icon: <Calendar className="w-8 h-8" />,
+                title: "Industry Connections",
+                description: "Strong partnerships with leading technology companies"
+              }
+            ].map((item, index) => (
+              <Card key={index} delay={index * 0.2}>
+                <div className="p-6 text-center">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full text-white mb-4">
+                    {item.icon}
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                    {item.title}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300">
+                    {item.description}
+                  </p>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* About HITAM AI Club Section */}
+      <section className="py-20 px-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-900">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-6">
+              About HITAM AI Club
+            </h2>
+            <p className="text-lg text-gray-600 dark:text-gray-300 max-w-4xl mx-auto">
+              The HITAM AI Club is a vibrant community of students passionate about Artificial Intelligence, 
+              Machine Learning, and cutting-edge technology. We organize workshops, hackathons, and seminars 
+              to help students stay at the forefront of AI innovation.
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+            >
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                Our Mission
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-6">
+                To create a collaborative environment where students can explore, learn, and innovate 
+                in the field of Artificial Intelligence, fostering the next generation of AI leaders.
+              </p>
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                Our Motive
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300">
+                We believe in democratizing AI education and making it accessible to all students, 
+                regardless of their background. Through hands-on workshops, real-world projects, 
+                and industry partnerships, we prepare students for the AI-driven future.
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="space-y-6"
+            >
+              {[
+                "Regular AI/ML workshops and seminars",
+                "Hands-on project development",
+                "Industry expert guest lectures",
+                "Hackathons and competitions",
+                "Research collaboration opportunities",
+                "Career guidance and placement support"
+              ].map((item, index) => (
+                <div key={index} className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"></div>
+                  <span className="text-gray-700 dark:text-gray-300">{item}</span>
+                </div>
+              ))}
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Committee Members Section */}
+      <section className="py-20 px-4">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-6">
+              Our Committee
+            </h2>
+            <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+              Meet the dedicated team behind HITAM AI Club
+            </p>
+          </motion.div>
+
+          {loading ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="bg-gray-200 dark:bg-gray-700 rounded-2xl h-64"></div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {committeeMembers.map((member, index) => (
+                <Card key={member.id} delay={index * 0.1}>
+                  <div className="p-6 text-center">
+                    <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
+                      {member.photoUrl ? (
+                        <img 
+                          src={member.photoUrl} 
+                          alt={member.name}
+                          className="w-full h-full rounded-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-white text-2xl font-bold">
+                          {member.name?.charAt(0)}
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                      {member.name}
+                    </h3>
+                    <p className="text-blue-600 dark:text-blue-400 font-medium">
+                      {member.role}
+                    </p>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Featured Event Section */}
+      {featuredEvent && (
+        <section className="py-20 px-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-900">
+          <div className="max-w-6xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="text-center mb-16"
+            >
+              <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-6">
+                Featured Event
+              </h2>
+              <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+                Don't miss our upcoming event
+              </p>
+            </motion.div>
+
+            <Card className="max-w-4xl mx-auto">
+              <div className="md:flex">
+                <div className="md:w-1/2">
+                  <img
+                    src={featuredEvent.meta?.imageUrl || 'https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=800'}
+                    alt={featuredEvent.meta?.title}
+                    className="w-full h-48 md:h-full object-cover"
+                  />
+                </div>
+                <div className="md:w-1/2 p-6">
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                    {featuredEvent.meta?.title}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300 mb-4">
+                    {featuredEvent.meta?.description}
+                  </p>
+                  <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-6">
+                    <Calendar className="w-4 h-4 mr-2" />
+                    <span>
+                      {featuredEvent.meta?.startDate && 
+                        new Date(featuredEvent.meta.startDate).toLocaleDateString()
+                      }
+                    </span>
+                  </div>
+                  <Button>
+                    Learn More
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </section>
+      )}
+    </div>
+  );
+};
+
+export default HomePage;
