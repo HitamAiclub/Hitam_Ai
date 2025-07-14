@@ -387,14 +387,13 @@ const UpcomingActivities = () => {
       required: true, 
       options: [
         'Computer Science Engineering',
-        'Information Technology',
-        'Electronics and Communication Engineering',
-        'Electrical and Electronics Engineering',
-        'Mechanical Engineering',
-        'Civil Engineering',
-        'Chemical Engineering',
-        'Biotechnology',
-        'Aerospace Engineering'
+  'Computer Science Engineering (AI & ML)',
+  'Computer Science Engineering (Data Science)',
+  'Computer Science Engineering (Cyber Security)',
+  'Computer Science Engineering (IoT)',
+  'Electronics and Communication Engineering',
+  'Electrical and Electronics Engineering',
+  'Mechanical Engineering'
       ]
     }
   ];
