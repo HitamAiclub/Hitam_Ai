@@ -5,7 +5,7 @@ const AnimatedBackground = () => {
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
   const mouseRef = useRef({ x: 0, y: 0 });
-  const trailRef = useRef([]);
+  const touchRef = useRef({ x: 0, y: 0 });
   const { theme } = useTheme();
 
   useEffect(() => {
@@ -20,181 +20,261 @@ const AnimatedBackground = () => {
     setCanvasSize();
     window.addEventListener('resize', setCanvasSize);
 
-    // Particles system
-    const particles = [];
-    const particleCount = window.innerWidth < 768 ? 30 : 60; // Fewer on mobile
+    // Bubble system
+    const bubbles = [];
+    const poppedBubbles = [];
+    const bubbleCount = window.innerWidth < 768 ? 25 : window.innerWidth < 1024 ? 40 : 60;
     
-    // Neural network connections
-    const connections = [];
-    
-    // Initialize particles
-    for (let i = 0; i < particleCount; i++) {
-      particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: (Math.random() - 0.5) * 0.3,
-        size: Math.random() * 3 + 1,
-        opacity: Math.random() * 0.6 + 0.2,
-        pulse: Math.random() * 0.02 + 0.01,
-        hue: Math.random() * 60 + 180, // Blue to cyan range
-        originalSize: 0
-      });
-      particles[i].originalSize = particles[i].size;
-    }
-
-    // Mouse tracking
-    const handleMouseMove = (e) => {
-      mouseRef.current = { x: e.clientX, y: e.clientY };
-      
-      // Add to trail
-      trailRef.current.push({
-        x: e.clientX,
-        y: e.clientY,
-        opacity: 1,
-        size: 8
-      });
-      
-      // Limit trail length
-      if (trailRef.current.length > 15) {
-        trailRef.current.shift();
+    // Bubble class
+    class Bubble {
+      constructor(x, y, customSize = null) {
+        this.x = x || Math.random() * canvas.width;
+        this.y = y || canvas.height + Math.random() * 200;
+        this.size = customSize || Math.random() * 30 + 10;
+        this.originalSize = this.size;
+        this.vx = (Math.random() - 0.5) * 0.8;
+        this.vy = -(Math.random() * 1.2 + 0.5);
+        this.opacity = Math.random() * 0.8 + 0.4;
+        this.originalOpacity = this.opacity;
+        this.hue = Math.random() * 60 + 180; // Blue to cyan range
+        this.saturation = Math.random() * 30 + 50;
+        this.lightness = theme === 'dark' ? Math.random() * 30 + 70 : Math.random() * 30 + 50;
+        this.pulseSpeed = Math.random() * 0.02 + 0.01;
+        this.pulseOffset = Math.random() * Math.PI * 2;
+        this.glowIntensity = Math.random() * 0.5 + 0.3;
+        this.driftAmplitude = Math.random() * 0.5 + 0.2;
+        this.driftSpeed = Math.random() * 0.01 + 0.005;
+        this.time = 0;
+        this.isPopping = false;
+        this.popProgress = 0;
+        this.respawnDelay = 0;
       }
-    };
 
-    // Click effect
-    const handleClick = (e) => {
-      const ripple = {
-        x: e.clientX,
-        y: e.clientY,
-        radius: 0,
-        maxRadius: 100,
-        opacity: 0.8,
-        expanding: true
-      };
-      
-      const animateRipple = () => {
-        if (ripple.expanding) {
-          ripple.radius += 3;
-          ripple.opacity -= 0.02;
+      update() {
+        if (this.isPopping) {
+          this.popProgress += 0.08;
+          this.size = this.originalSize * (1 - this.popProgress);
+          this.opacity = this.originalOpacity * (1 - this.popProgress);
           
-          if (ripple.radius >= ripple.maxRadius || ripple.opacity <= 0) {
-            return;
+          if (this.popProgress >= 1) {
+            this.respawn();
           }
-          
-          requestAnimationFrame(animateRipple);
+          return;
         }
-      };
-      
-      animateRipple();
-    };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('click', handleClick);
+        this.time += 0.016; // ~60fps
 
-    const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      // Update and draw particles
-      particles.forEach((particle, index) => {
-        // Update position
-        particle.x += particle.vx;
-        particle.y += particle.vy;
-        
-        // Update opacity (pulsing effect)
-        particle.opacity += particle.pulse;
-        if (particle.opacity > 0.8 || particle.opacity < 0.1) {
-          particle.pulse *= -1;
+        // Floating movement with drift
+        this.x += this.vx + Math.sin(this.time * this.driftSpeed) * this.driftAmplitude;
+        this.y += this.vy;
+
+        // Gentle pulsing effect
+        const pulse = Math.sin(this.time * this.pulseSpeed + this.pulseOffset) * 0.1;
+        this.size = this.originalSize + pulse * this.originalSize;
+        this.opacity = this.originalOpacity + pulse * 0.2;
+
+        // Respawn when bubble goes off screen
+        if (this.y < -this.size * 2 || this.x < -this.size * 2 || this.x > canvas.width + this.size * 2) {
+          this.respawn();
         }
+
+        // Subtle color shifting
+        this.hue += 0.1;
+        if (this.hue > 240) this.hue = 180;
+      }
+
+      respawn() {
+        this.x = Math.random() * canvas.width;
+        this.y = canvas.height + Math.random() * 200;
+        this.size = Math.random() * 30 + 10;
+        this.originalSize = this.size;
+        this.vx = (Math.random() - 0.5) * 0.8;
+        this.vy = -(Math.random() * 1.2 + 0.5);
+        this.opacity = Math.random() * 0.6 + 0.2;
+        this.originalOpacity = this.opacity;
+        this.hue = Math.random() * 60 + 180;
+        this.isPopping = false;
+        this.popProgress = 0;
+        this.time = 0;
+      }
+
+      draw() {
+        const alpha = Math.max(0, Math.min(1, this.opacity));
         
-        // Bounce off edges
-        if (particle.x < 0 || particle.x > canvas.width) particle.vx *= -1;
-        if (particle.y < 0 || particle.y > canvas.height) particle.vy *= -1;
-        
-        // Mouse interaction - particles attracted to cursor
-        const dx = mouseRef.current.x - particle.x;
-        const dy = mouseRef.current.y - particle.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        
-        if (distance < 150) {
-          const force = (150 - distance) / 150;
-          particle.size = particle.originalSize + force * 2;
-          particle.vx += (dx / distance) * force * 0.01;
-          particle.vy += (dy / distance) * force * 0.01;
-        } else {
-          particle.size = particle.originalSize;
-        }
-        
-        // Draw particle with glow effect
+        // Create gradient for glow effect
         const gradient = ctx.createRadialGradient(
-          particle.x, particle.y, 0,
-          particle.x, particle.y, particle.size * 8
+          this.x, this.y, 0,
+          this.x, this.y, this.size * 2.5
         );
         
-        const alpha = theme === 'dark' ? particle.opacity : particle.opacity * 0.4;
-        const color = `hsl(${particle.hue}, 70%, 60%)`;
+        const baseAlpha = theme === 'dark' ? alpha * 1.2 : alpha * 0.8;
+        const glowAlpha = theme === 'dark' ? alpha * 0.6 : alpha * 0.4;
         
-        gradient.addColorStop(0, `hsla(${particle.hue}, 70%, 60%, ${alpha})`);
-        gradient.addColorStop(0.5, `hsla(${particle.hue}, 70%, 60%, ${alpha * 0.3})`);
-        gradient.addColorStop(1, `hsla(${particle.hue}, 70%, 60%, 0)`);
-        
+        gradient.addColorStop(0, `hsla(${this.hue}, ${this.saturation}%, ${this.lightness}%, ${baseAlpha})`);
+        gradient.addColorStop(0.4, `hsla(${this.hue}, ${this.saturation}%, ${this.lightness}%, ${baseAlpha * 0.6})`);
+        gradient.addColorStop(0.7, `hsla(${this.hue}, ${this.saturation}%, ${this.lightness}%, ${glowAlpha})`);
+        gradient.addColorStop(1, `hsla(${this.hue}, ${this.saturation}%, ${this.lightness}%, 0)`);
+
+        // Draw outer glow
         ctx.fillStyle = gradient;
         ctx.beginPath();
-        ctx.arc(particle.x, particle.y, particle.size * 8, 0, Math.PI * 2);
+        ctx.arc(this.x, this.y, this.size * 2.5, 0, Math.PI * 2);
         ctx.fill();
+
+        // Draw bubble with subtle inner gradient
+        const innerGradient = ctx.createRadialGradient(
+          this.x - this.size * 0.3, this.y - this.size * 0.3, 0,
+          this.x, this.y, this.size
+        );
         
-        // Draw core particle
-        ctx.fillStyle = `hsla(${particle.hue}, 70%, 80%, ${alpha})`;
+        innerGradient.addColorStop(0, `hsla(${this.hue}, ${this.saturation}%, ${this.lightness + 20}%, ${baseAlpha})`);
+        innerGradient.addColorStop(0.6, `hsla(${this.hue}, ${this.saturation}%, ${this.lightness}%, ${baseAlpha * 0.8})`);
+        innerGradient.addColorStop(1, `hsla(${this.hue}, ${this.saturation}%, ${this.lightness - 10}%, ${baseAlpha * 0.6})`);
+
+        ctx.fillStyle = innerGradient;
         ctx.beginPath();
-        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         ctx.fill();
-      });
-      
-      // Draw neural network connections
-      particles.forEach((particle, i) => {
-        particles.slice(i + 1).forEach(otherParticle => {
-          const dx = particle.x - otherParticle.x;
-          const dy = particle.y - otherParticle.y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-          
-          if (distance < 120) {
-            const opacity = (120 - distance) / 120;
-            const alpha = theme === 'dark' ? opacity * 0.15 : opacity * 0.08;
-            
-            ctx.strokeStyle = `hsla(200, 70%, 60%, ${alpha})`;
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(particle.x, particle.y);
-            ctx.lineTo(otherParticle.x, otherParticle.y);
-            ctx.stroke();
-          }
-        });
-      });
-      
-      // Draw cursor trail
-      trailRef.current.forEach((point, index) => {
-        point.opacity -= 0.05;
-        point.size -= 0.3;
-        
-        if (point.opacity > 0 && point.size > 0) {
-          const gradient = ctx.createRadialGradient(
-            point.x, point.y, 0,
-            point.x, point.y, point.size * 3
+
+        // Add highlight for bubble effect
+        if (!this.isPopping) {
+          const highlightGradient = ctx.createRadialGradient(
+            this.x - this.size * 0.4, this.y - this.size * 0.4, 0,
+            this.x - this.size * 0.4, this.y - this.size * 0.4, this.size * 0.6
           );
           
-          const alpha = theme === 'dark' ? point.opacity * 0.6 : point.opacity * 0.3;
-          gradient.addColorStop(0, `hsla(220, 70%, 70%, ${alpha})`);
-          gradient.addColorStop(1, `hsla(220, 70%, 70%, 0)`);
-          
-          ctx.fillStyle = gradient;
+          highlightGradient.addColorStop(0, `hsla(${this.hue}, 30%, 90%, ${baseAlpha * 0.8})`);
+          highlightGradient.addColorStop(1, `hsla(${this.hue}, 30%, 90%, 0)`);
+
+          ctx.fillStyle = highlightGradient;
           ctx.beginPath();
-          ctx.arc(point.x, point.y, point.size * 3, 0, Math.PI * 2);
+          ctx.arc(this.x - this.size * 0.4, this.y - this.size * 0.4, this.size * 0.6, 0, Math.PI * 2);
           ctx.fill();
         }
+      }
+
+      checkCollision(x, y) {
+        const dx = x - this.x;
+        const dy = y - this.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        return distance < this.size && !this.isPopping;
+      }
+
+      pop() {
+        if (!this.isPopping) {
+          this.isPopping = true;
+          this.popProgress = 0;
+          
+          // Create pop effect particles
+          for (let i = 0; i < 8; i++) {
+            poppedBubbles.push({
+              x: this.x + (Math.random() - 0.5) * this.size,
+              y: this.y + (Math.random() - 0.5) * this.size,
+              vx: (Math.random() - 0.5) * 4,
+              vy: (Math.random() - 0.5) * 4,
+              size: Math.random() * 3 + 1,
+              opacity: 0.8,
+              hue: this.hue,
+              life: 1
+            });
+          }
+        }
+      }
+    }
+
+    // Initialize bubbles
+    for (let i = 0; i < bubbleCount; i++) {
+      bubbles.push(new Bubble());
+    }
+
+    // Mouse/touch interaction
+    const handleInteraction = (x, y) => {
+      bubbles.forEach(bubble => {
+        if (bubble.checkCollision(x, y)) {
+          bubble.pop();
+        }
       });
+    };
+
+    const handleMouseMove = (e) => {
+      mouseRef.current = { x: e.clientX, y: e.clientY };
+    };
+
+    const handleClick = (e) => {
+      handleInteraction(e.clientX, e.clientY);
+    };
+
+    const handleTouchStart = (e) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      touchRef.current = { x: touch.clientX, y: touch.clientY };
+      handleInteraction(touch.clientX, touch.clientY);
+    };
+
+    const handleTouchMove = (e) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      touchRef.current = { x: touch.clientX, y: touch.clientY };
+      handleInteraction(touch.clientX, touch.clientY);
+    };
+
+    // Event listeners
+    canvas.addEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('click', handleClick);
+    canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+    canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+
+    const animate = () => {
+      // Clear canvas with subtle background
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       
-      // Clean up trail
-      trailRef.current = trailRef.current.filter(point => point.opacity > 0 && point.size > 0);
+      // Update and draw bubbles
+      bubbles.forEach(bubble => {
+        bubble.update();
+        bubble.draw();
+      });
+
+      // Update and draw pop effect particles
+      for (let i = poppedBubbles.length - 1; i >= 0; i--) {
+        const particle = poppedBubbles[i];
+        
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+        particle.vx *= 0.98;
+        particle.vy *= 0.98;
+        particle.life -= 0.02;
+        particle.opacity = particle.life;
+        particle.size *= 0.98;
+
+        if (particle.life > 0) {
+          ctx.fillStyle = `hsla(${particle.hue}, 60%, 70%, ${particle.opacity})`;
+          ctx.beginPath();
+          ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          poppedBubbles.splice(i, 1);
+        }
+      }
+
+      // Hover effect - make nearby bubbles slightly larger
+      const mouse = mouseRef.current;
+      const touch = touchRef.current;
+      const interactionPoint = mouse.x ? mouse : touch;
       
+      if (interactionPoint.x) {
+        bubbles.forEach(bubble => {
+          const dx = interactionPoint.x - bubble.x;
+          const dy = interactionPoint.y - bubble.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          
+          if (distance < 100 && !bubble.isPopping) {
+            const force = (100 - distance) / 100;
+            bubble.size = bubble.originalSize * (1 + force * 0.2);
+            bubble.opacity = bubble.originalOpacity * (1 + force * 0.3);
+          }
+        });
+      }
+
       animationRef.current = requestAnimationFrame(animate);
     };
     
@@ -202,8 +282,10 @@ const AnimatedBackground = () => {
     
     return () => {
       window.removeEventListener('resize', setCanvasSize);
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('click', handleClick);
+      canvas.removeEventListener('mousemove', handleMouseMove);
+      canvas.removeEventListener('click', handleClick);
+      canvas.removeEventListener('touchstart', handleTouchStart);
+      canvas.removeEventListener('touchmove', handleTouchMove);
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
@@ -213,11 +295,12 @@ const AnimatedBackground = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 -z-10 w-full h-full pointer-events-none"
+      className="fixed inset-0 -z-10 w-full h-full"
       style={{ 
         background: theme === 'dark' 
-          ? 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)'
-          : 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f8fafc 100%)'
+          ? 'radial-gradient(ellipse at center, #0f172a 0%, #1e293b 50%, #0f172a 100%)'
+          : 'radial-gradient(ellipse at center, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%)',
+        touchAction: 'none'
       }}
     />
   );

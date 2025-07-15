@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { collection, getDocs, deleteDoc, doc, updateDoc, addDoc, onSnapshot } from 'firebase/firestore';
+import { collection, getDocs, deleteDoc, doc, updateDoc, addDoc, onSnapshot, getDoc, setDoc } from 'firebase/firestore';
 import { db, auth } from '../../firebase';
 import { useAuth } from '../../contexts/AuthContext';
 import Card from '../../components/UI/Card';
@@ -15,10 +15,12 @@ const CommunityMembers = () => {
   const [error, setError] = useState(null);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [acceptingSubmissions, setAcceptingSubmissions] = useState(true);
+  const [settingsLoading, setSettingsLoading] = useState(false);
 
   useEffect(() => {
     if (user) {
       fetchMembers();
+      loadSettings();
     }
   }, [user]);
 
@@ -45,6 +47,17 @@ const CommunityMembers = () => {
       setError(error.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadSettings = async () => {
+    try {
+      const settingsDoc = await getDoc(doc(db, 'settings', 'clubJoinStatus'));
+      if (settingsDoc.exists()) {
+        setAcceptingSubmissions(settingsDoc.data().enabled || false);
+      }
+    } catch (error) {
+      console.warn('Could not load settings:', error.message);
     }
   };
 
@@ -104,15 +117,24 @@ const CommunityMembers = () => {
       return;
     }
 
+    setSettingsLoading(true);
     try {
       console.log('Updating submission settings:', acceptingSubmissions);
-      // You can store this setting in a separate collection or use it as needed
-      // For now, we'll just update the local state
+      
+      // Save settings to Firestore
+      await setDoc(doc(db, 'settings', 'clubJoinStatus'), {
+        enabled: acceptingSubmissions,
+        updatedAt: new Date().toISOString(),
+        updatedBy: user.uid
+      });
+      
       setShowSettingsModal(false);
       alert('Settings updated successfully');
     } catch (error) {
       console.error('Error updating settings:', error);
-      alert('Failed to update settings');
+      alert(`Failed to update settings: ${error.message}`);
+    } finally {
+      setSettingsLoading(false);
     }
   };
 
@@ -297,10 +319,14 @@ const CommunityMembers = () => {
             <Button
               variant="outline"
               onClick={() => setShowSettingsModal(false)}
+              disabled={settingsLoading}
             >
               Cancel
             </Button>
-            <Button onClick={updateSubmissionSettings}>
+            <Button 
+              onClick={updateSubmissionSettings}
+              loading={settingsLoading}
+            >
               Save Settings
             </Button>
           </div>
