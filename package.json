@@ -9,9 +9,6 @@
     "lint": "eslint .",
     "preview": "vite preview"
   },
-  "engines": {
-    "node": "18.20.8"
-  },
   "dependencies": {
     "date-fns": "^4.1.0",
     "firebase": "^11.10.0",
