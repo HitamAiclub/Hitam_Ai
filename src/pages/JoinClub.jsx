@@ -14,6 +14,7 @@ const JoinClub = () => {
     branch: '',
     year: '',
     section: '',
+    phone: '',
     email: ''
   });
   const [loading, setLoading] = useState(false);
@@ -35,6 +36,7 @@ const JoinClub = () => {
   ];
 
   const years = ['1st Year', '2nd Year', '3rd Year', '4th Year'];
+  const sections = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 
   useEffect(() => {
     checkSubmissionStatus();
@@ -72,6 +74,21 @@ const JoinClub = () => {
       return;
     }
 
+    // Validate phone number (basic validation)
+    const phoneRegex = /^[+]?[0-9]{10,15}$/;
+    if (!phoneRegex.test(formData.phone.replace(/\s/g, ''))) {
+      setError('Please enter a valid phone number');
+      setLoading(false);
+      return;
+    }
+
+    // Validate required fields
+    if (!formData.name || !formData.rollNo || !formData.branch || !formData.year || !formData.section) {
+      setError('Please fill in all required fields');
+      setLoading(false);
+      return;
+    }
+
     try {
       const joinData = {
         ...formData,
@@ -83,30 +100,6 @@ const JoinClub = () => {
       const result = await addDoc(collection(db, 'clubJoins'), joinData);
       console.log('Join data saved:', result);
 
-      // Send welcome email with WhatsApp group link (simulated)
-      const emailData = {
-        to: formData.email,
-        subject: 'Welcome to HITAM AI Club!',
-        body: `
-          Dear ${formData.name},
-          
-          Thank you for joining the HITAM AI Club! Your application has been received and is under review.
-          
-          Join our WhatsApp group for updates: https://chat.whatsapp.com/hitam-ai-club
-          
-          We'll notify you once your membership is approved.
-          
-          Best regards,
-          HITAM AI Club Team
-        `,
-        timestamp: new Date().toISOString()
-      };
-
-      // Store email log (for admin reference)
-      console.log('Saving email log:', emailData);
-      const emailResult = await addDoc(collection(db, 'emailLogs'), emailData);
-      console.log('Email log saved:', emailResult);
-
       setSuccess(true);
       setFormData({
         name: '',
@@ -114,6 +107,7 @@ const JoinClub = () => {
         branch: '',
         year: '',
         section: '',
+        phone: '',
         email: ''
       });
     } catch (error) {
@@ -316,7 +310,7 @@ const JoinClub = () => {
                   />
 
                   <Input
-                    label="Roll Number"
+                    label="Student Roll Number"
                     value={formData.rollNo}
                     onChange={(e) => handleChange('rollNo', e.target.value)}
                     placeholder="Enter your roll number"
@@ -325,7 +319,7 @@ const JoinClub = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Branch
+                      Branch *
                     </label>
                     <select
                       value={formData.branch}
@@ -333,7 +327,7 @@ const JoinClub = () => {
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                       required
                     >
-                      <option value="">Select your branch</option>
+                      <option value="">Select Branch</option>
                       {branches.map((branch) => (
                         <option key={branch} value={branch}>
                           {branch}
@@ -342,30 +336,52 @@ const JoinClub = () => {
                     </select>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Year
-                    </label>
-                    <select
-                      value={formData.year}
-                      onChange={(e) => handleChange('year', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      required
-                    >
-                      <option value="">Select your year</option>
-                      {years.map((year) => (
-                        <option key={year} value={year}>
-                          {year}
-                        </option>
-                      ))}
-                    </select>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Academic Year *
+                      </label>
+                      <select
+                        value={formData.year}
+                        onChange={(e) => handleChange('year', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                      >
+                        <option value="">Select Year</option>
+                        {years.map((year) => (
+                          <option key={year} value={year}>
+                            {year}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Section *
+                      </label>
+                      <select
+                        value={formData.section}
+                        onChange={(e) => handleChange('section', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                      >
+                        <option value="">Select Section</option>
+                        {sections.map((section) => (
+                          <option key={section} value={section}>
+                            {section}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
 
                   <Input
-                    label="Section"
-                    value={formData.section}
-                    onChange={(e) => handleChange('section', e.target.value)}
-                    placeholder="Enter your section (e.g., A, B, C)"
+                    label="Mobile Number"
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => handleChange('phone', e.target.value)}
+                    placeholder="+91 XXXXXXXXXX"
                     required
                   />
 

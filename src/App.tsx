@@ -26,10 +26,10 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <Router>
-          <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+          <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200 relative">
             <AnimatedBackground />
             <Navbar />
-            <main className="relative z-10">
+            <main className="relative z-20">
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/events" element={<EventsPage />} />

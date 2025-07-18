@@ -81,17 +81,13 @@ const HomePage = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="flex flex-col sm:flex-row gap-4 justify-center relative z-10"
           >
-            <a href="/events">
-              <Button size="lg" className="group">
-                Explore Events
-                <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </a>
-            <a href="/join">
-              <Button variant="outline" size="lg">
-                Join Our Community
-              </Button>
-            </a>
+            <Button size="lg" className="group">
+              Explore Events
+              <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </Button>
+            <Button variant="outline" size="lg">
+              Join Our Community
+            </Button>
           </motion.div>
         </div>
       </section>
@@ -279,6 +275,58 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* Featured Event Section */}
+      {featuredEvent && (
+        <section className="py-20 px-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-900">
+          <div className="max-w-6xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="text-center mb-16"
+            >
+              <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-6">
+                Featured Event
+              </h2>
+              <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+                Don't miss our upcoming event
+              </p>
+            </motion.div>
+
+            <Card className="max-w-4xl mx-auto">
+              <div className="md:flex">
+                <div className="md:w-1/2">
+                  <img
+                    src={featuredEvent.meta?.imageUrl || 'https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=800'}
+                    alt={featuredEvent.meta?.title}
+                    className="w-full h-48 md:h-full object-cover"
+                  />
+                </div>
+                <div className="md:w-1/2 p-6">
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                    {featuredEvent.meta?.title}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300 mb-4">
+                    {featuredEvent.meta?.description}
+                  </p>
+                  <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-6">
+                    <Calendar className="w-4 h-4 mr-2" />
+                    <span>
+                      {featuredEvent.meta?.startDate && 
+                        new Date(featuredEvent.meta.startDate).toLocaleDateString()
+                      }
+                    </span>
+                  </div>
+                  <Button>
+                    Learn More
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </section>
+      )}
     </div>
   );
 };

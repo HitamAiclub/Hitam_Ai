@@ -118,20 +118,54 @@ const UpcomingActivities = () => {
 
       console.log('Final form schema:', finalFormSchema);
 
-      const activityData = {
+      // Utility function to remove undefined values recursively
+      const removeUndefinedValues = (obj) => {
+        if (Array.isArray(obj)) {
+          return obj.map(item => removeUndefinedValues(item));
+        } else if (obj !== null && typeof obj === 'object') {
+          const cleaned = {};
+          Object.keys(obj).forEach(key => {
+            const value = obj[key];
+            if (value !== undefined) {
+              cleaned[key] = removeUndefinedValues(value);
+            }
+          });
+          return cleaned;
+        }
+        return obj;
+      };
+
+      // Clean up form data to prevent undefined values in Firestore
+      const cleanedFormData = {
         ...formData,
-        formSchema: finalFormSchema,
+        maxParticipants: formData.maxParticipants && formData.maxParticipants.trim() !== '' 
+          ? parseInt(formData.maxParticipants, 10) 
+          : null,
+        fee: formData.fee && formData.fee.trim() !== '' 
+          ? parseFloat(formData.fee) 
+          : null
+      };
+
+      // Clean the form schema to remove undefined values
+      const cleanedFormSchema = removeUndefinedValues(finalFormSchema);
+
+      const activityData = {
+        ...cleanedFormData,
+        formSchema: cleanedFormSchema,
         createdAt: editingActivity?.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
 
-      console.log('Saving activity data:', activityData);
+      // Final cleanup of the entire activity data object
+      const finalActivityData = removeUndefinedValues(activityData);
+
+      console.log('Saving activity data:', finalActivityData);
       
       if (editingActivity) {
-        const result = await updateDoc(doc(db, 'upcomingActivities', editingActivity.id), activityData);
+        const result = await updateDoc(doc(db, 'upcomingActivities', editingActivity.id), finalActivityData);
         console.log('Activity updated:', result);
       } else {
-        const result = await addDoc(collection(db, 'upcomingActivities'), activityData);
+        const result = await addDoc(collection(db, 'upcomingActivities'), finalActivityData);
         console.log('Activity added:', result);
       }
 
@@ -893,10 +927,12 @@ const UpcomingActivities = () => {
                   </p>
                 </div>
                 
-                <FormBuilder
-                  formSchema={formData.formSchema || getDefaultFormSchema()}
-                  onChange={(schema) => setFormData({...formData, formSchema: schema})}
-                />
+                <div onClick={(e) => e.stopPropagation()}>
+                  <FormBuilder
+                    formSchema={formData.formSchema || getDefaultFormSchema()}
+                    onChange={(schema) => setFormData({...formData, formSchema: schema})}
+                  />
+                </div>
               </div>
             )}
 

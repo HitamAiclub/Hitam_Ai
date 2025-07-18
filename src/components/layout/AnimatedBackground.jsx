@@ -295,7 +295,7 @@ const AnimatedBackground = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 -z-10 w-full h-full"
+      className="fixed inset-0 z-0 w-full h-full pointer-events-auto"
       style={{ 
         background: theme === 'dark' 
           ? 'radial-gradient(ellipse at center, #0f172a 0%, #1e293b 50%, #0f172a 100%)'

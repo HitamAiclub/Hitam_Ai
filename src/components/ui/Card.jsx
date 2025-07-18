@@ -51,6 +51,7 @@ const Card = ({
         overflow-hidden
         hover:bg-white/95 dark:hover:bg-gray-800/95
         transition-all duration-300
+        relative z-10
         ${className}
       `}
       {...props}
