@@ -94,12 +94,13 @@ const CommunityMembers = () => {
         member.year || '',
         member.section || '',
         member.email || '',
+        member.phone || '',
         member.joinedAt || '',
-        member.status || ''
+        
       ].join(',');
     }).join('\n');
 
-    const headers = 'Name,Roll No,Branch,Year,Section,Email,Joined At,Status';
+    const headers = 'Name,Roll No,Branch,Year,Section,Email,Phone,Joined At';
     const fullContent = headers + '\n' + csvContent;
 
     const blob = new Blob([fullContent], { type: 'text/csv' });
@@ -232,22 +233,23 @@ const CommunityMembers = () => {
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                     {member.name}
+                    <span className="text-gray-500 dark:text-gray-400 text-sm ml-2">
+                      {member.rollNo}
+                    </span>
+               
                   </h3>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    member.status === 'approved' 
-                      ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
-                      : member.status === 'rejected'
-                      ? 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
-                      : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300'
-                  }`}>
-                    {member.status || 'pending'}
-                  </span>
+                  
                 </div>
                 
                 <div className="space-y-2 text-sm text-gray-600 dark:text-gray-300 mb-4">
                   <div className="flex items-center">
                     <Mail className="w-4 h-4 mr-2" />
                     <span className="truncate">{member.email}</span>
+
+                  </div>
+                  <div className="flex items-center">
+                    <Phone className="w-4 h-4 mr-2" />
+                    <span className="truncate">{member.phone || 'Not provided'}</span>
                   </div>
                   <div className="flex items-center">
                     <GraduationCap className="w-4 h-4 mr-2" />

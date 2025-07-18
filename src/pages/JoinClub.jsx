@@ -24,15 +24,14 @@ const JoinClub = () => {
   const [checkingStatus, setCheckingStatus] = useState(true);
 
   const branches = [
-    'Computer Science Engineering',
-    'Information Technology',
-    'Electronics and Communication Engineering',
-    'Electrical and Electronics Engineering',
-    'Mechanical Engineering',
-    'Civil Engineering',
-    'Chemical Engineering',
-    'Biotechnology',
-    'Aerospace Engineering'
+     'Computer Science Engineering',
+  'Computer Science Engineering (AI & ML)',
+  'Computer Science Engineering (Data Science)',
+  'Computer Science Engineering (Cyber Security)',
+  'Computer Science Engineering (IoT)',
+  'Electronics and Communication Engineering',
+  'Electrical and Electronics Engineering',
+  'Mechanical Engineering'
   ];
 
   const years = ['1st Year', '2nd Year', '3rd Year', '4th Year'];
