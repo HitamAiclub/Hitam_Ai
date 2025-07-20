@@ -8,7 +8,7 @@ const firebaseConfig = {
   authDomain: "hitam-ai-club.firebaseapp.com",
   databaseURL: "https://hitam-ai-club-default-rtdb.firebaseio.com",
   projectId: "hitam-ai-club",
-  storageBucket: "hitam-ai-club.firebasestorage.app",
+  storageBucket: "hitam-ai-club.appspot.com",
   messagingSenderId: "87157714690",
   appId: "1:87157714690:web:3888500c1ff26590259c1b",
   measurementId: "G-X4J4GVY63K"

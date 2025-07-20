@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, GripVertical, Eye, Settings, Link, Image as ImageIcon, Type, Copy, ArrowUp, ArrowDown } from 'lucide-react';
-import Button from '../UI/Button';
-import Input from '../UI/Input';
-import Modal from '../UI/Modal';
+import Button from '../ui/Button';
+import Input from '../ui/Input';
+import Modal from '../ui/Modal';
 
 const FormBuilder = ({ formSchema = [], onChange }) => {
   const [fields, setFields] = useState(formSchema);
   const [showAddField, setShowAddField] = useState(false);
   const [editingField, setEditingField] = useState(null);
+  const [editingFieldDraft, setEditingFieldDraft] = useState(null);
   const [previewMode, setPreviewMode] = useState(false);
   const [draggedField, setDraggedField] = useState(null);
 
@@ -75,6 +76,7 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
     }
   };
 
+  // Only update fields array, not editingFieldDraft
   const updateField = (fieldId, updates) => {
     const updatedFields = fields.map(field => 
       field.id === fieldId ? { ...field, ...updates } : field
@@ -120,18 +122,16 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
 
   const FieldEditor = ({ field, index }) => {
     const fieldType = fieldTypes.find(f => f.type === field.type);
-    
+    // Only update fields array, not modal draft
     const addOption = () => {
       const newOptions = [...(field.options || []), `Option ${(field.options?.length || 0) + 1}`];
       updateField(field.id, { options: newOptions });
     };
-
     const updateOption = (optionIndex, value) => {
       const newOptions = [...(field.options || [])];
       newOptions[optionIndex] = value;
       updateField(field.id, { options: newOptions });
     };
-
     const removeOption = (optionIndex) => {
       const newOptions = field.options?.filter((_, i) => i !== optionIndex) || [];
       updateField(field.id, { options: newOptions });
@@ -342,7 +342,10 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
               type="button"
               variant="ghost"
               size="sm"
-              onClick={() => setEditingField(field)}
+              onClick={() => {
+                setEditingField(field);
+                setEditingFieldDraft({ ...field });
+              }}
             >
               <Settings className="w-4 h-4" />
             </Button>
@@ -683,11 +686,10 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
         </h3>
         <div className="flex items-center space-x-3">
           <Button
-            type="button"
-            type="button"
+            
             variant="outline"
             onClick={() => setPreviewMode(!previewMode)}
-          >
+            className="flex items-center">
             <Eye className="w-4 h-4 mr-2" />
             {previewMode ? 'Edit Form' : 'Preview Form'}
           </Button>
@@ -853,26 +855,25 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
       {/* Field Settings Modal */}
       <Modal
         isOpen={!!editingField}
-        onClose={() => setEditingField(null)}
-        title={`Edit ${fieldTypes.find(f => f.type === editingField?.type)?.label || 'Field'}`}
+        onClose={() => {
+          setEditingField(null);
+          setEditingFieldDraft(null);
+        }}
+        title={`Edit ${fieldTypes.find(f => f.type === editingFieldDraft?.type)?.label || 'Field'}`}
         size="lg"
       >
-        {editingField && (
+        {editingFieldDraft && (
           <div className="space-y-6">
             {/* Content Fields Settings */}
-            {editingField.type === 'label' && (
+            {editingFieldDraft.type === 'label' && (
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Content/Description
                   </label>
                   <textarea
-                    value={editingField.content || ''}
-                    onChange={(e) => {
-                      const updated = { ...editingField, content: e.target.value };
-                      setEditingField(updated);
-                      updateField(editingField.id, { content: e.target.value });
-                    }}
+                    value={editingFieldDraft.content || ''}
+                    onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, content: e.target.value })}
                     placeholder="Enter description, instructions, or any text content..."
                     rows={4}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -881,19 +882,14 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
                     You can include links using markdown: [Link Text](https://example.com)
                   </p>
                 </div>
-                
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Font Size
                     </label>
                     <select
-                      value={editingField.fontSize || 'medium'}
-                      onChange={(e) => {
-                        const updated = { ...editingField, fontSize: e.target.value };
-                        setEditingField(updated);
-                        updateField(editingField.id, { fontSize: e.target.value });
-                      }}
+                      value={editingFieldDraft.fontSize || 'medium'}
+                      onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, fontSize: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="small">Small</option>
@@ -902,18 +898,13 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
                       <option value="xl">Extra Large</option>
                     </select>
                   </div>
-                  
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Alignment
                     </label>
                     <select
-                      value={editingField.alignment || 'left'}
-                      onChange={(e) => {
-                        const updated = { ...editingField, alignment: e.target.value };
-                        setEditingField(updated);
-                        updateField(editingField.id, { alignment: e.target.value });
-                      }}
+                      value={editingFieldDraft.alignment || 'left'}
+                      onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, alignment: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="left">Left</option>
@@ -925,7 +916,7 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
               </div>
             )}
 
-            {editingField.type === 'image' && (
+            {editingFieldDraft.type === 'image' && (
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -933,38 +924,30 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
                   </label>
                   <div className="space-y-3">
                     <div className="flex items-center space-x-2">
-                      <input
-                        type="radio"
-                        id="imageUrl"
-                        name="imageSource"
-                        value="url"
-                        checked={!editingField.useFileUpload}
-                        onChange={() => {
-                          const updated = { ...editingField, useFileUpload: false };
-                          setEditingField(updated);
-                          updateField(editingField.id, { useFileUpload: false });
-                        }}
-                        className="text-blue-600"
-                      />
+                    <input
+                      type="radio"
+                      id="imageUrl"
+                      name="imageSource"
+                      value="url"
+                      checked={!editingFieldDraft.useFileUpload}
+                      onChange={() => setEditingFieldDraft({ ...editingFieldDraft, useFileUpload: false })}
+                      className="text-blue-600"
+                    />
                       <label htmlFor="imageUrl" className="text-sm text-gray-700 dark:text-gray-300">
                         Use Image URL/Link
                       </label>
                     </div>
                     
                     <div className="flex items-center space-x-2">
-                      <input
-                        type="radio"
-                        id="imageUpload"
-                        name="imageSource"
-                        value="upload"
-                        checked={editingField.useFileUpload}
-                        onChange={() => {
-                          const updated = { ...editingField, useFileUpload: true };
-                          setEditingField(updated);
-                          updateField(editingField.id, { useFileUpload: true });
-                        }}
-                        className="text-blue-600"
-                      />
+                    <input
+                      type="radio"
+                      id="imageUpload"
+                      name="imageSource"
+                      value="upload"
+                      checked={editingFieldDraft.useFileUpload}
+                      onChange={() => setEditingFieldDraft({ ...editingFieldDraft, useFileUpload: true })}
+                      className="text-blue-600"
+                    />
                       <label htmlFor="imageUpload" className="text-sm text-gray-700 dark:text-gray-300">
                         Upload Image File
                       </label>
@@ -972,15 +955,11 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
                   </div>
                 </div>
 
-                {!editingField.useFileUpload ? (
+                {!editingFieldDraft.useFileUpload ? (
                   <Input
                     label="Image URL"
-                    value={editingField.imageUrl || ''}
-                    onChange={(e) => {
-                      const updated = { ...editingField, imageUrl: e.target.value };
-                      setEditingField(updated);
-                      updateField(editingField.id, { imageUrl: e.target.value });
-                    }}
+                    value={editingFieldDraft.imageUrl || ''}
+                    onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, imageUrl: e.target.value })}
                     placeholder="https://example.com/image.jpg"
                   />
                 ) : (
@@ -995,19 +974,12 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
                         const file = e.target.files[0];
                         if (file) {
                           try {
-                            // Import Firebase storage functions
                             const { ref, uploadBytes, getDownloadURL } = await import('firebase/storage');
                             const { storage } = await import('../../firebase');
-                            
-                            // Upload file to Firebase Storage
                             const imageRef = ref(storage, `form-images/${Date.now()}_${file.name}`);
                             await uploadBytes(imageRef, file);
                             const imageUrl = await getDownloadURL(imageRef);
-                            
-                            // Update field with uploaded image URL
-                            const updated = { ...editingField, imageUrl };
-                            setEditingField(updated);
-                            updateField(editingField.id, { imageUrl });
+                            setEditingFieldDraft({ ...editingFieldDraft, imageUrl });
                           } catch (error) {
                             console.error('Error uploading image:', error);
                             alert('Failed to upload image. Please try again.');
@@ -1021,29 +993,19 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
                     </p>
                   </div>
                 )}
-                
                 <Input
                   label="Alt Text (Optional)"
-                  value={editingField.altText || ''}
-                  onChange={(e) => {
-                    const updated = { ...editingField, altText: e.target.value };
-                    setEditingField(updated);
-                    updateField(editingField.id, { altText: e.target.value });
-                  }}
+                  value={editingFieldDraft.altText || ''}
+                  onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, altText: e.target.value })}
                   placeholder="Description of the image"
                 />
-                
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Alignment
                   </label>
                   <select
-                    value={editingField.alignment || 'center'}
-                    onChange={(e) => {
-                      const updated = { ...editingField, alignment: e.target.value };
-                      setEditingField(updated);
-                      updateField(editingField.id, { alignment: e.target.value });
-                    }}
+                    value={editingFieldDraft.alignment || 'center'}
+                    onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, alignment: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="left">Left</option>
@@ -1051,13 +1013,12 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
                     <option value="right">Right</option>
                   </select>
                 </div>
-                
-                {editingField.imageUrl && (
+                {editingFieldDraft.imageUrl && (
                   <div className="mt-4">
                     <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Preview:</p>
                     <img 
-                      src={editingField.imageUrl} 
-                      alt={editingField.altText || 'Preview'} 
+                      src={editingFieldDraft.imageUrl} 
+                      alt={editingFieldDraft.altText || 'Preview'} 
                       className="max-w-full h-32 object-cover rounded-lg border border-gray-300 dark:border-gray-600"
                       onError={(e) => {
                         e.target.src = 'https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=400';
@@ -1068,58 +1029,39 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
               </div>
             )}
 
-            {editingField.type === 'link' && (
+            {editingFieldDraft.type === 'link' && (
               <div className="space-y-4">
                 <Input
                   label="Link URL"
-                  value={editingField.linkUrl || ''}
-                  onChange={(e) => {
-                    const updated = { ...editingField, linkUrl: e.target.value };
-                    setEditingField(updated);
-                    updateField(editingField.id, { linkUrl: e.target.value });
-                  }}
+                  value={editingFieldDraft.linkUrl || ''}
+                  onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, linkUrl: e.target.value })}
                   placeholder="https://example.com"
                 />
-                
                 <Input
                   label="Link Text"
-                  value={editingField.linkText || ''}
-                  onChange={(e) => {
-                    const updated = { ...editingField, linkText: e.target.value };
-                    setEditingField(updated);
-                    updateField(editingField.id, { linkText: e.target.value });
-                  }}
+                  value={editingFieldDraft.linkText || ''}
+                  onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, linkText: e.target.value })}
                   placeholder="Click here"
                 />
-                
                 <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"
-                    id={`newTab-${editingField.id}`}
-                    checked={editingField.openInNewTab || false}
-                    onChange={(e) => {
-                      const updated = { ...editingField, openInNewTab: e.target.checked };
-                      setEditingField(updated);
-                      updateField(editingField.id, { openInNewTab: e.target.checked });
-                    }}
+                    id={`newTab-${editingFieldDraft.id}`}
+                    checked={editingFieldDraft.openInNewTab || false}
+                    onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, openInNewTab: e.target.checked })}
                     className="rounded border-gray-300 dark:border-gray-600"
                   />
-                  <label htmlFor={`newTab-${editingField.id}`} className="text-sm text-gray-700 dark:text-gray-300">
+                  <label htmlFor={`newTab-${editingFieldDraft.id}`} className="text-sm text-gray-700 dark:text-gray-300">
                     Open in new tab
                   </label>
                 </div>
-                
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Button Style
                   </label>
                   <select
-                    value={editingField.buttonStyle || 'primary'}
-                    onChange={(e) => {
-                      const updated = { ...editingField, buttonStyle: e.target.value };
-                      setEditingField(updated);
-                      updateField(editingField.id, { buttonStyle: e.target.value });
-                    }}
+                    value={editingFieldDraft.buttonStyle || 'primary'}
+                    onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, buttonStyle: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="primary">Primary Button</option>
@@ -1132,53 +1074,34 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
             )}
 
             {/* Regular Field Settings */}
-            {!['label', 'image', 'link'].includes(editingField.type) && (
+            {!['label', 'image', 'link'].includes(editingFieldDraft.type) && (
               <div className="space-y-4">
                 <Input
                   label="Field Label"
-                  value={editingField.label || ''}
-                  onChange={(e) => {
-                    const updated = { ...editingField, label: e.target.value };
-                    setEditingField(updated);
-                    updateField(editingField.id, { label: e.target.value });
-                  }}
+                  value={editingFieldDraft.label || ''}
+                  onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, label: e.target.value })}
                   placeholder="Enter field label"
                 />
-
                 <Input
                   label="Placeholder Text"
-                  value={editingField.placeholder || ''}
-                  onChange={(e) => {
-                    const updated = { ...editingField, placeholder: e.target.value };
-                    setEditingField(updated);
-                    updateField(editingField.id, { placeholder: e.target.value });
-                  }}
+                  value={editingFieldDraft.placeholder || ''}
+                  onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, placeholder: e.target.value })}
                   placeholder="Enter placeholder text"
                 />
-                
                 <Input
                   label="Help Text"
-                  value={editingField.helpText || ''}
-                  onChange={(e) => {
-                    const updated = { ...editingField, helpText: e.target.value };
-                    setEditingField(updated);
-                    updateField(editingField.id, { helpText: e.target.value });
-                  }}
+                  value={editingFieldDraft.helpText || ''}
+                  onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, helpText: e.target.value })}
                   placeholder="Optional help text for users"
                 />
-
-                {editingField.type === 'file' && (
+                {editingFieldDraft.type === 'file' && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Accepted File Types
                     </label>
                     <select
-                      value={editingField.acceptedFileTypes || '*'}
-                      onChange={(e) => {
-                        const updated = { ...editingField, acceptedFileTypes: e.target.value };
-                        setEditingField(updated);
-                        updateField(editingField.id, { acceptedFileTypes: e.target.value });
-                      }}
+                      value={editingFieldDraft.acceptedFileTypes || '*'}
+                      onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, acceptedFileTypes: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="*">All Files</option>
@@ -1190,32 +1113,85 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
                     </select>
                   </div>
                 )}
-
                 <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"
                     id="required-setting"
-                    checked={editingField.required || false}
-                    onChange={(e) => {
-                      const updated = { ...editingField, required: e.target.checked };
-                      setEditingField(updated);
-                      updateField(editingField.id, { required: e.target.checked });
-                    }}
+                    checked={editingFieldDraft.required || false}
+                    onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, required: e.target.checked })}
                     className="rounded border-gray-300 dark:border-gray-600"
                   />
                   <label htmlFor="required-setting" className="text-sm text-gray-700 dark:text-gray-300">
                     Required field
                   </label>
                 </div>
+                {/* Options for choice fields */}
+                {(editingFieldDraft.type === 'select' || editingFieldDraft.type === 'radio' || editingFieldDraft.type === 'checkbox') && (
+                  <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Options:</span>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setEditingFieldDraft({ ...editingFieldDraft, options: [...(editingFieldDraft.options || []), `Option ${(editingFieldDraft.options?.length || 0) + 1}`] })}
+                      >
+                        <Plus className="w-3 h-3 mr-1" />
+                        Add Option
+                      </Button>
+                    </div>
+                    <div className="space-y-2">
+                      {editingFieldDraft.options?.map((option, optionIndex) => (
+                        <div key={optionIndex} className="flex items-center space-x-2">
+                          <input
+                            type="text"
+                            value={option}
+                            onChange={(e) => {
+                              const newOptions = [...editingFieldDraft.options];
+                              newOptions[optionIndex] = e.target.value;
+                              setEditingFieldDraft({ ...editingFieldDraft, options: newOptions });
+                            }}
+                            className="flex-1 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              const newOptions = editingFieldDraft.options.filter((_, i) => i !== optionIndex);
+                              setEditingFieldDraft({ ...editingFieldDraft, options: newOptions });
+                            }}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
             <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
               <Button
                 variant="outline"
-                onClick={() => setEditingField(null)}
+                onClick={() => {
+                  setEditingField(null);
+                  setEditingFieldDraft(null);
+                }}
               >
-                Close
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() => {
+                  updateField(editingFieldDraft.id, editingFieldDraft);
+                  setEditingField(null);
+                  setEditingFieldDraft(null);
+                }}
+              >
+                Save Changes
               </Button>
             </div>
           </div>
