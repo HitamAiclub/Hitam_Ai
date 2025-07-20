@@ -3,9 +3,9 @@ import { motion } from 'framer-motion';
 import { collection, getDocs, deleteDoc, doc, updateDoc, addDoc, onSnapshot, getDoc, setDoc } from 'firebase/firestore';
 import { db, auth } from '../../firebase';
 import { useAuth } from '../../contexts/AuthContext';
-import Card from '../../components/UI/Card';
-import Button from '../../components/UI/Button';
-import Modal from '../../components/UI/Modal';
+import Card from '../../components/ui/Card';
+import Button from '../../components/ui/Button';
+import Modal from '../../components/ui/Modal';
 import { Download, Users, Calendar, Mail, Phone, GraduationCap, Settings, Trash2, UserPlus } from 'lucide-react';
 
 const CommunityMembers = () => {

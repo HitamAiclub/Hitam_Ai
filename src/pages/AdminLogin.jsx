@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import Card from '../components/UI/Card';
-import Button from '../components/UI/Button';
-import Input from '../components/UI/Input';
+import Card from '../components/ui/Card';
+import Button from '../components/ui/Button';
+import Input from '../components/ui/Input';
 import { Lock, User } from 'lucide-react';
 
 const AdminLogin = () => {

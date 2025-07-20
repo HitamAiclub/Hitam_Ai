@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { collection, addDoc, doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import Card from '../components/UI/Card';
-import Button from '../components/UI/Button';
-import Input from '../components/UI/Input';
+import Card from '../components/ui/Card';
+import Button from '../components/ui/Button';
+import Input from '../components/ui/Input';
 import { UserPlus, Mail, Phone, Book, Users, AlertCircle } from 'lucide-react';
 
 const JoinClub = () => {

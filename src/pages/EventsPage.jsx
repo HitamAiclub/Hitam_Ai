@@ -4,10 +4,10 @@ import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, onSnapshot } fr
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
-import Card from '../components/UI/Card';
-import Button from '../components/UI/Button';
-import Modal from '../components/UI/Modal';
-import Input from '../components/UI/Input';
+import Card from '../components/ui/Card';
+import Button from '../components/ui/Button';
+import Modal from '../components/ui/Modal';
+import Input from '../components/ui/Input';
 import { Calendar, User, Plus, Edit, Trash2, Image as ImageIcon } from 'lucide-react';
 
 const EventsPage = () => {

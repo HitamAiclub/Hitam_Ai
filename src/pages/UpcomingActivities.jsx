@@ -289,9 +289,36 @@ const UpcomingActivities = () => {
     setOptimisticActivities(prev => prev.filter(activity => activity.id !== activityId));
 
     try {
-      await deleteDoc(doc(db, 'upcomingActivities', activityId));
+      // Delete all registrations for this activity in subcollection
+      const registrationsRef = collection(db, 'upcomingActivities', activityId, 'registrations');
+      const registrationsSnap = await getDocs(registrationsRef);
+      const batchOps = [];
+      registrationsSnap.forEach((docSnap) => {
+        batchOps.push(deleteDoc(docSnap.ref));
+      });
+      await Promise.all(batchOps);
+
+
+      // Delete all documents in allRegistrations where activityId field matches
+      const allRegistrationsRef = collection(db, 'allRegistrations');
+      const allRegistrationsSnap = await getDocs(allRegistrationsRef);
+      const deleteAllRegOps = [];
+      allRegistrationsSnap.forEach((docSnap) => {
+        if (docSnap.data().activityId === activityId) {
+          deleteAllRegOps.push(deleteDoc(docSnap.ref));
+        }
+      });
+      await Promise.all(deleteAllRegOps);
+
+      // Delete only the document in upcomingActivities with id = activityId
+      const activityDocRef = doc(db, 'upcomingActivities', activityId);
+      try {
+        await deleteDoc(activityDocRef);
+      } catch (e) {
+        // If not found, ignore
+      }
     } catch (error) {
-      console.error('Error deleting activity:', error);
+      console.error('Error deleting activity and registrations:', error);
       if (activityToDelete) {
         setOptimisticActivities(prev => [...prev, activityToDelete]);
       }
