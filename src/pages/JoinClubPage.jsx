@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { collection, addDoc } from 'firebase/firestore';
-import { db } from '../firebase/config';
+import { db } from '../firebase';
 import { FiCheck } from 'react-icons/fi';
 import PageHeader from '../components/ui/PageHeader';
 import AnimatedSection from '../components/ui/AnimatedSection';

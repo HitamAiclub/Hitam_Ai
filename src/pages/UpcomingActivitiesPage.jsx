@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { collection, getDocs, query, where, orderBy, addDoc, Timestamp } from 'firebase/firestore';
-import { db } from '../firebase/config';
+import { db } from '../firebase';
 import Modal from '../components/ui/Modal';
 import Input from '../components/ui/Input';
 import { useAuth } from '../contexts/AuthContext';

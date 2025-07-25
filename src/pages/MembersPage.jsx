@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
-import { db } from '../firebase/config';
+import { db } from '../firebase';
 import { FiPlus, FiSearch, FiFilter } from 'react-icons/fi';
 import PageHeader from '../components/ui/PageHeader';
 import MemberCard from '../components/admin/MemberCard';
