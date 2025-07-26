@@ -81,13 +81,22 @@ const HomePage = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="flex flex-col sm:flex-row gap-4 justify-center relative z-10"
           >
+            <a href="/events" className="btn-secondary flex items-center">
             <Button size="lg" className="group">
               Explore Events
               <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Button>
-            <Button variant="outline" size="lg">
-              Join Our Community
-            </Button>
+            </a>
+            <a href="/join-club" className="btn-secondary flex items-center">
+              <Button variant="outline" size="lg">
+                Join Our Community
+              </Button>
+            </a>
+            <a href="/upcoming" className="btn-tertiary flex items-center">
+              <Button variant="outline" size="lg">
+                View Upcoming Activities
+              </Button>
+            </a>
           </motion.div>
         </div>
       </section>
