@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../firebase';
-import { motion } from 'framer-motion';
-import { FiCalendar, FiUser, FiClock, FiArrowLeft, FiEdit, FiTrash2 } from 'react-icons/fi';
-import { useAuth } from '../contexts/AuthContext';
-import LoadingSpinner from '../components/ui/LoadingSpinner';
-import AnimatedSection from '../components/ui/AnimatedSection';
-import { formatDate } from '../utils/dateUtils';
+import { useState, useEffect } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../firebase";
+import { motion } from "framer-motion";
+import { FiCalendar, FiUser, FiClock, FiArrowLeft, FiEdit, FiTrash2 } from "react-icons/fi";
+import { useAuth } from "../contexts/AuthContext";
+import LoadingSpinner from "../components/ui/LoadingSpinner";
+import AnimatedSection from "../components/ui/AnimatedSection";
+import { formatDate } from "../utils/dateUtils";
 
 function EventDetailPage() {
   const { id, type } = useParams();
@@ -19,17 +19,17 @@ function EventDetailPage() {
   useEffect(() => {
     async function fetchEvent() {
       try {
-        const eventRef = doc(db, 'events', id);
+        const eventRef = doc(db, "events", id);
         const eventDoc = await getDoc(eventRef);
         
         if (eventDoc.exists()) {
           setEvent({ id: eventDoc.id, ...eventDoc.data() });
         } else {
           // Event not found, redirect to events page
-          navigate('/events', { replace: true });
+          navigate("/events", { replace: true });
         }
       } catch (error) {
-        console.error('Error fetching event:', error);
+        console.error("Error fetching event:", error);
       } finally {
         setLoading(false);
       }
@@ -44,12 +44,12 @@ function EventDetailPage() {
   };
   
   const handleDelete = async () => {
-    if (window.confirm('Are you sure you want to delete this event?')) {
+    if (window.confirm("Are you sure you want to delete this event?")) {
       try {
         // Placeholder for delete functionality
-        navigate('/events');
+        navigate("/events");
       } catch (error) {
-        console.error('Error deleting event:', error);
+        console.error("Error deleting event:", error);
       }
     }
   };
@@ -71,7 +71,7 @@ function EventDetailPage() {
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
             
             <img 
-              src={event.imageUrl || 'https://images.pexels.com/photos/3184296/pexels-photo-3184296.jpeg'} 
+              src={event.imageUrl || "https://images.pexels.com/photos/3184296/pexels-photo-3184296.jpeg"} 
               alt={event.title} 
               className="w-full h-full object-cover"
             />
@@ -85,17 +85,17 @@ function EventDetailPage() {
                 >
                   <div className="flex flex-wrap items-center mb-4 gap-4">
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      event.type === 'event' 
-                        ? 'bg-primary-500 text-white' 
-                        : 'bg-secondary-500 text-white'
+                      event.type === "event" 
+                        ? "bg-primary-500 text-white" 
+                        : "bg-secondary-500 text-white"
                     }`}>
-                      {event.type === 'event' ? 'Event' : 'Workshop'}
+                      {event.type === "event" ? "Event" : "Workshop"}
                     </span>
                     
                     <div className="flex items-center text-white">
                       <FiCalendar className="mr-2" />
                       <span>
-                        {event.type === 'workshop' && event.endDate
+                        {event.type === "workshop" && event.endDate
                           ? `${formatDate(event.date)} - ${formatDate(event.endDate)}`
                           : formatDate(event.date)
                         }
@@ -151,7 +151,7 @@ function EventDetailPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <AnimatedSection animation="fade-up" className="lg:col-span-2">
                 <div className="card p-8">
-                  <h2 className="text-2xl font-bold mb-6">About This {event.type === 'event' ? 'Event' : 'Workshop'}</h2>
+                  <h2 className="text-2xl font-bold mb-6">About This {event.type === "event" ? "Event" : "Workshop"}</h2>
                   
                   <div className="prose max-w-none dark:prose-invert">
                     <p className="whitespace-pre-line">{event.description}</p>
@@ -170,7 +170,7 @@ function EventDetailPage() {
                         <FiCalendar className="mr-2 text-primary-500" />
                         <span>
                           {formatDate(event.date)}
-                          {event.type === 'workshop' && event.endDate && (
+                          {event.type === "workshop" && event.endDate && (
                             <> - {formatDate(event.endDate)}</>
                           )}
                         </span>
@@ -221,7 +221,7 @@ function EventDetailPage() {
       ) : (
         <div className="container py-12 text-center">
           <h2 className="text-2xl font-semibold mb-4">Event Not Found</h2>
-          <p className="mb-8">The event you're looking for doesn't exist or has been removed.</p>
+          <p className="mb-8">The event you"re looking for doesn"t exist or has been removed.</p>
           <Link to="/events" className="btn-primary">
             View All Events
           </Link>

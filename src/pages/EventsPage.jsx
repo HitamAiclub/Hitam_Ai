@@ -1,30 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from 'firebase/firestore';
-import { ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { db, storage } from '../firebase';
-import { useAuth } from '../contexts/AuthContext';
-import Card from '../components/ui/Card';
-import Button from '../components/ui/Button';
-import Modal from '../components/ui/Modal';
-import Input from '../components/ui/Input';
-import ImageManager from '../components/ImageManager';
-import { Calendar, User, Plus, Edit, Trash2, Image as ImageIcon } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "firebase/firestore";
+import { ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
+import { db, storage } from "../firebase";
+import { useAuth } from "../contexts/AuthContext";
+import Card from "../components/ui/Card";
+import Button from "../components/ui/Button";
+import Modal from "../components/ui/Modal";
+import Input from "../components/ui/Input";
+import ImageManager from "../components/ImageManager";
+import { Calendar, User, Plus, Edit, Trash2, Image as ImageIcon } from "lucide-react";
 
 const EventsPage = () => {
   const [events, setEvents] = useState([]);
   const [filteredEvents, setFilteredEvents] = useState([]);
-  const [activeFilter, setActiveFilter] = useState('all');
+  const [activeFilter, setActiveFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    startDate: '',
-    endDate: '',
-    sessionBy: '',
-    type: 'event'
+    title: "",
+    description: "",
+    startDate: "",
+    endDate: "",
+    sessionBy: "",
+    type: "event"
   });
   const [imageFile, setImageFile] = useState(null);
   const [uploading, setUploading] = useState(false);
@@ -35,7 +35,7 @@ const EventsPage = () => {
   useEffect(() => {
     // Real-time listener for events with error handling
     const unsubscribe = onSnapshot(
-      collection(db, 'events'), 
+      collection(db, "events"), 
       (snapshot) => {
         const eventsData = snapshot.docs.map(doc => ({
           id: doc.id,
@@ -46,7 +46,7 @@ const EventsPage = () => {
         setLoading(false);
       }, 
       (error) => {
-        console.warn('Events listener error:', error.message);
+        console.warn("Events listener error:", error.message);
         setEvents([]);
         setOptimisticEvents([]);
         setLoading(false);
@@ -62,21 +62,21 @@ const EventsPage = () => {
 
   const fetchEvents = async () => {
     try {
-      const eventsSnapshot = await getDocs(collection(db, 'events'));
+      const eventsSnapshot = await getDocs(collection(db, "events"));
       const eventsData = eventsSnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
       setEvents(eventsData);
     } catch (error) {
-      console.error('Error fetching events:', error);
+      console.error("Error fetching events:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const filterEvents = () => {
-    if (activeFilter === 'all') {
+    if (activeFilter === "all") {
       setFilteredEvents(events);
     } else {
       setFilteredEvents(events.filter(event => event.meta?.type === activeFilter));
@@ -93,7 +93,7 @@ const EventsPage = () => {
       id: editingEvent?.id || tempId,
       meta: {
         ...formData,
-        imageUrl: imageFile ? URL.createObjectURL(imageFile) : editingEvent?.meta?.imageUrl || '',
+        imageUrl: imageFile ? URL.createObjectURL(imageFile) : editingEvent?.meta?.imageUrl || "",
         createdAt: editingEvent?.meta?.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString()
       },
@@ -115,8 +115,8 @@ const EventsPage = () => {
     resetForm();
 
     try {
-      let imageUrl = editingEvent?.meta?.imageUrl || '';
-      let imageStoragePath = editingEvent?.meta?.imageStoragePath || '';
+      let imageUrl = editingEvent?.meta?.imageUrl || "";
+      let imageStoragePath = editingEvent?.meta?.imageStoragePath || "";
 
       if (imageFile) {
         // Use a unique storage path for each image
@@ -137,13 +137,13 @@ const EventsPage = () => {
       };
 
       if (editingEvent) {
-        await updateDoc(doc(db, 'events', editingEvent.id), eventData);
+        await updateDoc(doc(db, "events", editingEvent.id), eventData);
       } else {
-        await addDoc(collection(db, 'events'), eventData);
+        await addDoc(collection(db, "events"), eventData);
       }
 
     } catch (error) {
-      console.error('Error saving event:', error);
+      console.error("Error saving event:", error);
       // Revert optimistic update on error
       if (editingEvent) {
         setOptimisticEvents(prev => 
@@ -154,7 +154,7 @@ const EventsPage = () => {
       } else {
         setOptimisticEvents(prev => prev.filter(event => event.id !== tempId));
       }
-      alert('Failed to save event. Please try again.');
+      alert("Failed to save event. Please try again.");
     } finally {
       setUploading(false);
     }
@@ -163,12 +163,12 @@ const EventsPage = () => {
   const handleEdit = (event) => {
     setEditingEvent(event);
     setFormData({
-      title: event.meta?.title || '',
-      description: event.meta?.description || '',
-      startDate: event.meta?.startDate || '',
-      endDate: event.meta?.endDate || '',
-      sessionBy: event.meta?.sessionBy || '',
-      type: event.meta?.type || 'event'
+      title: event.meta?.title || "",
+      description: event.meta?.description || "",
+      startDate: event.meta?.startDate || "",
+      endDate: event.meta?.endDate || "",
+      sessionBy: event.meta?.sessionBy || "",
+      type: event.meta?.type || "event"
     });
     setShowModal(true);
   };
@@ -191,34 +191,34 @@ const EventsPage = () => {
         const imageRef = storageRef(storage, eventToDelete.meta.imageStoragePath);
         await deleteObject(imageRef);
       }
-      await deleteDoc(doc(db, 'events', eventId));
+      await deleteDoc(doc(db, "events", eventId));
     } catch (error) {
-      console.error('Error deleting event:', error);
+      console.error("Error deleting event:", error);
       // Revert optimistic delete on error
       if (eventToDelete) {
         setOptimisticEvents(prev => [...prev, eventToDelete]);
       }
-      alert('Failed to delete event. Please try again.');
+      alert("Failed to delete event. Please try again.");
     }
   };
 
   const resetForm = () => {
     setEditingEvent(null);
     setFormData({
-      title: '',
-      description: '',
-      startDate: '',
-      endDate: '',
-      sessionBy: '',
-      type: 'event'
+      title: "",
+      description: "",
+      startDate: "",
+      endDate: "",
+      sessionBy: "",
+      type: "event"
     });
     setImageFile(null);
   };
 
   const filters = [
-    { key: 'all', label: 'All' },
-    { key: 'event', label: 'Events' },
-    { key: 'workshop', label: 'Workshops' }
+    { key: "all", label: "All" },
+    { key: "event", label: "Events" },
+    { key: "workshop", label: "Workshops" }
   ];
 
   return (
@@ -242,7 +242,7 @@ const EventsPage = () => {
           {filters.map((filter) => (
             <Button
               key={filter.key}
-              variant={activeFilter === filter.key ? 'primary' : 'outline'}
+              variant={activeFilter === filter.key ? "primary" : "outline"}
               onClick={() => setActiveFilter(filter.key)}
             >
               {filter.label}
@@ -278,22 +278,22 @@ const EventsPage = () => {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {optimisticEvents.filter(event => 
-              activeFilter === 'all' || event.meta?.type === activeFilter
+              activeFilter === "all" || event.meta?.type === activeFilter
             ).map((event, index) => (
               <Card key={event.id} delay={index * 0.1}>
-                <div className={`relative ${event.isOptimistic ? 'opacity-75' : ''}`}>
+                <div className={`relative ${event.isOptimistic ? "opacity-75" : ""}`}>
                   <img
-                    src={event.meta?.imageUrl || 'https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=800'}
+                    src={event.meta?.imageUrl || "https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=800"}
                     alt={event.meta?.title}
                     className="w-full h-48 object-cover rounded-t-2xl"
                   />
                   <div className="absolute top-4 right-4">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      event.meta?.type === 'workshop' 
-                        ? 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300'
-                        : 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                      event.meta?.type === "workshop" 
+                        ? "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300"
+                        : "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
                     }`}>
-                      {event.meta?.type === 'workshop' ? 'Workshop' : 'Event'}
+                      {event.meta?.type === "workshop" ? "Workshop" : "Event"}
                     </span>
                   </div>
                 </div>
@@ -353,7 +353,7 @@ const EventsPage = () => {
         )}
 
         {optimisticEvents.filter(event => 
-          activeFilter === 'all' || event.meta?.type === activeFilter
+          activeFilter === "all" || event.meta?.type === activeFilter
         ).length === 0 && !loading && (
           <div className="text-center py-12">
             <p className="text-gray-500 dark:text-gray-400">
@@ -367,7 +367,7 @@ const EventsPage = () => {
       <Modal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        title={editingEvent ? 'Edit Event' : 'Add Event'}
+        title={editingEvent ? "Edit Event" : "Add Event"}
         size="lg"
       >
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -441,7 +441,7 @@ const EventsPage = () => {
 
           <div className="flex gap-4">
             <Button type="submit" loading={uploading} className="flex-1">
-              {editingEvent ? 'Update' : 'Create'} Event
+              {editingEvent ? "Update" : "Create"} Event
             </Button>
             <Button
               type="button"

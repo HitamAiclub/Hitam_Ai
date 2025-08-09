@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { database } from '../firebase/config';
-import { ref, onValue, off } from 'firebase/database';
+import { useState, useEffect } from "react";
+import { database } from "../firebase/config";
+import { ref, onValue, off } from "firebase/database";
 
 export const useFirebaseData = (path) => {
   const [data, setData] = useState(null);
@@ -27,20 +27,20 @@ export const useFirebaseData = (path) => {
       }
     );
 
-    return () => off(dataRef, 'value', unsubscribe);
+    return () => off(dataRef, "value", unsubscribe);
   }, [path]);
 
   return { data, loading, error };
 };
 
 export const useEvents = () => {
-  return useFirebaseData('events');
+  return useFirebaseData("events");
 };
 
 export const useClubMembers = () => {
-  return useFirebaseData('clubMembers');
+  return useFirebaseData("clubMembers");
 };
 
 export const useCommunityMembers = () => {
-  return useFirebaseData('communityMembers');
+  return useFirebaseData("communityMembers");
 };

@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import LoadingSpinner from '../ui/LoadingSpinner';
+import { useState } from "react";
+import { motion } from "framer-motion";
+import LoadingSpinner from "../ui/LoadingSpinner";
 
 function MemberForm({ 
   initialData = {}, 
@@ -9,12 +9,12 @@ function MemberForm({
   isLoading = false 
 }) {
   const [formData, setFormData] = useState({
-    name: initialData.name || '',
-    rollNo: initialData.rollNo || '',
-    year: initialData.year || '',
-    branch: initialData.branch || '',
-    email: initialData.email || '',
-    role: initialData.role || '',
+    name: initialData.name || "",
+    rollNo: initialData.rollNo || "",
+    year: initialData.year || "",
+    branch: initialData.branch || "",
+    email: initialData.email || "",
+    role: initialData.role || "",
   });
   
   const handleChange = (e) => {
@@ -27,9 +27,9 @@ function MemberForm({
     onSubmit(formData);
   };
   
-  const years = ['1st Year', '2nd Year', '3rd Year', '4th Year'];
-  const branches = ['Computer Science', 'Information Technology', 'Electronics', 'Electrical', 'Mechanical', 'Civil', 'Other'];
-  const roles = ['Club President', 'Vice President', 'Secretary', 'Treasurer', 'Technical Lead', 'Event Coordinator', 'Media Coordinator', 'Member'];
+  const years = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
+  const branches = ["Computer Science", "Information Technology", "Electronics", "Electrical", "Mechanical", "Civil", "Other"];
+  const roles = ["Club President", "Vice President", "Secretary", "Treasurer", "Technical Lead", "Event Coordinator", "Media Coordinator", "Member"];
   
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -150,7 +150,7 @@ function MemberForm({
               <span className="ml-2">Saving...</span>
             </div>
           ) : (
-            <span>{initialData.id ? 'Update' : 'Add'} Member</span>
+            <span>{initialData.id ? "Update" : "Add"} Member</span>
           )}
         </motion.button>
       </div>

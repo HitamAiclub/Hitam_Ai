@@ -1,6 +1,6 @@
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import LoadingSpinner from '../components/ui/LoadingSpinner';
+import { Navigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
+import LoadingSpinner from "../components/ui/LoadingSpinner";
 
 function ProtectedRoute({ children }) {
   const { currentUser, isAdmin, loading } = useAuth();

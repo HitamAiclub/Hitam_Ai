@@ -1,15 +1,15 @@
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { collection, getDocs, query, where, orderBy, addDoc, Timestamp } from 'firebase/firestore';
-import { db } from '../firebase';
-import Modal from '../components/ui/Modal';
-import Input from '../components/ui/Input';
-import { useAuth } from '../contexts/AuthContext';
-import { FiCalendar, FiUser, FiMapPin, FiPlus, FiExternalLink } from 'react-icons/fi';
-import PageHeader from '../components/ui/PageHeader';
-import AnimatedSection from '../components/ui/AnimatedSection';
-import LoadingSpinner from '../components/ui/LoadingSpinner';
-import { formatDate, isFutureDate } from '../utils/dateUtils';
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { collection, getDocs, query, where, orderBy, addDoc, Timestamp } from "firebase/firestore";
+import { db } from "../firebase";
+import Modal from "../components/ui/Modal";
+import Input from "../components/ui/Input";
+import { useAuth } from "../contexts/AuthContext";
+import { FiCalendar, FiUser, FiMapPin, FiPlus, FiExternalLink } from "react-icons/fi";
+import PageHeader from "../components/ui/PageHeader";
+import AnimatedSection from "../components/ui/AnimatedSection";
+import LoadingSpinner from "../components/ui/LoadingSpinner";
+import { formatDate, isFutureDate } from "../utils/dateUtils";
 
 function UpcomingActivitiesPage() {
   const [activities, setActivities] = useState([]);
@@ -18,23 +18,23 @@ function UpcomingActivitiesPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
-    title: '',
-    description: '',
-    date: '',
-    endDate: '',
-    type: 'event',
-    presenter: '',
-    location: '',
-    imageUrl: '',
-    registrationLink: ''
+    title: "",
+    description: "",
+    date: "",
+    endDate: "",
+    type: "event",
+    presenter: "",
+    location: "",
+    imageUrl: "",
+    registrationLink: ""
   });
-  const [formError, setFormError] = useState('');
+  const [formError, setFormError] = useState("");
   // Registration modal state
   const [showRegModal, setShowRegModal] = useState(false);
   const [regActivity, setRegActivity] = useState(null);
   const [regSaving, setRegSaving] = useState(false);
-  const [regForm, setRegForm] = useState({ name: '', email: '', phone: '' });
-  const [regError, setRegError] = useState('');
+  const [regForm, setRegForm] = useState({ name: "", email: "", phone: "" });
+  const [regError, setRegError] = useState("");
   
   useEffect(() => {
     fetchActivities();
@@ -50,9 +50,9 @@ function UpcomingActivitiesPage() {
       
       // Create query for upcoming activities
       const activitiesQuery = query(
-        collection(db, 'events'),
-        where('date', '>=', today),
-        orderBy('date')
+        collection(db, "events"),
+        where("date", ">=", today),
+        orderBy("date")
       );
       
       const activitiesSnapshot = await getDocs(activitiesQuery);
@@ -63,7 +63,7 @@ function UpcomingActivitiesPage() {
       
       setActivities(activitiesData);
     } catch (error) {
-      console.error('Error fetching activities:', error);
+      console.error("Error fetching activities:", error);
     } finally {
       setLoading(false);
     }
@@ -71,25 +71,25 @@ function UpcomingActivitiesPage() {
   
   const handleAddActivity = () => {
     setForm({
-      title: '',
-      description: '',
-      date: '',
-      endDate: '',
-      type: 'event',
-      presenter: '',
-      location: '',
-      imageUrl: '',
-      registrationLink: ''
+      title: "",
+      description: "",
+      date: "",
+      endDate: "",
+      type: "event",
+      presenter: "",
+      location: "",
+      imageUrl: "",
+      registrationLink: ""
     });
-    setFormError('');
+    setFormError("");
     setShowAddModal(true);
   };
 
   async function saveActivity(e) {
     e.preventDefault();
-    setFormError('');
+    setFormError("");
     if (!form.title || !form.date || !form.description) {
-      setFormError('Title, Date, and Description are required.');
+      setFormError("Title, Date, and Description are required.");
       return;
     }
     setSaving(true);
@@ -102,14 +102,14 @@ function UpcomingActivitiesPage() {
         date: Timestamp.fromDate(dateObj),
         ...(endDateObj ? { endDate: Timestamp.fromDate(endDateObj) } : {})
       };
-      await addDoc(collection(db, 'events'), docData);
+      await addDoc(collection(db, "events"), docData);
       setShowAddModal(false);
       setForm({
-        title: '', description: '', date: '', endDate: '', type: 'event', presenter: '', location: '', imageUrl: '', registrationLink: ''
+        title: "", description: "", date: "", endDate: "", type: "event", presenter: "", location: "", imageUrl: "", registrationLink: ""
       });
       fetchActivities();
     } catch (err) {
-      setFormError('Failed to save activity. Please try again.');
+      setFormError("Failed to save activity. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -160,7 +160,7 @@ function UpcomingActivitiesPage() {
                 <label className="block text-sm font-medium mb-1">Date</label>
                 <input type="date" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} className="w-full px-3 py-2 border rounded" required />
               </div>
-              {form.type === 'workshop' && (
+              {form.type === "workshop" && (
                 <div className="flex-1">
                   <label className="block text-sm font-medium mb-1">End Date</label>
                   <input type="date" value={form.endDate} onChange={e => setForm(f => ({ ...f, endDate: e.target.value }))} className="w-full px-3 py-2 border rounded" />
@@ -171,17 +171,17 @@ function UpcomingActivitiesPage() {
             {formError && <div className="text-red-500 text-sm">{formError}</div>}
             <div className="flex justify-end gap-2">
               <button type="button" className="btn-outline" onClick={() => setShowAddModal(false)} disabled={saving}>Cancel</button>
-              <button type="submit" className="btn-primary" disabled={saving}>{saving ? 'Saving...' : 'Save Activity'}</button>
+              <button type="submit" className="btn-primary" disabled={saving}>{saving ? "Saving..." : "Save Activity"}</button>
             </div>
           </form>
         </Modal>
         {/* Registration Modal */}
-        <Modal isOpen={showRegModal} onClose={() => setShowRegModal(false)} title={regActivity ? `Register for ${regActivity.title}` : 'Register'} size="md">
+        <Modal isOpen={showRegModal} onClose={() => setShowRegModal(false)} title={regActivity ? `Register for ${regActivity.title}` : "Register"} size="md">
           <form onSubmit={async (e) => {
             e.preventDefault();
-            setRegError('');
+            setRegError("");
             if (!regForm.name || !regForm.email || !regForm.phone) {
-              setRegError('All fields are required.');
+              setRegError("All fields are required.");
               return;
             }
             setRegSaving(true);
@@ -191,10 +191,10 @@ function UpcomingActivitiesPage() {
                 submittedAt: new Date().toISOString()
               });
               setShowRegModal(false);
-              setRegForm({ name: '', email: '', phone: '' });
-              alert('Registration submitted!');
+              setRegForm({ name: "", email: "", phone: "" });
+              alert("Registration submitted!");
             } catch (err) {
-              setRegError('Failed to submit registration. Please try again.');
+              setRegError("Failed to submit registration. Please try again.");
             } finally {
               setRegSaving(false);
             }
@@ -205,7 +205,7 @@ function UpcomingActivitiesPage() {
             {regError && <div className="text-red-500 text-sm">{regError}</div>}
             <div className="flex justify-end gap-2">
               <button type="button" className="btn-outline" onClick={() => setShowRegModal(false)} disabled={regSaving}>Cancel</button>
-              <button type="submit" className="btn-primary" disabled={regSaving}>{regSaving ? 'Submitting...' : 'Submit'}</button>
+              <button type="submit" className="btn-primary" disabled={regSaving}>{regSaving ? "Submitting..." : "Submit"}</button>
             </div>
           </form>
         </Modal>
@@ -226,7 +226,7 @@ function UpcomingActivitiesPage() {
                 <div className="md:flex">
                   <div className="md:w-1/3 bg-neutral-100 dark:bg-neutral-800">
                     <img 
-                      src={activity.imageUrl || 'https://images.pexels.com/photos/3184296/pexels-photo-3184296.jpeg'} 
+                      src={activity.imageUrl || "https://images.pexels.com/photos/3184296/pexels-photo-3184296.jpeg"} 
                       alt={activity.title} 
                       className="w-full h-48 md:h-full object-cover"
                     />
@@ -234,16 +234,16 @@ function UpcomingActivitiesPage() {
                   <div className="p-6 md:w-2/3">
                     <div className="flex flex-wrap items-center gap-3 mb-3">
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        activity.type === 'event' 
-                          ? 'bg-primary-500 text-white' 
-                          : 'bg-secondary-500 text-white'
+                        activity.type === "event" 
+                          ? "bg-primary-500 text-white" 
+                          : "bg-secondary-500 text-white"
                       }`}>
-                        {activity.type === 'event' ? 'Event' : 'Workshop'}
+                        {activity.type === "event" ? "Event" : "Workshop"}
                       </span>
                       <div className="flex items-center text-neutral-500 dark:text-neutral-400 text-sm">
                         <FiCalendar className="mr-1" />
                         <span>
-                          {activity.type === 'workshop' && activity.endDate
+                          {activity.type === "workshop" && activity.endDate
                             ? `${formatDate(activity.date)} - ${formatDate(activity.endDate)}`
                             : formatDate(activity.date)
                           }

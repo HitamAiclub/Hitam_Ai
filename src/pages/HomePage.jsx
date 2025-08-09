@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../firebase';
-import Card from '../components/ui/Card';
-import Button from '../components/ui/Button';
-import { Calendar, Users, Trophy, ArrowRight } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../firebase";
+import Card from "../components/ui/Card";
+import Button from "../components/ui/Button";
+import { Calendar, Users, Trophy, ArrowRight } from "lucide-react";
 
 const HomePage = () => {
   const [committeeMembers, setCommitteeMembers] = useState([]);
@@ -19,20 +19,20 @@ const HomePage = () => {
     try {
       try {
         // Fetch committee members
-        const committeeSnapshot = await getDocs(collection(db, 'committeeMembers'));
+        const committeeSnapshot = await getDocs(collection(db, "committeeMembers"));
         const members = committeeSnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         }));
         setCommitteeMembers(members);
       } catch (error) {
-        console.warn('Could not fetch committee members:', error.message);
+        console.warn("Could not fetch committee members:", error.message);
         setCommitteeMembers([]);
       }
 
       try {
         // Fetch featured event (latest event)
-        const eventsSnapshot = await getDocs(collection(db, 'events'));
+        const eventsSnapshot = await getDocs(collection(db, "events"));
         const events = eventsSnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
@@ -45,11 +45,11 @@ const HomePage = () => {
           setFeaturedEvent(sortedEvents[0]);
         }
       } catch (error) {
-        console.warn('Could not fetch events:', error.message);
+        console.warn("Could not fetch events:", error.message);
         setFeaturedEvent(null);
       }
     } catch (error) {
-      console.warn('General data fetch error:', error.message);
+      console.warn("General data fetch error:", error.message);
     } finally {
       setLoading(false);
     }

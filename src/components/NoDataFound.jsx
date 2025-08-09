@@ -1,9 +1,9 @@
-import { motion } from 'framer-motion';
-import { Search, Database } from 'lucide-react';
+import { motion } from "framer-motion";
+import { Search, Database } from "lucide-react";
 
 const NoDataFound = ({ 
-  title = 'No Data Found', 
-  message = 'There is no data available at the moment.',
+  title = "No Data Found", 
+  message = "There is no data available at the moment.",
   icon: Icon = Database,
   actionButton = null 
 }) => {

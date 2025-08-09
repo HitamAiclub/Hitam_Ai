@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { collection, getDocs, deleteDoc, doc, updateDoc, onSnapshot } from 'firebase/firestore';
-import { db, auth } from '../../firebase';
-import { useAuth } from '../../contexts/AuthContext';
-import Card from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
-import Modal from '../../components/ui/Modal';
-import { Download, Eye, Calendar, Users, Trash2, Edit } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { collection, getDocs, deleteDoc, doc, updateDoc, onSnapshot } from "firebase/firestore";
+import { db, auth } from "../../firebase";
+import { useAuth } from "../../contexts/AuthContext";
+import Card from "../../components/ui/Card";
+import Button from "../../components/ui/Button";
+import Modal from "../../components/ui/Modal";
+import { Download, Eye, Calendar, Users, Trash2, Edit } from "lucide-react";
 
 const FormSubmissions = () => {
   const { user } = useAuth();
@@ -14,7 +14,7 @@ const FormSubmissions = () => {
   const [selectedSubmissions, setSelectedSubmissions] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedTitle, setSelectedTitle] = useState('');
+  const [selectedTitle, setSelectedTitle] = useState("");
   const [selectedSubmission, setSelectedSubmission] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -27,17 +27,17 @@ const FormSubmissions = () => {
 
   const fetchAllSubmissions = async () => {
     if (!user) {
-      setError('User not authenticated');
+      setError("User not authenticated");
       setLoading(false);
       return;
     }
 
     try {
       setError(null);
-      console.log('Fetching submissions for user:', user.uid);
+      console.log("Fetching submissions for user:", user.uid);
       
-      const activitiesSnapshot = await getDocs(collection(db, 'upcomingActivities'));
-      console.log('Activities found:', activitiesSnapshot.size);
+      const activitiesSnapshot = await getDocs(collection(db, "upcomingActivities"));
+      console.log("Activities found:", activitiesSnapshot.size);
       
       const activitiesData = await Promise.all(
         activitiesSnapshot.docs.map(async (doc) => {
@@ -46,7 +46,7 @@ const FormSubmissions = () => {
           let registrations = [];
           try {
             const registrationsSnapshot = await getDocs(
-              collection(db, 'upcomingActivities', doc.id, 'registrations')
+              collection(db, "upcomingActivities", doc.id, "registrations")
             );
             registrations = registrationsSnapshot.docs.map(regDoc => ({
               id: regDoc.id,
@@ -59,20 +59,20 @@ const FormSubmissions = () => {
             // Continue with empty registrations array
           }
           
-          return { ...activity, registrations, type: 'activity' };
+          return { ...activity, registrations, type: "activity" };
         })
       );
       
       setActivities(activitiesData);
-      console.log('Total activities loaded:', activitiesData.length);
+      console.log("Total activities loaded:", activitiesData.length);
     } catch (error) {
-      console.error('Error fetching submissions:', error);
+      console.error("Error fetching submissions:", error);
       setError(error.message);
       
       // Fallback: try to load from allRegistrations collection
       try {
-        console.log('Trying fallback method...');
-        const allRegsSnapshot = await getDocs(collection(db, 'allRegistrations'));
+        console.log("Trying fallback method...");
+        const allRegsSnapshot = await getDocs(collection(db, "allRegistrations"));
         const groupedRegistrations = {};
         
         allRegsSnapshot.docs.forEach(doc => {
@@ -81,9 +81,9 @@ const FormSubmissions = () => {
           if (!groupedRegistrations[activityId]) {
             groupedRegistrations[activityId] = {
               id: activityId,
-              title: data.activityTitle || 'Unknown Activity',
+              title: data.activityTitle || "Unknown Activity",
               registrations: [],
-              type: 'activity'
+              type: "activity"
             };
           }
           groupedRegistrations[activityId].registrations.push({
@@ -94,10 +94,10 @@ const FormSubmissions = () => {
         
         setActivities(Object.values(groupedRegistrations));
         setError(null);
-        console.log('Fallback method successful');
+        console.log("Fallback method successful");
       } catch (fallbackError) {
-        console.error('Fallback method also failed:', fallbackError);
-        setError('Unable to load submissions. Please check your permissions.');
+        console.error("Fallback method also failed:", fallbackError);
+        setError("Unable to load submissions. Please check your permissions.");
       }
     } finally {
       setLoading(false);
@@ -106,34 +106,34 @@ const FormSubmissions = () => {
 
   const exportSubmissions = (submissions, title) => {
     if (submissions.length === 0) {
-      alert('No submissions to export');
+      alert("No submissions to export");
       return;
     }
 
     const csvContent = submissions.map(submission => {
       const row = [];
       Object.values(submission).forEach(value => {
-        if (typeof value === 'object' && value !== null) {
+        if (typeof value === "object" && value !== null) {
           if (value.fileUrl) {
             row.push(value.fileUrl);
           } else {
             row.push(JSON.stringify(value));
           }
         } else {
-          row.push(value || '');
+          row.push(value || "");
         }
       });
-      return row.join(',');
-    }).join('\n');
+      return row.join(",");
+    }).join("\n");
 
-    const headers = Object.keys(submissions[0]).join(',');
-    const fullContent = headers + '\n' + csvContent;
+    const headers = Object.keys(submissions[0]).join(",");
+    const fullContent = headers + "\n" + csvContent;
 
-    const blob = new Blob([fullContent], { type: 'text/csv' });
+    const blob = new Blob([fullContent], { type: "text/csv" });
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = `${title.replace(/\s+/g, '_')}_submissions.csv`;
+    a.download = `${title.replace(/\s+/g, "_")}_submissions.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
   };
@@ -151,17 +151,17 @@ const FormSubmissions = () => {
 
   const updateSubmissionStatus = async (submissionId, activityId, newStatus) => {
     if (!user) {
-      alert('User not authenticated');
+      alert("User not authenticated");
       return;
     }
 
     try {
-      console.log('Updating submission status:', { submissionId, activityId, newStatus });
+      console.log("Updating submission status:", { submissionId, activityId, newStatus });
       
       // Update in upcomingActivities collection
       try {
         await updateDoc(
-          doc(db, 'upcomingActivities', activityId, 'registrations', submissionId),
+          doc(db, "upcomingActivities", activityId, "registrations", submissionId),
           { 
             status: newStatus,
             updatedAt: new Date().toISOString(),
@@ -169,11 +169,11 @@ const FormSubmissions = () => {
           }
         );
       } catch (updateError) {
-        console.warn('Failed to update in upcomingActivities, trying allRegistrations:', updateError);
+        console.warn("Failed to update in upcomingActivities, trying allRegistrations:", updateError);
         
         // Fallback: update in allRegistrations
         await updateDoc(
-          doc(db, 'allRegistrations', submissionId),
+          doc(db, "allRegistrations", submissionId),
           { 
             status: newStatus,
             updatedAt: new Date().toISOString(),
@@ -185,44 +185,44 @@ const FormSubmissions = () => {
       // Refresh data
       await fetchAllSubmissions();
       setShowEditModal(false);
-      alert('Status updated successfully');
+      alert("Status updated successfully");
     } catch (error) {
-      console.error('Error updating status:', error);
-      alert('Failed to update status');
+      console.error("Error updating status:", error);
+      alert("Failed to update status");
     }
   };
 
   const deleteSubmission = async (submissionId, activityId) => {
     if (!user) {
-      alert('User not authenticated');
+      alert("User not authenticated");
       return;
     }
 
-    if (window.confirm('Are you sure you want to delete this submission?')) {
+    if (window.confirm("Are you sure you want to delete this submission?")) {
       try {
-        console.log('Deleting submission:', { submissionId, activityId });
+        console.log("Deleting submission:", { submissionId, activityId });
         
         // Delete from upcomingActivities collection
         try {
           await deleteDoc(
-            doc(db, 'upcomingActivities', activityId, 'registrations', submissionId)
+            doc(db, "upcomingActivities", activityId, "registrations", submissionId)
           );
         } catch (deleteError) {
-          console.warn('Failed to delete from upcomingActivities, trying allRegistrations:', deleteError);
+          console.warn("Failed to delete from upcomingActivities, trying allRegistrations:", deleteError);
           
           // Fallback: delete from allRegistrations
           await deleteDoc(
-            doc(db, 'allRegistrations', submissionId)
+            doc(db, "allRegistrations", submissionId)
           );
         }
         
         // Refresh data
         await fetchAllSubmissions();
         setShowModal(false);
-        alert('Submission deleted successfully');
+        alert("Submission deleted successfully");
       } catch (error) {
-        console.error('Error deleting submission:', error);
-        alert('Failed to delete submission');
+        console.error("Error deleting submission:", error);
+        alert("Failed to delete submission");
       }
     }
   };
@@ -318,7 +318,7 @@ const FormSubmissions = () => {
                     <span>
                       {item.eventDate 
                         ? new Date(item.eventDate).toLocaleDateString()
-                        : 'Date not set'
+                        : "Date not set"
                       }
                     </span>
                   </div>
@@ -400,19 +400,19 @@ const FormSubmissions = () => {
                 <tbody>
                   {selectedSubmissions.map((submission, index) => (
                     <tr key={index} className="border-b border-gray-200 dark:border-gray-700">
-                      <td className="px-4 py-2">{submission.name || '-'}</td>
-                      <td className="px-4 py-2">{submission.email || '-'}</td>
+                      <td className="px-4 py-2">{submission.name || "-"}</td>
+                      <td className="px-4 py-2">{submission.email || "-"}</td>
                       <td className="px-4 py-2">
                         <span className={`px-2 py-1 rounded-full text-xs ${
-                          submission.status === 'confirmed' 
-                            ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
-                            : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300'
+                          submission.status === "confirmed" 
+                            ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+                            : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300"
                         }`}>
-                          {submission.status || 'pending'}
+                          {submission.status || "pending"}
                         </span>
                       </td>
                       <td className="px-4 py-2">
-                        {submission.submittedAt ? new Date(submission.submittedAt).toLocaleDateString() : '-'}
+                        {submission.submittedAt ? new Date(submission.submittedAt).toLocaleDateString() : "-"}
                       </td>
                       <td className="px-4 py-2">
                         <div className="flex gap-1">
@@ -474,11 +474,11 @@ const FormSubmissions = () => {
                   Current Status
                 </label>
                 <span className={`px-2 py-1 rounded-full text-xs ${
-                  selectedSubmission.status === 'confirmed' 
-                    ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
-                    : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300'
+                  selectedSubmission.status === "confirmed" 
+                    ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+                    : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300"
                 }`}>
-                  {selectedSubmission.status || 'pending'}
+                  {selectedSubmission.status || "pending"}
                 </span>
               </div>
               <div>
@@ -486,7 +486,7 @@ const FormSubmissions = () => {
                   Submitted At
                 </label>
                 <p className="text-gray-900 dark:text-white">
-                  {selectedSubmission.submittedAt ? new Date(selectedSubmission.submittedAt).toLocaleString() : '-'}
+                  {selectedSubmission.submittedAt ? new Date(selectedSubmission.submittedAt).toLocaleString() : "-"}
                 </p>
               </div>
             </div>
@@ -512,7 +512,7 @@ const FormSubmissions = () => {
                 onClick={() => updateSubmissionStatus(
                   selectedSubmission.id, 
                   selectedSubmission.activityId, 
-                  'confirmed'
+                  "confirmed"
                 )}
                 className="flex-1"
               >
@@ -523,7 +523,7 @@ const FormSubmissions = () => {
                 onClick={() => updateSubmissionStatus(
                   selectedSubmission.id, 
                   selectedSubmission.activityId, 
-                  'pending_payment'
+                  "pending_payment"
                 )}
                 className="flex-1"
               >

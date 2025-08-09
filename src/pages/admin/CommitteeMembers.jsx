@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage, auth } from '../../firebase';
-import Card from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
-import Modal from '../../components/ui/Modal';
-import Input from '../../components/ui/Input';
-import { Plus, Edit, Trash2, Upload, User } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { db, storage, auth } from "../../firebase";
+import Card from "../../components/ui/Card";
+import Button from "../../components/ui/Button";
+import Modal from "../../components/ui/Modal";
+import Input from "../../components/ui/Input";
+import { Plus, Edit, Trash2, Upload, User } from "lucide-react";
 
 const CommitteeMembers = () => {
   const [members, setMembers] = useState([]);
@@ -15,12 +15,12 @@ const CommitteeMembers = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingMember, setEditingMember] = useState(null);
   const [formData, setFormData] = useState({
-    name: '',
-    role: '',
-    branch: '',
-    year: '',
-    email: '',
-    phone: ''
+    name: "",
+    role: "",
+    branch: "",
+    year: "",
+    email: "",
+    phone: ""
   });
   const [imageFile, setImageFile] = useState(null);
   const [uploading, setUploading] = useState(false);
@@ -28,34 +28,34 @@ const CommitteeMembers = () => {
   const [deleteConfirm, setDeleteConfirm] = useState(null);
 
   const roles = [
-    'President',
-    'Vice President',
-    'Secretary',
-    'Treasurer',
-    'Technical Lead',
-    'Event Coordinator',
-    'Marketing Head',
-    'Design Head',
-    'Content Writer',
-    'Social Media Manager',
-    'Committee Member'
+    "President",
+    "Vice President",
+    "Secretary",
+    "Treasurer",
+    "Technical Lead",
+    "Event Coordinator",
+    "Marketing Head",
+    "Design Head",
+    "Content Writer",
+    "Social Media Manager",
+    "Committee Member"
   ];
 
   const branches = [
-     'Computer Science Engineering',
-  'Computer Science Engineering (AI & ML)',
-  'Computer Science Engineering (Data Science)',
-  'Computer Science Engineering (Cyber Security)',
-  'Computer Science Engineering (IoT)',
-  'Electronics and Communication Engineering',
-  'Electrical and Electronics Engineering',
-  'Mechanical Engineering'
+     "Computer Science Engineering",
+  "Computer Science Engineering (AI & ML)",
+  "Computer Science Engineering (Data Science)",
+  "Computer Science Engineering (Cyber Security)",
+  "Computer Science Engineering (IoT)",
+  "Electronics and Communication Engineering",
+  "Electrical and Electronics Engineering",
+  "Mechanical Engineering"
   ];
 
   useEffect(() => {
     // Real-time listener with error handling
     const unsubscribe = onSnapshot(
-      collection(db, 'committeeMembers'), 
+      collection(db, "committeeMembers"), 
       (snapshot) => {
         const membersData = snapshot.docs.map(doc => ({
           id: doc.id,
@@ -66,7 +66,7 @@ const CommitteeMembers = () => {
         setLoading(false);
       }, 
       (error) => {
-        console.warn('Committee members listener error:', error.message);
+        console.warn("Committee members listener error:", error.message);
         setMembers([]);
         setOptimisticMembers([]);
         setLoading(false);
@@ -80,13 +80,13 @@ const CommitteeMembers = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    console.log('Starting committee member submission...');
-    console.log('Form data:', formData);
-    console.log('Current user:', auth.currentUser);
+    console.log("Starting committee member submission...");
+    console.log("Form data:", formData);
+    console.log("Current user:", auth.currentUser);
     
     // Check authentication first
     if (!auth.currentUser) {
-      alert('You must be logged in to perform this action');
+      alert("You must be logged in to perform this action");
       return;
     }
     
@@ -97,7 +97,7 @@ const CommitteeMembers = () => {
     const optimisticMember = {
       id: editingMember?.id || tempId,
       ...formData,
-      photoUrl: imageFile ? URL.createObjectURL(imageFile) : editingMember?.photoUrl || '',
+      photoUrl: imageFile ? URL.createObjectURL(imageFile) : editingMember?.photoUrl || "",
       createdAt: editingMember?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       isOptimistic: !editingMember
@@ -120,16 +120,16 @@ const CommitteeMembers = () => {
     resetForm();
 
     try {
-      let photoUrl = editingMember?.photoUrl || '';
+      let photoUrl = editingMember?.photoUrl || "";
       
       if (imageFile) {
-        console.log('Uploading image...');
+        console.log("Uploading image...");
         // Show upload progress
         const imageRef = ref(storage, `committee/${Date.now()}_${imageFile.name}`);
         const uploadResult = await uploadBytes(imageRef, imageFile);
-        console.log('Image uploaded successfully');
+        console.log("Image uploaded successfully");
         photoUrl = await getDownloadURL(imageRef);
-        console.log('Image URL obtained');
+        console.log("Image URL obtained");
       }
 
       const memberData = {
@@ -139,26 +139,26 @@ const CommitteeMembers = () => {
         updatedAt: new Date().toISOString()
       };
 
-      console.log('Saving member data to Firestore...');
+      console.log("Saving member data to Firestore...");
       
       if (editingMember) {
-        await updateDoc(doc(db, 'committeeMembers', editingMember.id), memberData);
-        console.log('Member updated successfully');
+        await updateDoc(doc(db, "committeeMembers", editingMember.id), memberData);
+        console.log("Member updated successfully");
       } else {
-        const docRef = await addDoc(collection(db, 'committeeMembers'), memberData);
-        console.log('Member added successfully with ID:', docRef.id);
+        const docRef = await addDoc(collection(db, "committeeMembers"), memberData);
+        console.log("Member added successfully with ID:", docRef.id);
       }
 
       // Real-time listener will handle the update
-      alert(editingMember ? 'Member updated successfully!' : 'Member added successfully!');
+      alert(editingMember ? "Member updated successfully!" : "Member added successfully!");
     } catch (error) {
-      console.error('Error saving member:', error);
-      console.error('Error code:', error.code);
-      console.error('Error message:', error.message);
-      console.error('Auth state:', auth.currentUser ? 'Authenticated' : 'Not authenticated');
+      console.error("Error saving member:", error);
+      console.error("Error code:", error.code);
+      console.error("Error message:", error.message);
+      console.error("Auth state:", auth.currentUser ? "Authenticated" : "Not authenticated");
       
-      if (error.code === 'permission-denied') {
-        alert('Permission denied. Please ensure you are logged in as an admin and Firebase rules allow write access.');
+      if (error.code === "permission-denied") {
+        alert("Permission denied. Please ensure you are logged in as an admin and Firebase rules allow write access.");
       } else {
         alert(`Failed to save member: ${error.message}`);
       }
@@ -181,12 +181,12 @@ const CommitteeMembers = () => {
   const handleEdit = (member) => {
     setEditingMember(member);
     setFormData({
-      name: member.name || '',
-      role: member.role || '',
-      branch: member.branch || '',
-      year: member.year || '',
-      email: member.email || '',
-      phone: member.phone || ''
+      name: member.name || "",
+      role: member.role || "",
+      branch: member.branch || "",
+      year: member.year || "",
+      email: member.email || "",
+      phone: member.phone || ""
     });
     setShowModal(true);
   };
@@ -204,33 +204,33 @@ const CommitteeMembers = () => {
     setOptimisticMembers(prev => prev.filter(member => member.id !== memberId));
 
     try {
-      await deleteDoc(doc(db, 'committeeMembers', memberId));
+      await deleteDoc(doc(db, "committeeMembers", memberId));
     } catch (error) {
-      console.error('Error deleting member:', error);
+      console.error("Error deleting member:", error);
       // Revert optimistic delete on error
       if (memberToDelete) {
         setOptimisticMembers(prev => [...prev, memberToDelete]);
       }
-      alert('Failed to delete member. Please try again.');
+      alert("Failed to delete member. Please try again.");
     }
   };
 
   const resetForm = () => {
     setEditingMember(null);
     setFormData({
-      name: '',
-      role: '',
-      branch: '',
-      year: '',
-      email: '',
-      phone: ''
+      name: "",
+      role: "",
+      branch: "",
+      year: "",
+      email: "",
+      phone: ""
     });
     setImageFile(null);
   };
 
   const exportMembers = () => {
     if (members.length === 0) {
-      alert('No members to export');
+      alert("No members to export");
       return;
     }
 
@@ -243,17 +243,17 @@ const CommitteeMembers = () => {
         member.email,
         member.phone,
         member.createdAt
-      ].join(',');
-    }).join('\n');
+      ].join(",");
+    }).join("\n");
 
-    const headers = 'Name,Role,Branch,Year,Email,Phone,Created At';
-    const fullContent = headers + '\n' + csvContent;
+    const headers = "Name,Role,Branch,Year,Email,Phone,Created At";
+    const fullContent = headers + "\n" + csvContent;
 
-    const blob = new Blob([fullContent], { type: 'text/csv' });
+    const blob = new Blob([fullContent], { type: "text/csv" });
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = 'committee_members.csv';
+    a.download = "committee_members.csv";
     a.click();
     window.URL.revokeObjectURL(url);
   };
@@ -308,7 +308,7 @@ const CommitteeMembers = () => {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {optimisticMembers.map((member, index) => (
               <Card key={member.id} delay={index * 0.1}>
-                <div className={`p-6 ${member.isOptimistic ? 'opacity-75' : ''}`}>
+                <div className={`p-6 ${member.isOptimistic ? "opacity-75" : ""}`}>
                   <div className="flex items-center space-x-4 mb-4">
                     <div className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center overflow-hidden">
                       {member.photoUrl ? (
@@ -386,7 +386,7 @@ const CommitteeMembers = () => {
       <Modal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        title={editingMember ? 'Edit Member' : 'Add Committee Member'}
+        title={editingMember ? "Edit Member" : "Add Committee Member"}
         size="lg"
       >
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -506,7 +506,7 @@ const CommitteeMembers = () => {
 
           <div className="flex gap-4">
             <Button type="submit" loading={uploading} className="flex-1">
-              {editingMember ? 'Update' : 'Add'} Member
+              {editingMember ? "Update" : "Add"} Member
             </Button>
             <Button
               type="button"

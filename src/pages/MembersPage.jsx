@@ -1,15 +1,15 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
-import { db } from '../firebase';
-import { FiPlus, FiSearch, FiFilter } from 'react-icons/fi';
-import PageHeader from '../components/ui/PageHeader';
-import MemberCard from '../components/admin/MemberCard';
-import MemberForm from '../components/admin/MemberForm';
-import LoadingSpinner from '../components/ui/LoadingSpinner';
-import { useAuth } from '../contexts/AuthContext';
-import { Navigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { db } from "../firebase";
+import { FiPlus, FiSearch, FiFilter } from "react-icons/fi";
+import PageHeader from "../components/ui/PageHeader";
+import MemberCard from "../components/admin/MemberCard";
+import MemberForm from "../components/admin/MemberForm";
+import LoadingSpinner from "../components/ui/LoadingSpinner";
+import { useAuth } from "../contexts/AuthContext";
+import { Navigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 function MembersPage() {
   const [members, setMembers] = useState([]);
@@ -17,8 +17,8 @@ function MembersPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingMember, setEditingMember] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filter, setFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filter, setFilter] = useState("all");
   
   const { isAdmin } = useAuth();
   
@@ -38,7 +38,7 @@ function MembersPage() {
       setLoading(true);
       
       // Get members from Firestore
-      const membersQuery = collection(db, 'members');
+      const membersQuery = collection(db, "members");
       const membersSnapshot = await getDocs(membersQuery);
       const membersData = membersSnapshot.docs.map(doc => ({
         id: doc.id,
@@ -47,15 +47,15 @@ function MembersPage() {
       
       // Sort: committee members first, then alphabetically by name
       membersData.sort((a, b) => {
-        if (a.role === 'Member' && b.role !== 'Member') return 1;
-        if (a.role !== 'Member' && b.role === 'Member') return -1;
+        if (a.role === "Member" && b.role !== "Member") return 1;
+        if (a.role !== "Member" && b.role === "Member") return -1;
         return a.name.localeCompare(b.name);
       });
       
       setMembers(membersData);
     } catch (error) {
-      console.error('Error fetching members:', error);
-      toast.error('Failed to load members');
+      console.error("Error fetching members:", error);
+      toast.error("Failed to load members");
     } finally {
       setLoading(false);
     }
@@ -72,14 +72,14 @@ function MembersPage() {
   };
   
   const handleDeleteMember = async (id) => {
-    if (window.confirm('Are you sure you want to delete this member?')) {
+    if (window.confirm("Are you sure you want to delete this member?")) {
       try {
-        await deleteDoc(doc(db, 'members', id));
+        await deleteDoc(doc(db, "members", id));
         setMembers(members.filter(member => member.id !== id));
-        toast.success('Member deleted successfully');
+        toast.success("Member deleted successfully");
       } catch (error) {
-        console.error('Error deleting member:', error);
-        toast.error('Failed to delete member');
+        console.error("Error deleting member:", error);
+        toast.error("Failed to delete member");
       }
     }
   };
@@ -96,11 +96,11 @@ function MembersPage() {
         // Simulate successful submission
         setShowForm(false);
         fetchMembers();
-        toast.success(editingMember ? 'Member updated successfully' : 'Member added successfully');
+        toast.success(editingMember ? "Member updated successfully" : "Member added successfully");
       }, 1000);
     } catch (error) {
-      console.error('Error submitting member:', error);
-      toast.error('Failed to save member');
+      console.error("Error submitting member:", error);
+      toast.error("Failed to save member");
     } finally {
       setIsSubmitting(false);
     }
@@ -114,9 +114,9 @@ function MembersPage() {
       member.rollNo.toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesFilter = 
-      filter === 'all' || 
-      (filter === 'committee' && member.role !== 'Member') ||
-      (filter === 'regular' && member.role === 'Member');
+      filter === "all" || 
+      (filter === "committee" && member.role !== "Member") ||
+      (filter === "regular" && member.role === "Member");
     
     return matchesSearch && matchesFilter;
   });
@@ -148,31 +148,31 @@ function MembersPage() {
               <FiFilter className="mr-2 text-neutral-500" />
               <div className="flex space-x-2">
                 <button
-                  onClick={() => setFilter('all')}
+                  onClick={() => setFilter("all")}
                   className={`px-3 py-1 rounded-full text-sm ${
-                    filter === 'all'
-                      ? 'bg-primary-500 text-white'
-                      : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300'
+                    filter === "all"
+                      ? "bg-primary-500 text-white"
+                      : "bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300"
                   }`}
                 >
                   All
                 </button>
                 <button
-                  onClick={() => setFilter('committee')}
+                  onClick={() => setFilter("committee")}
                   className={`px-3 py-1 rounded-full text-sm ${
-                    filter === 'committee'
-                      ? 'bg-primary-500 text-white'
-                      : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300'
+                    filter === "committee"
+                      ? "bg-primary-500 text-white"
+                      : "bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300"
                   }`}
                 >
                   Committee
                 </button>
                 <button
-                  onClick={() => setFilter('regular')}
+                  onClick={() => setFilter("regular")}
                   className={`px-3 py-1 rounded-full text-sm ${
-                    filter === 'regular'
-                      ? 'bg-primary-500 text-white'
-                      : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300'
+                    filter === "regular"
+                      ? "bg-primary-500 text-white"
+                      : "bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300"
                   }`}
                 >
                   Regular
@@ -208,7 +208,7 @@ function MembersPage() {
                 className="bg-white dark:bg-neutral-800 rounded-xl p-6 w-full max-w-xl max-h-[90vh] overflow-y-auto"
               >
                 <h2 className="text-2xl font-bold mb-6">
-                  {editingMember ? 'Edit Member' : 'Add New Member'}
+                  {editingMember ? "Edit Member" : "Add New Member"}
                 </h2>
                 
                 <MemberForm 
@@ -242,8 +242,8 @@ function MembersPage() {
           <div className="text-center py-12">
             <p className="text-neutral-500 dark:text-neutral-400 mb-4">
               {searchQuery 
-                ? 'No members found matching your search criteria.' 
-                : 'No members found in the database.'}
+                ? "No members found matching your search criteria." 
+                : "No members found in the database."}
             </p>
             <button
               onClick={handleAddMember}

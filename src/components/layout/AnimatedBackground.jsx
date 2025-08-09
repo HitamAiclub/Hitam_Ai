@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import { useTheme } from '../../contexts/ThemeContext';
+import React, { useEffect, useRef } from "react";
+import { useTheme } from "../../contexts/ThemeContext";
 
 const AnimatedBackground = () => {
   const canvasRef = useRef(null);
@@ -10,7 +10,7 @@ const AnimatedBackground = () => {
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     
     const setCanvasSize = () => {
       canvas.width = window.innerWidth;
@@ -18,7 +18,7 @@ const AnimatedBackground = () => {
     };
     
     setCanvasSize();
-    window.addEventListener('resize', setCanvasSize);
+    window.addEventListener("resize", setCanvasSize);
 
     // Bubble system
     const bubbles = [];
@@ -38,7 +38,7 @@ const AnimatedBackground = () => {
         this.originalOpacity = this.opacity;
         this.hue = Math.random() * 60 + 180; // Blue to cyan range
         this.saturation = Math.random() * 30 + 50;
-        this.lightness = theme === 'dark' ? Math.random() * 30 + 70 : Math.random() * 30 + 50;
+        this.lightness = theme === "dark" ? Math.random() * 30 + 70 : Math.random() * 30 + 50;
         this.pulseSpeed = Math.random() * 0.02 + 0.01;
         this.pulseOffset = Math.random() * Math.PI * 2;
         this.glowIntensity = Math.random() * 0.5 + 0.3;
@@ -107,8 +107,8 @@ const AnimatedBackground = () => {
           this.x, this.y, this.size * 2.5
         );
         
-        const baseAlpha = theme === 'dark' ? alpha * 1.2 : alpha * 0.8;
-        const glowAlpha = theme === 'dark' ? alpha * 0.6 : alpha * 0.4;
+        const baseAlpha = theme === "dark" ? alpha * 1.2 : alpha * 0.8;
+        const glowAlpha = theme === "dark" ? alpha * 0.6 : alpha * 0.4;
         
         gradient.addColorStop(0, `hsla(${this.hue}, ${this.saturation}%, ${this.lightness}%, ${baseAlpha})`);
         gradient.addColorStop(0.4, `hsla(${this.hue}, ${this.saturation}%, ${this.lightness}%, ${baseAlpha * 0.6})`);
@@ -219,10 +219,10 @@ const AnimatedBackground = () => {
     };
 
     // Event listeners
-    canvas.addEventListener('mousemove', handleMouseMove);
-    canvas.addEventListener('click', handleClick);
-    canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
-    canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+    canvas.addEventListener("mousemove", handleMouseMove);
+    canvas.addEventListener("click", handleClick);
+    canvas.addEventListener("touchstart", handleTouchStart, { passive: false });
+    canvas.addEventListener("touchmove", handleTouchMove, { passive: false });
 
     const animate = () => {
       // Clear canvas with subtle background
@@ -281,11 +281,11 @@ const AnimatedBackground = () => {
     animate();
     
     return () => {
-      window.removeEventListener('resize', setCanvasSize);
-      canvas.removeEventListener('mousemove', handleMouseMove);
-      canvas.removeEventListener('click', handleClick);
-      canvas.removeEventListener('touchstart', handleTouchStart);
-      canvas.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener("resize", setCanvasSize);
+      canvas.removeEventListener("mousemove", handleMouseMove);
+      canvas.removeEventListener("click", handleClick);
+      canvas.removeEventListener("touchstart", handleTouchStart);
+      canvas.removeEventListener("touchmove", handleTouchMove);
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
@@ -297,10 +297,10 @@ const AnimatedBackground = () => {
       ref={canvasRef}
       className="fixed inset-0 z-0 w-full h-full pointer-events-auto"
       style={{ 
-        background: theme === 'dark' 
-          ? 'radial-gradient(ellipse at center, #0f172a 0%, #1e293b 50%, #0f172a 100%)'
-          : 'radial-gradient(ellipse at center, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%)',
-        touchAction: 'none'
+        background: theme === "dark" 
+          ? "radial-gradient(ellipse at center, #0f172a 0%, #1e293b 50%, #0f172a 100%)"
+          : "radial-gradient(ellipse at center, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%)",
+        touchAction: "none"
       }}
     />
   );

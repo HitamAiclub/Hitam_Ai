@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { collection, getDocs, deleteDoc, doc, updateDoc, addDoc, onSnapshot, getDoc, setDoc } from 'firebase/firestore';
-import { db, auth } from '../../firebase';
-import { useAuth } from '../../contexts/AuthContext';
-import Card from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
-import Modal from '../../components/ui/Modal';
-import { Download, Users, Calendar, Mail, Phone, GraduationCap, Settings, Trash2, UserPlus } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { collection, getDocs, deleteDoc, doc, updateDoc, addDoc, onSnapshot, getDoc, setDoc } from "firebase/firestore";
+import { db, auth } from "../../firebase";
+import { useAuth } from "../../contexts/AuthContext";
+import Card from "../../components/ui/Card";
+import Button from "../../components/ui/Button";
+import Modal from "../../components/ui/Modal";
+import { Download, Users, Calendar, Mail, Phone, GraduationCap, Settings, Trash2, UserPlus } from "lucide-react";
 
 const CommunityMembers = () => {
   const { user } = useAuth();
@@ -26,24 +26,24 @@ const CommunityMembers = () => {
 
   const fetchMembers = async () => {
     if (!user) {
-      setError('User not authenticated');
+      setError("User not authenticated");
       setLoading(false);
       return;
     }
 
     try {
       setError(null);
-      console.log('Fetching community members for user:', user.uid);
+      console.log("Fetching community members for user:", user.uid);
       
-      const snapshot = await getDocs(collection(db, 'clubJoins'));
+      const snapshot = await getDocs(collection(db, "clubJoins"));
       const membersData = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
       setMembers(membersData);
-      console.log('Community members loaded:', membersData.length);
+      console.log("Community members loaded:", membersData.length);
     } catch (error) {
-      console.error('Error fetching members:', error);
+      console.error("Error fetching members:", error);
       setError(error.message);
     } finally {
       setLoading(false);
@@ -52,87 +52,87 @@ const CommunityMembers = () => {
 
   const loadSettings = async () => {
     try {
-      const settingsDoc = await getDoc(doc(db, 'settings', 'clubJoinStatus'));
+      const settingsDoc = await getDoc(doc(db, "settings", "clubJoinStatus"));
       if (settingsDoc.exists()) {
         setAcceptingSubmissions(settingsDoc.data().enabled || false);
       }
     } catch (error) {
-      console.warn('Could not load settings:', error.message);
+      console.warn("Could not load settings:", error.message);
     }
   };
 
   const deleteMember = async (memberId) => {
     if (!user) {
-      alert('User not authenticated');
+      alert("User not authenticated");
       return;
     }
 
-    if (window.confirm('Are you sure you want to delete this member?')) {
+    if (window.confirm("Are you sure you want to delete this member?")) {
       try {
-        console.log('Deleting member:', memberId);
-        await deleteDoc(doc(db, 'clubJoins', memberId));
+        console.log("Deleting member:", memberId);
+        await deleteDoc(doc(db, "clubJoins", memberId));
         await fetchMembers();
-        alert('Member deleted successfully');
+        alert("Member deleted successfully");
       } catch (error) {
-        console.error('Error deleting member:', error);
-        alert('Failed to delete member');
+        console.error("Error deleting member:", error);
+        alert("Failed to delete member");
       }
     }
   };
 
   const exportMembers = () => {
     if (members.length === 0) {
-      alert('No members to export');
+      alert("No members to export");
       return;
     }
 
     const csvContent = members.map(member => {
       return [
-        member.name || '',
-        member.rollNo || '',
-        member.branch || '',
-        member.year || '',
-        member.section || '',
-        member.email || '',
-        member.phone || '',
-        member.joinedAt || '',
+        member.name || "",
+        member.rollNo || "",
+        member.branch || "",
+        member.year || "",
+        member.section || "",
+        member.email || "",
+        member.phone || "",
+        member.joinedAt || "",
         
-      ].join(',');
-    }).join('\n');
+      ].join(",");
+    }).join("\n");
 
-    const headers = 'Name,Roll No,Branch,Year,Section,Email,Phone,Joined At';
-    const fullContent = headers + '\n' + csvContent;
+    const headers = "Name,Roll No,Branch,Year,Section,Email,Phone,Joined At";
+    const fullContent = headers + "\n" + csvContent;
 
-    const blob = new Blob([fullContent], { type: 'text/csv' });
+    const blob = new Blob([fullContent], { type: "text/csv" });
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = 'community_members.csv';
+    a.download = "community_members.csv";
     a.click();
     window.URL.revokeObjectURL(url);
   };
 
   const updateSubmissionSettings = async () => {
     if (!user) {
-      alert('User not authenticated');
+      alert("User not authenticated");
       return;
     }
 
     setSettingsLoading(true);
     try {
-      console.log('Updating submission settings:', acceptingSubmissions);
+      console.log("Updating submission settings:", acceptingSubmissions);
       
       // Save settings to Firestore
-      await setDoc(doc(db, 'settings', 'clubJoinStatus'), {
+      await setDoc(doc(db, "settings", "clubJoinStatus"), {
         enabled: acceptingSubmissions,
         updatedAt: new Date().toISOString(),
         updatedBy: user.uid
       });
       
       setShowSettingsModal(false);
-      alert('Settings updated successfully');
+      alert("Settings updated successfully");
     } catch (error) {
-      console.error('Error updating settings:', error);
+      console.error("Error updating settings:", error);
       alert(`Failed to update settings: ${error.message}`);
     } finally {
       setSettingsLoading(false);
@@ -249,7 +249,7 @@ const CommunityMembers = () => {
                   </div>
                   <div className="flex items-center">
                     <Phone className="w-4 h-4 mr-2" />
-                    <span className="truncate">{member.phone || 'Not provided'}</span>
+                    <span className="truncate">{member.phone || "Not provided"}</span>
                   </div>
                   <div className="flex items-center">
                     <GraduationCap className="w-4 h-4 mr-2" />
@@ -260,7 +260,7 @@ const CommunityMembers = () => {
                     <span>
                       {member.joinedAt 
                         ? new Date(member.joinedAt).toLocaleDateString()
-                        : 'Date not available'
+                        : "Date not available"
                       }
                     </span>
                   </div>
@@ -313,7 +313,7 @@ const CommunityMembers = () => {
               </span>
             </label>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              When disabled, students won't be able to submit new join requests
+              When disabled, students won"t be able to submit new join requests
             </p>
           </div>
 

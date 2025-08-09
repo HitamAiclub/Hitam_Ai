@@ -1,14 +1,14 @@
-import { useState } from 'react';
-import { useNavigate, Navigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { useAuth } from '../contexts/AuthContext';
-import { FiLock, FiMail } from 'react-icons/fi';
-import LoadingSpinner from '../components/ui/LoadingSpinner';
+import { useState } from "react";
+import { useNavigate, Navigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { useAuth } from "../contexts/AuthContext";
+import { FiLock, FiMail } from "react-icons/fi";
+import LoadingSpinner from "../components/ui/LoadingSpinner";
 
 function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   
   const { login, currentUser } = useAuth();
@@ -23,13 +23,13 @@ function LoginPage() {
     e.preventDefault();
     
     try {
-      setError('');
+      setError("");
       setLoading(true);
       await login(email, password);
-      navigate('/');
+      navigate("/");
     } catch (error) {
-      setError('Failed to log in. Please check your credentials.');
-      console.error('Login error:', error);
+      setError("Failed to log in. Please check your credentials.");
+      console.error("Login error:", error);
     } finally {
       setLoading(false);
     }

@@ -1,6 +1,6 @@
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { FiHome } from 'react-icons/fi';
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import { FiHome } from "react-icons/fi";
 
 function NotFoundPage() {
   return (
@@ -20,7 +20,7 @@ function NotFoundPage() {
           </h2>
           
           <p className="text-lg text-neutral-600 dark:text-neutral-400 mb-8">
-            The page you're looking for doesn't exist or has been moved.
+            The page you"re looking for doesn"t exist or has been moved.
           </p>
           
           <Link to="/" className="btn-primary inline-flex items-center">

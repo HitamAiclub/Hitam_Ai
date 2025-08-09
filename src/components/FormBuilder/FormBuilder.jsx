@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, GripVertical, Eye, Settings, Link, Image as ImageIcon, Type, Copy, ArrowUp, ArrowDown } from 'lucide-react';
-import Button from '../ui/Button';
-import Input from '../ui/Input';
-import Modal from '../ui/Modal';
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Plus, Trash2, GripVertical, Eye, Settings, Link, Image as ImageIcon, Type, Copy, ArrowUp, ArrowDown } from "lucide-react";
+import Button from "../ui/Button";
+import Input from "../ui/Input";
+import Modal from "../ui/Modal";
 
 const FormBuilder = ({ formSchema = [], onChange }) => {
   const [fields, setFields] = useState(formSchema);
@@ -19,59 +19,59 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
   }, [formSchema]);
 
   const fieldTypes = [
-    { type: 'text', label: 'Short Text', icon: '📝', category: 'input' },
-    { type: 'textarea', label: 'Long Text', icon: '📄', category: 'input' },
-    { type: 'email', label: 'Email', icon: '📧', category: 'input' },
-    { type: 'phone', label: 'Phone Number', icon: '📞', category: 'input' },
-    { type: 'number', label: 'Number', icon: '🔢', category: 'input' },
-    { type: 'select', label: 'Dropdown', icon: '📋', category: 'choice' },
-    { type: 'radio', label: 'Multiple Choice', icon: '⚪', category: 'choice' },
-    { type: 'checkbox', label: 'Checkboxes', icon: '☑️', category: 'choice' },
-    { type: 'file', label: 'File Upload', icon: '📎', category: 'input' },
-    { type: 'date', label: 'Date', icon: '📅', category: 'input' },
-    { type: 'time', label: 'Time', icon: '⏰', category: 'input' },
-    { type: 'url', label: 'Website URL', icon: '🌐', category: 'input' },
-    { type: 'label', label: 'Description', icon: '📋', category: 'content' },
-    { type: 'image', label: 'Image', icon: '🖼️', category: 'content' },
-    { type: 'link', label: 'Link/Button', icon: '🔗', category: 'content' }
+    { type: "text", label: "Short Text", icon: "📝", category: "input" },
+    { type: "textarea", label: "Long Text", icon: "📄", category: "input" },
+    { type: "email", label: "Email", icon: "📧", category: "input" },
+    { type: "phone", label: "Phone Number", icon: "📞", category: "input" },
+    { type: "number", label: "Number", icon: "🔢", category: "input" },
+    { type: "select", label: "Dropdown", icon: "📋", category: "choice" },
+    { type: "radio", label: "Multiple Choice", icon: "⚪", category: "choice" },
+    { type: "checkbox", label: "Checkboxes", icon: "☑️", category: "choice" },
+    { type: "file", label: "File Upload", icon: "📎", category: "input" },
+    { type: "date", label: "Date", icon: "📅", category: "input" },
+    { type: "time", label: "Time", icon: "⏰", category: "input" },
+    { type: "url", label: "Website URL", icon: "🌐", category: "input" },
+    { type: "label", label: "Description", icon: "📋", category: "content" },
+    { type: "image", label: "Image", icon: "🖼️", category: "content" },
+    { type: "link", label: "Link/Button", icon: "🔗", category: "content" }
   ];
 
   const addField = (type) => {
-    console.log('addField called with type:', type);
+    console.log("addField called with type:", type);
     const fieldType = fieldTypes.find(f => f.type === type);
-    console.log('Found field type:', fieldType);
+    console.log("Found field type:", fieldType);
     const newField = {
       id: `field_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       type,
-      label: fieldType?.category === 'content' ? '' : `${fieldType?.label || 'New Field'}`,
+      label: fieldType?.category === "content" ? "" : `${fieldType?.label || "New Field"}`,
       required: false,
-      placeholder: '',
-      options: type === 'select' || type === 'radio' || type === 'checkbox' ? ['Option 1', 'Option 2'] : undefined,
+      placeholder: "",
+      options: type === "select" || type === "radio" || type === "checkbox" ? ["Option 1", "Option 2"] : undefined,
       validation: {},
-      helpText: '',
-      acceptedFileTypes: type === 'file' ? '*' : undefined,
+      helpText: "",
+      acceptedFileTypes: type === "file" ? "*" : undefined,
       // Content field properties
-      content: type === 'label' ? 'Add your description here. You can use [links](https://example.com) in your text.' : '',
-      imageUrl: type === 'image' ? 'https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=400' : undefined,
-      altText: type === 'image' ? 'Sample image' : undefined,
-      linkUrl: type === 'link' ? 'https://example.com' : undefined,
-      linkText: type === 'link' ? 'Click here' : undefined,
-      openInNewTab: type === 'link' ? true : undefined,
-      buttonStyle: type === 'link' ? 'primary' : undefined,
-      fontSize: type === 'label' ? 'medium' : undefined,
-      alignment: (type === 'label' || type === 'image') ? 'left' : undefined
+      content: type === "label" ? "Add your description here. You can use [links](https://example.com) in your text." : "",
+      imageUrl: type === "image" ? "https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=400" : undefined,
+      altText: type === "image" ? "Sample image" : undefined,
+      linkUrl: type === "link" ? "https://example.com" : undefined,
+      linkText: type === "link" ? "Click here" : undefined,
+      openInNewTab: type === "link" ? true : undefined,
+      buttonStyle: type === "link" ? "primary" : undefined,
+      fontSize: type === "label" ? "medium" : undefined,
+      alignment: (type === "label" || type === "image") ? "left" : undefined
     };
     
     const updatedFields = [...fields, newField];
-    console.log('Updated fields:', updatedFields);
+    console.log("Updated fields:", updatedFields);
     setFields(updatedFields);
     onChange(updatedFields);
-    console.log('Closing modal after adding field');
+    console.log("Closing modal after adding field");
     setShowAddField(false);
     
     // Auto-open settings for content fields
-    if (['label', 'image', 'link'].includes(type)) {
-      console.log('Auto-opening settings for content field');
+    if (["label", "image", "link"].includes(type)) {
+      console.log("Auto-opening settings for content field");
       setTimeout(() => setEditingField(newField), 100);
     }
   };
@@ -86,7 +86,7 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
   };
 
   const deleteField = (fieldId) => {
-    if (window.confirm('Are you sure you want to delete this field?')) {
+    if (window.confirm("Are you sure you want to delete this field?")) {
       const updatedFields = fields.filter(field => field.id !== fieldId);
       setFields(updatedFields);
       onChange(updatedFields);
@@ -97,7 +97,7 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
     const newField = {
       ...field,
       id: `field_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      label: field.label + ' (Copy)'
+      label: field.label + " (Copy)"
     };
     const fieldIndex = fields.findIndex(f => f.id === field.id);
     const updatedFields = [...fields];
@@ -110,7 +110,7 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
     const currentIndex = fields.findIndex(f => f.id === fieldId);
     if (currentIndex === -1) return;
     
-    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    const newIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
     if (newIndex < 0 || newIndex >= fields.length) return;
     
     const updatedFields = [...fields];
@@ -139,28 +139,28 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
 
     const renderFieldPreview = () => {
       switch (field.type) {
-        case 'label':
+        case "label":
           return (
             <div className={`${getAlignmentClass(field.alignment)} mb-4`}>
               <div 
                 className={`${getFontSizeClass(field.fontSize)} text-gray-900 dark:text-white`}
                 dangerouslySetInnerHTML={{ 
-                  __html: renderMarkdownLinks(field.content || 'Add your description here...') 
+                  __html: renderMarkdownLinks(field.content || "Add your description here...") 
                 }}
               />
             </div>
           );
 
-        case 'image':
+        case "image":
           return (
             <div className={`${getAlignmentClass(field.alignment)} mb-4`}>
               {field.imageUrl ? (
                 <img 
                   src={field.imageUrl} 
-                  alt={field.altText || 'Form image'} 
+                  alt={field.altText || "Form image"} 
                   className="max-w-full h-32 object-cover rounded-lg border border-gray-300 dark:border-gray-600"
                   onError={(e) => {
-                    e.target.src = 'https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=400';
+                    e.target.src = "https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=400";
                   }}
                 />
               ) : (
@@ -171,27 +171,27 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
             </div>
           );
 
-        case 'link':
+        case "link":
           const buttonClasses = {
-            primary: 'bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 rounded-lg inline-block',
-            secondary: 'bg-gray-500 text-white hover:bg-gray-600 px-4 py-2 rounded-lg inline-block',
-            outline: 'border border-blue-500 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-4 py-2 rounded-lg inline-block',
-            link: 'text-blue-600 dark:text-blue-400 hover:underline inline-block'
+            primary: "bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 rounded-lg inline-block",
+            secondary: "bg-gray-500 text-white hover:bg-gray-600 px-4 py-2 rounded-lg inline-block",
+            outline: "border border-blue-500 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-4 py-2 rounded-lg inline-block",
+            link: "text-blue-600 dark:text-blue-400 hover:underline inline-block"
           };
 
           return (
             <div className="mb-4">
-              <span className={`transition-colors cursor-pointer ${buttonClasses[field.buttonStyle || 'primary']}`}>
-                {field.linkText || 'Click here'}
+              <span className={`transition-colors cursor-pointer ${buttonClasses[field.buttonStyle || "primary"]}`}>
+                {field.linkText || "Click here"}
               </span>
             </div>
           );
 
-        case 'select':
+        case "select":
           return (
             <div className="space-y-1">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                {field.label} {field.required && '*'}
+                {field.label} {field.required && "*"}
               </label>
               <select
                 disabled
@@ -205,11 +205,11 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
             </div>
           );
 
-        case 'radio':
+        case "radio":
           return (
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                {field.label} {field.required && '*'}
+                {field.label} {field.required && "*"}
               </label>
               <div className="space-y-2">
                 {field.options?.map((option, i) => (
@@ -222,11 +222,11 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
             </div>
           );
 
-        case 'checkbox':
+        case "checkbox":
           return (
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                {field.label} {field.required && '*'}
+                {field.label} {field.required && "*"}
               </label>
               <div className="space-y-2">
                 {field.options?.map((option, i) => (
@@ -239,11 +239,11 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
             </div>
           );
 
-        case 'textarea':
+        case "textarea":
           return (
             <div className="space-y-1">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                {field.label} {field.required && '*'}
+                {field.label} {field.required && "*"}
               </label>
               <textarea
                 disabled
@@ -254,11 +254,11 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
             </div>
           );
 
-        case 'file':
+        case "file":
           return (
             <div className="space-y-1">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                {field.label} {field.required && '*'}
+                {field.label} {field.required && "*"}
               </label>
               <input
                 type="file"
@@ -275,7 +275,7 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
           return (
             <div className="space-y-1">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                {field.label} {field.required && '*'}
+                {field.label} {field.required && "*"}
               </label>
               <input
                 type={field.type}
@@ -316,7 +316,7 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
               type="button"
               variant="ghost"
               size="sm"
-              onClick={() => moveField(field.id, 'up')}
+              onClick={() => moveField(field.id, "up")}
               disabled={index === 0}
             >
               <ArrowUp className="w-4 h-4" />
@@ -325,7 +325,7 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
               type="button"
               variant="ghost"
               size="sm"
-              onClick={() => moveField(field.id, 'down')}
+              onClick={() => moveField(field.id, "down")}
               disabled={index === fields.length - 1}
             >
               <ArrowDown className="w-4 h-4" />
@@ -367,7 +367,7 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
         </div>
 
         {/* Quick Edit for Choice Fields */}
-        {(field.type === 'select' || field.type === 'radio' || field.type === 'checkbox') && (
+        {(field.type === "select" || field.type === "radio" || field.type === "checkbox") && (
           <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Options:</span>
@@ -413,29 +413,29 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
 
     const renderField = (field) => {
       // Handle content fields
-      if (field.type === 'label') {
+      if (field.type === "label") {
         return (
           <div key={field.id} className={`${getAlignmentClass(field.alignment)} mb-6`}>
             <div 
               className={`${getFontSizeClass(field.fontSize)} text-gray-900 dark:text-white`}
               dangerouslySetInnerHTML={{ 
-                __html: renderMarkdownLinks(field.content || '') 
+                __html: renderMarkdownLinks(field.content || "") 
               }}
             />
           </div>
         );
       }
 
-      if (field.type === 'image') {
+      if (field.type === "image") {
         return (
           <div key={field.id} className={`${getAlignmentClass(field.alignment)} mb-6`}>
             {field.imageUrl && (
               <img 
                 src={field.imageUrl} 
-                alt={field.altText || 'Form image'} 
+                alt={field.altText || "Form image"} 
                 className="max-w-full h-auto rounded-lg border border-gray-300 dark:border-gray-600"
                 onError={(e) => {
-                  e.target.src = 'https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=400';
+                  e.target.src = "https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=400";
                 }}
               />
             )}
@@ -443,23 +443,23 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
         );
       }
 
-      if (field.type === 'link') {
+      if (field.type === "link") {
         const buttonClasses = {
-          primary: 'bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 rounded-lg',
-          secondary: 'bg-gray-500 text-white hover:bg-gray-600 px-4 py-2 rounded-lg',
-          outline: 'border border-blue-500 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-4 py-2 rounded-lg',
-          link: 'text-blue-600 dark:text-blue-400 hover:underline'
+          primary: "bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 rounded-lg",
+          secondary: "bg-gray-500 text-white hover:bg-gray-600 px-4 py-2 rounded-lg",
+          outline: "border border-blue-500 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-4 py-2 rounded-lg",
+          link: "text-blue-600 dark:text-blue-400 hover:underline"
         };
 
         return (
           <div key={field.id} className="mb-6">
             <a
-              href={field.linkUrl || '#'}
-              target={field.openInNewTab ? '_blank' : '_self'}
-              rel={field.openInNewTab ? 'noopener noreferrer' : ''}
-              className={`inline-block transition-colors ${buttonClasses[field.buttonStyle || 'primary']}`}
+              href={field.linkUrl || "#"}
+              target={field.openInNewTab ? "_blank" : "_self"}
+              rel={field.openInNewTab ? "noopener noreferrer" : ""}
+              className={`inline-block transition-colors ${buttonClasses[field.buttonStyle || "primary"]}`}
             >
-              {field.linkText || 'Click here'}
+              {field.linkText || "Click here"}
             </a>
           </div>
         );
@@ -468,22 +468,22 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
       // Handle regular form fields
       const commonProps = {
         key: field.id,
-        label: field.label + (field.required ? ' *' : ''),
-        value: formData[field.id] || '',
+        label: field.label + (field.required ? " *" : ""),
+        value: formData[field.id] || "",
         onChange: (e) => setFormData({ ...formData, [field.id]: e.target.value }),
         placeholder: field.placeholder,
         required: field.required
       };
 
       switch (field.type) {
-        case 'textarea':
+        case "textarea":
           return (
             <div key={field.id} className="space-y-2 mb-6">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                {field.label} {field.required && '*'}
+                {field.label} {field.required && "*"}
               </label>
               <textarea
-                value={formData[field.id] || ''}
+                value={formData[field.id] || ""}
                 onChange={(e) => setFormData({ ...formData, [field.id]: e.target.value })}
                 placeholder={field.placeholder}
                 required={field.required}
@@ -496,14 +496,14 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
             </div>
           );
 
-        case 'select':
+        case "select":
           return (
             <div key={field.id} className="space-y-2 mb-6">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                {field.label} {field.required && '*'}
+                {field.label} {field.required && "*"}
               </label>
               <select
-                value={formData[field.id] || ''}
+                value={formData[field.id] || ""}
                 onChange={(e) => setFormData({ ...formData, [field.id]: e.target.value })}
                 required={field.required}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -521,11 +521,11 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
             </div>
           );
 
-        case 'radio':
+        case "radio":
           return (
             <div key={field.id} className="space-y-3 mb-6">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                {field.label} {field.required && '*'}
+                {field.label} {field.required && "*"}
               </label>
               <div className="space-y-2">
                 {field.options?.map((option, index) => (
@@ -552,11 +552,11 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
             </div>
           );
 
-        case 'checkbox':
+        case "checkbox":
           return (
             <div key={field.id} className="space-y-3 mb-6">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                {field.label} {field.required && '*'}
+                {field.label} {field.required && "*"}
               </label>
               <div className="space-y-2">
                 {field.options?.map((option, index) => (
@@ -587,16 +587,16 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
             </div>
           );
 
-        case 'file':
+        case "file":
           return (
             <div key={field.id} className="space-y-2 mb-6">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                {field.label} {field.required && '*'}
+                {field.label} {field.required && "*"}
               </label>
               <input
                 type="file"
                 required={field.required}
-                accept={field.acceptedFileTypes || '*'}
+                accept={field.acceptedFileTypes || "*"}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               {field.helpText && (
@@ -609,11 +609,11 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
           return (
             <div key={field.id} className="space-y-2 mb-6">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                {field.label} {field.required && '*'}
+                {field.label} {field.required && "*"}
               </label>
               <input
                 type={field.type}
-                value={formData[field.id] || ''}
+                value={formData[field.id] || ""}
                 onChange={(e) => setFormData({ ...formData, [field.id]: e.target.value })}
                 placeholder={field.placeholder}
                 required={field.required}
@@ -663,18 +663,18 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
 
   const getFontSizeClass = (size) => {
     switch (size) {
-      case 'small': return 'text-sm';
-      case 'large': return 'text-lg';
-      case 'xl': return 'text-xl';
-      default: return 'text-base';
+      case "small": return "text-sm";
+      case "large": return "text-lg";
+      case "xl": return "text-xl";
+      default: return "text-base";
     }
   };
 
   const getAlignmentClass = (alignment) => {
     switch (alignment) {
-      case 'center': return 'text-center';
-      case 'right': return 'text-right';
-      default: return 'text-left';
+      case "center": return "text-center";
+      case "right": return "text-right";
+      default: return "text-left";
     }
   };
 
@@ -691,7 +691,7 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
             onClick={() => setPreviewMode(!previewMode)}
             className="flex items-center">
             <Eye className="w-4 h-4 mr-2" />
-            {previewMode ? 'Edit Form' : 'Preview Form'}
+            {previewMode ? "Edit Form" : "Preview Form"}
           </Button>
           {!previewMode && (
             <Button 
@@ -699,9 +699,9 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Add Field clicked, current state:', showAddField);
+                console.log("Add Field clicked, current state:", showAddField);
                 setShowAddField(true);
-                console.log('Add Field state set to true');
+                console.log("Add Field state set to true");
               }}
             >
               <Plus className="w-4 h-4 mr-2" />
@@ -716,7 +716,7 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
       ) : (
         <div className="space-y-4">
           {/* Debug info - remove after testing */}
-          {process.env.NODE_ENV === 'development' && (
+          {process.env.NODE_ENV === "development" && (
             <div className="text-xs text-gray-500 p-2 bg-gray-100 rounded">
               Debug: showAddField = {showAddField.toString()}, fields count = {fields.length}
             </div>
@@ -756,7 +756,7 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
       <Modal
         isOpen={showAddField}
         onClose={() => {
-          console.log('Closing Add Field modal');
+          console.log("Closing Add Field modal");
           setShowAddField(false);
         }}
         title="Add Form Field"
@@ -770,7 +770,7 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
               Input Fields
             </h4>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-              {fieldTypes.filter(f => f.category === 'input').map((fieldType) => (
+              {fieldTypes.filter(f => f.category === "input").map((fieldType) => (
                 <motion.button
                   key={fieldType.type}
                   whileHover={{ scale: 1.02 }}
@@ -778,7 +778,7 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('Adding field type:', fieldType.type);
+                    console.log("Adding field type:", fieldType.type);
                     addField(fieldType.type);
                   }}
                   className="p-4 border-2 border-gray-200 dark:border-gray-700 rounded-xl hover:border-blue-300 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all text-center group"
@@ -799,7 +799,7 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
               Choice Fields
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {fieldTypes.filter(f => f.category === 'choice').map((fieldType) => (
+              {fieldTypes.filter(f => f.category === "choice").map((fieldType) => (
                 <motion.button
                   key={fieldType.type}
                   whileHover={{ scale: 1.02 }}
@@ -807,7 +807,7 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('Adding choice field type:', fieldType.type);
+                    console.log("Adding choice field type:", fieldType.type);
                     addField(fieldType.type);
                   }}
                   className="p-4 border-2 border-purple-200 dark:border-purple-700 bg-purple-50 dark:bg-purple-900/20 rounded-xl hover:border-purple-300 dark:hover:border-purple-600 hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-all text-center group"
@@ -828,7 +828,7 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
               Content Elements
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {fieldTypes.filter(f => f.category === 'content').map((fieldType) => (
+              {fieldTypes.filter(f => f.category === "content").map((fieldType) => (
                 <motion.button
                   key={fieldType.type}
                   whileHover={{ scale: 1.02 }}
@@ -836,7 +836,7 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('Adding content field type:', fieldType.type);
+                    console.log("Adding content field type:", fieldType.type);
                     addField(fieldType.type);
                   }}
                   className="p-4 border-2 border-green-200 dark:border-green-700 bg-green-50 dark:bg-green-900/20 rounded-xl hover:border-green-300 dark:hover:border-green-600 hover:bg-green-100 dark:hover:bg-green-900/30 transition-all text-center group"
@@ -859,20 +859,20 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
           setEditingField(null);
           setEditingFieldDraft(null);
         }}
-        title={`Edit ${fieldTypes.find(f => f.type === editingFieldDraft?.type)?.label || 'Field'}`}
+        title={`Edit ${fieldTypes.find(f => f.type === editingFieldDraft?.type)?.label || "Field"}`}
         size="lg"
       >
         {editingFieldDraft && (
           <div className="space-y-6">
             {/* Content Fields Settings */}
-            {editingFieldDraft.type === 'label' && (
+            {editingFieldDraft.type === "label" && (
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Content/Description
                   </label>
                   <textarea
-                    value={editingFieldDraft.content || ''}
+                    value={editingFieldDraft.content || ""}
                     onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, content: e.target.value })}
                     placeholder="Enter description, instructions, or any text content..."
                     rows={4}
@@ -888,7 +888,7 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
                       Font Size
                     </label>
                     <select
-                      value={editingFieldDraft.fontSize || 'medium'}
+                      value={editingFieldDraft.fontSize || "medium"}
                       onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, fontSize: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
@@ -903,7 +903,7 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
                       Alignment
                     </label>
                     <select
-                      value={editingFieldDraft.alignment || 'left'}
+                      value={editingFieldDraft.alignment || "left"}
                       onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, alignment: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
@@ -916,7 +916,7 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
               </div>
             )}
 
-            {editingFieldDraft.type === 'image' && (
+            {editingFieldDraft.type === "image" && (
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -958,7 +958,7 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
                 {!editingFieldDraft.useFileUpload ? (
                   <Input
                     label="Image URL"
-                    value={editingFieldDraft.imageUrl || ''}
+                    value={editingFieldDraft.imageUrl || ""}
                     onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, imageUrl: e.target.value })}
                     placeholder="https://example.com/image.jpg"
                   />
@@ -974,15 +974,15 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
                         const file = e.target.files[0];
                         if (file) {
                           try {
-                            const { ref, uploadBytes, getDownloadURL } = await import('firebase/storage');
-                            const { storage } = await import('../../firebase');
+                            const { ref, uploadBytes, getDownloadURL } = await import("firebase/storage");
+                            const { storage } = await import("../../firebase");
                             const imageRef = ref(storage, `form-images/${Date.now()}_${file.name}`);
                             await uploadBytes(imageRef, file);
                             const imageUrl = await getDownloadURL(imageRef);
                             setEditingFieldDraft({ ...editingFieldDraft, imageUrl });
                           } catch (error) {
-                            console.error('Error uploading image:', error);
-                            alert('Failed to upload image. Please try again.');
+                            console.error("Error uploading image:", error);
+                            alert("Failed to upload image. Please try again.");
                           }
                         }
                       }}
@@ -995,7 +995,7 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
                 )}
                 <Input
                   label="Alt Text (Optional)"
-                  value={editingFieldDraft.altText || ''}
+                  value={editingFieldDraft.altText || ""}
                   onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, altText: e.target.value })}
                   placeholder="Description of the image"
                 />
@@ -1004,7 +1004,7 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
                     Alignment
                   </label>
                   <select
-                    value={editingFieldDraft.alignment || 'center'}
+                    value={editingFieldDraft.alignment || "center"}
                     onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, alignment: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
@@ -1018,10 +1018,10 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
                     <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Preview:</p>
                     <img 
                       src={editingFieldDraft.imageUrl} 
-                      alt={editingFieldDraft.altText || 'Preview'} 
+                      alt={editingFieldDraft.altText || "Preview"} 
                       className="max-w-full h-32 object-cover rounded-lg border border-gray-300 dark:border-gray-600"
                       onError={(e) => {
-                        e.target.src = 'https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=400';
+                        e.target.src = "https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=400";
                       }}
                     />
                   </div>
@@ -1029,17 +1029,17 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
               </div>
             )}
 
-            {editingFieldDraft.type === 'link' && (
+            {editingFieldDraft.type === "link" && (
               <div className="space-y-4">
                 <Input
                   label="Link URL"
-                  value={editingFieldDraft.linkUrl || ''}
+                  value={editingFieldDraft.linkUrl || ""}
                   onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, linkUrl: e.target.value })}
                   placeholder="https://example.com"
                 />
                 <Input
                   label="Link Text"
-                  value={editingFieldDraft.linkText || ''}
+                  value={editingFieldDraft.linkText || ""}
                   onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, linkText: e.target.value })}
                   placeholder="Click here"
                 />
@@ -1060,7 +1060,7 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
                     Button Style
                   </label>
                   <select
-                    value={editingFieldDraft.buttonStyle || 'primary'}
+                    value={editingFieldDraft.buttonStyle || "primary"}
                     onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, buttonStyle: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
@@ -1074,33 +1074,33 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
             )}
 
             {/* Regular Field Settings */}
-            {!['label', 'image', 'link'].includes(editingFieldDraft.type) && (
+            {!["label", "image", "link"].includes(editingFieldDraft.type) && (
               <div className="space-y-4">
                 <Input
                   label="Field Label"
-                  value={editingFieldDraft.label || ''}
+                  value={editingFieldDraft.label || ""}
                   onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, label: e.target.value })}
                   placeholder="Enter field label"
                 />
                 <Input
                   label="Placeholder Text"
-                  value={editingFieldDraft.placeholder || ''}
+                  value={editingFieldDraft.placeholder || ""}
                   onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, placeholder: e.target.value })}
                   placeholder="Enter placeholder text"
                 />
                 <Input
                   label="Help Text"
-                  value={editingFieldDraft.helpText || ''}
+                  value={editingFieldDraft.helpText || ""}
                   onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, helpText: e.target.value })}
                   placeholder="Optional help text for users"
                 />
-                {editingFieldDraft.type === 'file' && (
+                {editingFieldDraft.type === "file" && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Accepted File Types
                     </label>
                     <select
-                      value={editingFieldDraft.acceptedFileTypes || '*'}
+                      value={editingFieldDraft.acceptedFileTypes || "*"}
                       onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, acceptedFileTypes: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
@@ -1126,7 +1126,7 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
                   </label>
                 </div>
                 {/* Options for choice fields */}
-                {(editingFieldDraft.type === 'select' || editingFieldDraft.type === 'radio' || editingFieldDraft.type === 'checkbox') && (
+                {(editingFieldDraft.type === "select" || editingFieldDraft.type === "radio" || editingFieldDraft.type === "checkbox") && (
                   <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Options:</span>

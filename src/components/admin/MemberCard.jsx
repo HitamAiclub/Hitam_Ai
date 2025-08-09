@@ -1,5 +1,5 @@
-import { motion } from 'framer-motion';
-import { FiMail, FiEdit, FiTrash2 } from 'react-icons/fi';
+import { motion } from "framer-motion";
+import { FiMail, FiEdit, FiTrash2 } from "react-icons/fi";
 
 function MemberCard({ member, onEdit, onDelete }) {
   return (
@@ -12,7 +12,7 @@ function MemberCard({ member, onEdit, onDelete }) {
     >
       <div className="p-1">
         <h3 className="text-lg font-semibold mb-1">{member.name}</h3>
-        <p className="text-neutral-500 dark:text-neutral-400 text-sm mb-3">{member.role || 'Member'}</p>
+        <p className="text-neutral-500 dark:text-neutral-400 text-sm mb-3">{member.role || "Member"}</p>
         
         <div className="space-y-2 mb-4">
           <div className="flex items-center text-sm text-neutral-600 dark:text-neutral-300">

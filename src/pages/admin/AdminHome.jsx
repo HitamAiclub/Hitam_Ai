@@ -1,7 +1,7 @@
-import { motion } from 'framer-motion';
-import { BarChart3, Users, Calendar, TrendingUp } from 'lucide-react';
-import { useEvents, useClubMembers, useCommunityMembers } from '../../hooks/useFirebaseData';
-import LoadingSpinner from '../../components/LoadingSpinner';
+import { motion } from "framer-motion";
+import { BarChart3, Users, Calendar, TrendingUp } from "lucide-react";
+import { useEvents, useClubMembers, useCommunityMembers } from "../../hooks/useFirebaseData";
+import LoadingSpinner from "../../components/LoadingSpinner";
 
 const AdminHome = () => {
   const { data: eventsData, loading: eventsLoading } = useEvents();
@@ -16,34 +16,34 @@ const AdminHome = () => {
   const stats = [
     {
       icon: Users,
-      label: 'Club Members',
+      label: "Club Members",
       value: clubMembersCount.toString(),
-      change: '+12 this month',
-      color: 'from-blue-500 to-purple-500',
+      change: "+12 this month",
+      color: "from-blue-500 to-purple-500",
       loading: clubLoading
     },
     {
       icon: Calendar,
-      label: 'Total Events',
+      label: "Total Events",
       value: eventsCount.toString(),
-      change: '+3 this month',
-      color: 'from-purple-500 to-pink-500',
+      change: "+3 this month",
+      color: "from-purple-500 to-pink-500",
       loading: eventsLoading
     },
     {
       icon: Users,
-      label: 'Community Members',
+      label: "Community Members",
       value: communityMembersCount.toString(),
-      change: '+5 this month',
-      color: 'from-green-500 to-teal-500',
+      change: "+5 this month",
+      color: "from-green-500 to-teal-500",
       loading: communityLoading
     },
     {
       icon: TrendingUp,
-      label: 'Engagement Rate',
-      value: '87%',
-      change: '+5% this month',
-      color: 'from-orange-500 to-red-500',
+      label: "Engagement Rate",
+      value: "87%",
+      change: "+5% this month",
+      color: "from-orange-500 to-red-500",
       loading: false
     }
   ];
@@ -56,9 +56,9 @@ const AdminHome = () => {
       const recentMembers = Object.entries(clubMembersData)
         .slice(-3)
         .map(([id, member]) => ({
-          action: 'New member joined',
+          action: "New member joined",
           user: member.name,
-          time: '2 hours ago'
+          time: "2 hours ago"
         }));
       activities.push(...recentMembers);
     }
@@ -67,9 +67,9 @@ const AdminHome = () => {
       const recentEvents = Object.entries(eventsData)
         .slice(-2)
         .map(([id, event]) => ({
-          action: 'Event created',
+          action: "Event created",
           event: event.meta?.title,
-          time: '1 day ago'
+          time: "1 day ago"
         }));
       activities.push(...recentEvents);
     }
@@ -77,7 +77,7 @@ const AdminHome = () => {
     // Add some default activities if no data
     if (activities.length === 0) {
       activities.push(
-        { action: 'System initialized', title: 'Admin dashboard ready', time: 'Just now' }
+        { action: "System initialized", title: "Admin dashboard ready", time: "Just now" }
       );
     }
 
@@ -99,7 +99,7 @@ const AdminHome = () => {
             Admin Dashboard
           </h1>
           <p className="text-gray-600 dark:text-gray-300">
-            Welcome back! Here's what's happening with Hitam AI Club.
+            Welcome back! Here"s what"s happening with Hitam AI Club.
           </p>
         </motion.div>
 
@@ -176,9 +176,9 @@ const AdminHome = () => {
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
         >
           {[
-            { title: 'Create Event', description: 'Add a new event to the calendar', color: 'from-blue-500 to-purple-500' },
-            { title: 'Manage Members', description: 'View and manage community members', color: 'from-purple-500 to-pink-500' },
-            { title: 'Export Data', description: 'Download reports and analytics', color: 'from-green-500 to-teal-500' }
+            { title: "Create Event", description: "Add a new event to the calendar", color: "from-blue-500 to-purple-500" },
+            { title: "Manage Members", description: "View and manage community members", color: "from-purple-500 to-pink-500" },
+            { title: "Export Data", description: "Download reports and analytics", color: "from-green-500 to-teal-500" }
           ].map((action, index) => (
             <motion.div
               key={action.title}

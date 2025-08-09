@@ -1,10 +1,10 @@
-import { motion } from 'framer-motion';
-import { useInView } from 'framer-motion';
-import { useRef } from 'react';
-import { Brain, Users, Calendar, Award } from 'lucide-react';
-import { useCommunityMembers } from '../hooks/useFirebaseData';
-import LoadingSpinner from '../components/LoadingSpinner';
-import NoDataFound from '../components/NoDataFound';
+import { motion } from "framer-motion";
+import { useInView } from "framer-motion";
+import { useRef } from "react";
+import { Brain, Users, Calendar, Award } from "lucide-react";
+import { useCommunityMembers } from "../hooks/useFirebaseData";
+import LoadingSpinner from "../components/LoadingSpinner";
+import NoDataFound from "../components/NoDataFound";
 
 const Home = () => {
   const heroRef = useRef(null);
@@ -26,10 +26,10 @@ const Home = () => {
   })) : [];
 
   const stats = [
-    { icon: Users, label: 'Active Members', value: '150+' },
-    { icon: Calendar, label: 'Events Hosted', value: '25+' },
-    { icon: Award, label: 'Projects Completed', value: '40+' },
-    { icon: Brain, label: 'AI Workshops', value: '15+' },
+    { icon: Users, label: "Active Members", value: "150+" },
+    { icon: Calendar, label: "Events Hosted", value: "25+" },
+    { icon: Award, label: "Projects Completed", value: "40+" },
+    { icon: Brain, label: "AI Workshops", value: "15+" },
   ];
 
   return (
@@ -89,10 +89,10 @@ const Home = () => {
                 Hitam AI Club
               </h2>
               <p className="text-lg text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
-                Welcome to the premier artificial intelligence community at HITAM. We're a passionate group of students, researchers, and innovators dedicated to exploring the fascinating world of AI and machine learning.
+                Welcome to the premier artificial intelligence community at HITAM. We"re a passionate group of students, researchers, and innovators dedicated to exploring the fascinating world of AI and machine learning.
               </p>
               <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
-                Our club focuses on hands-on learning, collaborative projects, and staying at the forefront of AI technology. Whether you're a beginner or an expert, you'll find a supportive environment to grow your skills.
+                Our club focuses on hands-on learning, collaborative projects, and staying at the forefront of AI technology. Whether you"re a beginner or an expert, you"ll find a supportive environment to grow your skills.
               </p>
               <motion.div
                 whileHover={{ scale: 1.05 }}
@@ -203,16 +203,16 @@ const Home = () => {
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-purple-400 to-blue-400 flex items-center justify-center">
                         <span className="text-white font-bold text-lg">
-                          {member.name?.charAt(0) || 'M'}
+                          {member.name?.charAt(0) || "M"}
                         </span>
                       </div>
                     )}
                   </div>
                   <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
-                    {member.name || 'Community Member'}
+                    {member.name || "Community Member"}
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-300">
-                    {member.branch || 'Computer Science'}
+                    {member.branch || "Computer Science"}
                   </p>
                 </motion.div>
               ))}

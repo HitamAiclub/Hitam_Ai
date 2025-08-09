@@ -1,12 +1,12 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { collection, addDoc } from 'firebase/firestore';
-import { db } from '../firebase';
-import { FiCheck } from 'react-icons/fi';
-import PageHeader from '../components/ui/PageHeader';
-import AnimatedSection from '../components/ui/AnimatedSection';
-import JoinClubForm from '../components/forms/JoinClubForm';
-import { toast } from 'react-toastify';
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { collection, addDoc } from "firebase/firestore";
+import { db } from "../firebase";
+import { FiCheck } from "react-icons/fi";
+import PageHeader from "../components/ui/PageHeader";
+import AnimatedSection from "../components/ui/AnimatedSection";
+import JoinClubForm from "../components/forms/JoinClubForm";
+import { toast } from "react-toastify";
 
 function JoinClubPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -17,23 +17,23 @@ function JoinClubPage() {
       setIsSubmitting(true);
       
       // Add member to Firestore
-      await addDoc(collection(db, 'members'), {
+      await addDoc(collection(db, "members"), {
         ...formData,
-        role: 'Member',
+        role: "Member",
         joinDate: new Date().toISOString(),
       });
       
       // Show success message
       setSubmitted(true);
-      toast.success('Successfully joined the AI Club!');
+      toast.success("Successfully joined the AI Club!");
       
       // In a real implementation, you would also:
       // 1. Send confirmation email
       // 2. Include WhatsApp group invite link
       
     } catch (error) {
-      console.error('Error joining club:', error);
-      toast.error('Failed to join the club. Please try again.');
+      console.error("Error joining club:", error);
+      toast.error("Failed to join the club. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -70,7 +70,7 @@ function JoinClubPage() {
           <AnimatedSection animation="fade-up" className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">Why Join Us?</h2>
             <p className="text-lg text-neutral-700 dark:text-neutral-300">
-              By becoming a member of the HITAM AI Club, you'll gain access to exclusive workshops, events, and hands-on projects. Connect with like-minded peers and industry experts to enhance your AI knowledge and skills.
+              By becoming a member of the HITAM AI Club, you"ll gain access to exclusive workshops, events, and hands-on projects. Connect with like-minded peers and industry experts to enhance your AI knowledge and skills.
             </p>
           </AnimatedSection>
           
@@ -153,7 +153,7 @@ function JoinClubPage() {
               
               <h2 className="text-2xl font-bold mb-4">Welcome to HITAM AI Club!</h2>
               <p className="text-lg mb-6">
-                Your application has been submitted successfully. You'll receive a confirmation email shortly with more details and a WhatsApp group invite link.
+                Your application has been submitted successfully. You"ll receive a confirmation email shortly with more details and a WhatsApp group invite link.
               </p>
               
               <div className="max-w-md mx-auto p-4 bg-neutral-100 dark:bg-neutral-800 rounded-lg mb-6">

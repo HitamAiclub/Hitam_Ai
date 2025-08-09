@@ -1,33 +1,33 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Calendar, Clock, MapPin, Users, Filter } from 'lucide-react';
-import { useEvents } from '../hooks/useFirebaseData';
-import LoadingSpinner from '../components/LoadingSpinner';
-import NoDataFound from '../components/NoDataFound';
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { Calendar, Clock, MapPin, Users, Filter } from "lucide-react";
+import { useEvents } from "../hooks/useFirebaseData";
+import LoadingSpinner from "../components/LoadingSpinner";
+import NoDataFound from "../components/NoDataFound";
 
 const Events = () => {
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState("all");
   const { data: eventsData, loading, error } = useEvents();
 
   // Convert Firebase object to array
   const events = eventsData ? Object.entries(eventsData).map(([id, event]) => ({
     id,
     ...event.meta,
-    type: event.meta?.type || 'upcoming',
+    type: event.meta?.type || "upcoming",
     registrationOpen: event.meta?.registrationOpen || false
   })) : [];
 
   const filteredEvents = events.filter(event => {
-    if (filter === 'all') return true;
+    if (filter === "all") return true;
     return event.type === filter;
   });
 
   const getFilterColor = (type) => {
     switch (type) {
-      case 'completed': return 'from-green-500 to-emerald-500';
-      case 'upcoming': return 'from-blue-500 to-purple-500';
-      case 'registration': return 'from-orange-500 to-red-500';
-      default: return 'from-gray-500 to-gray-600';
+      case "completed": return "from-green-500 to-emerald-500";
+      case "upcoming": return "from-blue-500 to-purple-500";
+      case "registration": return "from-orange-500 to-red-500";
+      default: return "from-gray-500 to-gray-600";
     }
   };
 
@@ -81,10 +81,10 @@ const Events = () => {
               className="flex flex-wrap justify-center gap-4 mb-12"
             >
               {[
-                { key: 'all', label: 'All Events', color: 'from-gray-500 to-gray-600' },
-                { key: 'completed', label: 'Completed', color: 'from-green-500 to-emerald-500' },
-                { key: 'upcoming', label: 'Upcoming', color: 'from-blue-500 to-purple-500' },
-                { key: 'registration', label: 'Registration Open', color: 'from-orange-500 to-red-500' }
+                { key: "all", label: "All Events", color: "from-gray-500 to-gray-600" },
+                { key: "completed", label: "Completed", color: "from-green-500 to-emerald-500" },
+                { key: "upcoming", label: "Upcoming", color: "from-blue-500 to-purple-500" },
+                { key: "registration", label: "Registration Open", color: "from-orange-500 to-red-500" }
               ].map(({ key, label, color }) => (
                 <motion.button
                   key={key}
@@ -94,7 +94,7 @@ const Events = () => {
                   className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
                     filter === key
                       ? `bg-gradient-to-r ${color} text-white shadow-lg`
-                      : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                   }`}
                 >
                   <Filter className="w-4 h-4 inline mr-2" />
@@ -116,7 +116,7 @@ const Events = () => {
                   >
                     <div className="relative">
                       <img
-                        src={event.imageUrl || 'https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=400'}
+                        src={event.imageUrl || "https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=400"}
                         alt={event.title}
                         className="w-full h-48 object-cover"
                       />
@@ -151,13 +151,13 @@ const Events = () => {
                         )}
                       </div>
 
-                      {event.type === 'completed' && event.conclusion && (
+                      {event.type === "completed" && event.conclusion && (
                         <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
                           {event.conclusion}
                         </p>
                       )}
 
-                      {event.type !== 'completed' && event.description && (
+                      {event.type !== "completed" && event.description && (
                         <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
                           {event.description}
                         </p>

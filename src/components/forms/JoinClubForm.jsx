@@ -1,15 +1,15 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { FiCheck } from 'react-icons/fi';
-import LoadingSpinner from '../ui/LoadingSpinner';
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { FiCheck } from "react-icons/fi";
+import LoadingSpinner from "../ui/LoadingSpinner";
 
 function JoinClubForm({ onSubmit, isLoading }) {
   const [formData, setFormData] = useState({
-    name: '',
-    rollNo: '',
-    year: '',
-    branch: '',
-    email: '',
+    name: "",
+    rollNo: "",
+    year: "",
+    branch: "",
+    email: "",
   });
   
   const [errors, setErrors] = useState({});
@@ -20,7 +20,7 @@ function JoinClubForm({ onSubmit, isLoading }) {
     
     // Clear error when field is changed
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
+      setErrors(prev => ({ ...prev, [name]: "" }));
     }
   };
   
@@ -29,29 +29,29 @@ function JoinClubForm({ onSubmit, isLoading }) {
     
     // Validate name
     if (!formData.name.trim()) {
-      newErrors.name = 'Name is required';
+      newErrors.name = "Name is required";
     }
     
     // Validate roll number
     if (!formData.rollNo.trim()) {
-      newErrors.rollNo = 'Roll number is required';
+      newErrors.rollNo = "Roll number is required";
     }
     
     // Validate year
     if (!formData.year) {
-      newErrors.year = 'Year is required';
+      newErrors.year = "Year is required";
     }
     
     // Validate branch
     if (!formData.branch) {
-      newErrors.branch = 'Branch is required';
+      newErrors.branch = "Branch is required";
     }
     
     // Validate email (must be @hitam.org)
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!formData.email.endsWith('@hitam.org')) {
-      newErrors.email = 'Must be a valid HITAM email (@hitam.org)';
+      newErrors.email = "Email is required";
+    } else if (!formData.email.endsWith("@hitam.org")) {
+      newErrors.email = "Must be a valid HITAM email (@hitam.org)";
     }
     
     setErrors(newErrors);
@@ -66,8 +66,8 @@ function JoinClubForm({ onSubmit, isLoading }) {
     }
   };
   
-  const years = ['1st Year', '2nd Year', '3rd Year', '4th Year'];
-  const branches = ['Computer Science', 'Information Technology', 'Electronics', 'Electrical', 'Mechanical', 'Civil', 'Other'];
+  const years = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
+  const branches = ["Computer Science", "Information Technology", "Electronics", "Electrical", "Mechanical", "Civil", "Other"];
   
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl mx-auto">
@@ -79,7 +79,7 @@ function JoinClubForm({ onSubmit, isLoading }) {
           type="text"
           value={formData.name}
           onChange={handleChange}
-          className={`w-full ${errors.name ? 'border-error-500' : ''}`}
+          className={`w-full ${errors.name ? "border-error-500" : ""}`}
           placeholder="Enter your full name"
         />
         {errors.name && <p className="text-error-500 text-sm mt-1">{errors.name}</p>}
@@ -93,7 +93,7 @@ function JoinClubForm({ onSubmit, isLoading }) {
           type="text"
           value={formData.rollNo}
           onChange={handleChange}
-          className={`w-full ${errors.rollNo ? 'border-error-500' : ''}`}
+          className={`w-full ${errors.rollNo ? "border-error-500" : ""}`}
           placeholder="Enter your roll number"
         />
         {errors.rollNo && <p className="text-error-500 text-sm mt-1">{errors.rollNo}</p>}
@@ -107,7 +107,7 @@ function JoinClubForm({ onSubmit, isLoading }) {
             name="year"
             value={formData.year}
             onChange={handleChange}
-            className={`w-full ${errors.year ? 'border-error-500' : ''}`}
+            className={`w-full ${errors.year ? "border-error-500" : ""}`}
           >
             <option value="">Select Year</option>
             {years.map(year => (
@@ -124,7 +124,7 @@ function JoinClubForm({ onSubmit, isLoading }) {
             name="branch"
             value={formData.branch}
             onChange={handleChange}
-            className={`w-full ${errors.branch ? 'border-error-500' : ''}`}
+            className={`w-full ${errors.branch ? "border-error-500" : ""}`}
           >
             <option value="">Select Branch</option>
             {branches.map(branch => (
@@ -143,7 +143,7 @@ function JoinClubForm({ onSubmit, isLoading }) {
           type="email"
           value={formData.email}
           onChange={handleChange}
-          className={`w-full ${errors.email ? 'border-error-500' : ''}`}
+          className={`w-full ${errors.email ? "border-error-500" : ""}`}
           placeholder="youremail@hitam.org"
         />
         {errors.email && <p className="text-error-500 text-sm mt-1">{errors.email}</p>}

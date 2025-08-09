@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Moon, Sun, Menu, X, LogOut, User } from 'lucide-react';
-import { useTheme } from '../../contexts/ThemeContext';
-import { useAuth } from '../../contexts/AuthContext';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { Moon, Sun, Menu, X, LogOut, User } from "lucide-react";
+import { useTheme } from "../../contexts/ThemeContext";
+import { useAuth } from "../../contexts/AuthContext";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -14,26 +14,26 @@ const Navbar = () => {
   const handleLogout = async () => {
     try {
       await logout();
-      navigate('/');
+      navigate("/");
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error("Logout failed:", error);
     }
   };
 
   const publicNavItems = [
-    { name: 'Home', path: '/' },
-    { name: 'Events & Workshops', path: '/events' },
-    { name: 'Upcoming Activities', path: '/upcoming' },
-    { name: 'Join the Club', path: '/join' },
+    { name: "Home", path: "/" },
+    { name: "Events & Workshops", path: "/events" },
+    { name: "Upcoming Activities", path: "/upcoming" },
+    { name: "Join the Club", path: "/join" },
   ];
 
   const adminNavItems = [
-    { name: 'Home', path: '/' },
-    { name: 'Events & Workshops', path: '/events' },
-    { name: 'Upcoming Activities', path: '/upcoming' },
-    { name: 'Committee Members', path: '/admin/committee' },
-    { name: 'Form Submissions', path: '/admin/submissions' },
-    { name: 'Community Members', path: '/admin/community' },
+    { name: "Home", path: "/" },
+    { name: "Events & Workshops", path: "/events" },
+    { name: "Upcoming Activities", path: "/upcoming" },
+    { name: "Committee Members", path: "/admin/committee" },
+    { name: "Form Submissions", path: "/admin/submissions" },
+    { name: "Community Members", path: "/admin/community" },
   ];
 
   const navItems = user ? adminNavItems : publicNavItems;
@@ -88,7 +88,7 @@ const Navbar = () => {
               onClick={toggleTheme}
               className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200"
             >
-              {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+              {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
             </motion.button>
 
             {user ? (
@@ -134,7 +134,7 @@ const Navbar = () => {
         {isOpen && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
+            animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             className="md:hidden bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200/20 dark:border-gray-700/20"
           >

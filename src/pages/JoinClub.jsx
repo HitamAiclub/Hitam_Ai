@@ -1,42 +1,42 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { collection, addDoc, doc, getDoc, setDoc } from 'firebase/firestore';
-import { db } from '../firebase';
-import Card from '../components/ui/Card';
-import Button from '../components/ui/Button';
-import Input from '../components/ui/Input';
-import { UserPlus, Mail, Phone, Book, Users, AlertCircle } from 'lucide-react';
-import ImageManager from '../components/ImageManager';
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { collection, addDoc, doc, getDoc, setDoc } from "firebase/firestore";
+import { db } from "../firebase";
+import Card from "../components/ui/Card";
+import Button from "../components/ui/Button";
+import Input from "../components/ui/Input";
+import { UserPlus, Mail, Phone, Book, Users, AlertCircle } from "lucide-react";
+import ImageManager from "../components/ImageManager";
 
 const JoinClub = () => {
   const [formData, setFormData] = useState({
-    name: '',
-    rollNo: '',
-    branch: '',
-    year: '',
-    section: '',
-    phone: '',
-    email: ''
+    name: "",
+    rollNo: "",
+    branch: "",
+    year: "",
+    section: "",
+    phone: "",
+    email: ""
   });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [submissionEnabled, setSubmissionEnabled] = useState(true);
   const [checkingStatus, setCheckingStatus] = useState(true);
 
   const branches = [
-     'Computer Science Engineering',
-  'Computer Science Engineering (AI & ML)',
-  'Computer Science Engineering (Data Science)',
-  'Computer Science Engineering (Cyber Security)',
-  'Computer Science Engineering (IoT)',
-  'Electronics and Communication Engineering',
-  'Electrical and Electronics Engineering',
-  'Mechanical Engineering'
+     "Computer Science Engineering",
+  "Computer Science Engineering (AI & ML)",
+  "Computer Science Engineering (Data Science)",
+  "Computer Science Engineering (Cyber Security)",
+  "Computer Science Engineering (IoT)",
+  "Electronics and Communication Engineering",
+  "Electrical and Electronics Engineering",
+  "Mechanical Engineering"
   ];
 
-  const years = ['1st Year', '2nd Year', '3rd Year', '4th Year'];
-  const sections = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+  const years = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
+  const sections = ["A", "B", "C", "D", "E", "F", "G", "H"];
 
   useEffect(() => {
     checkSubmissionStatus();
@@ -44,16 +44,16 @@ const JoinClub = () => {
 
   const checkSubmissionStatus = async () => {
     try {
-      const statusDoc = await getDoc(doc(db, 'settings', 'clubJoinStatus'));
+      const statusDoc = await getDoc(doc(db, "settings", "clubJoinStatus"));
       if (statusDoc.exists()) {
         setSubmissionEnabled(statusDoc.data().enabled || false);
       } else {
-        // If document doesn't exist, enable submissions by default
+        // If document doesn"t exist, enable submissions by default
         setSubmissionEnabled(true);
       }
     } catch (error) {
-      console.warn('Could not check submission status:', error.message);
-      // Default to enabled if we can't check
+      console.warn("Could not check submission status:", error.message);
+      // Default to enabled if we can"t check
       setSubmissionEnabled(true);
     } finally {
       setCheckingStatus(false);
@@ -63,28 +63,28 @@ const JoinClub = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    console.log('Starting club join submission...', formData);
+    console.log("Starting club join submission...", formData);
     setLoading(true);
-    setError('');
+    setError("");
 
     // Validate email domain
-    if (!formData.email.endsWith('@hitam.org')) {
-      setError('Please use your HITAM email address (@hitam.org)');
+    if (!formData.email.endsWith("@hitam.org")) {
+      setError("Please use your HITAM email address (@hitam.org)");
       setLoading(false);
       return;
     }
 
     // Validate phone number (basic validation)
     const phoneRegex = /^[+]?[0-9]{10,15}$/;
-    if (!phoneRegex.test(formData.phone.replace(/\s/g, ''))) {
-      setError('Please enter a valid phone number');
+    if (!phoneRegex.test(formData.phone.replace(/\s/g, ""))) {
+      setError("Please enter a valid phone number");
       setLoading(false);
       return;
     }
 
     // Validate required fields
     if (!formData.name || !formData.rollNo || !formData.branch || !formData.year || !formData.section) {
-      setError('Please fill in all required fields');
+      setError("Please fill in all required fields");
       setLoading(false);
       return;
     }
@@ -93,26 +93,26 @@ const JoinClub = () => {
       const joinData = {
         ...formData,
         joinedAt: new Date().toISOString(),
-        status: 'pending'
+        status: "pending"
       };
 
-      console.log('Saving join data:', joinData);
-      const result = await addDoc(collection(db, 'clubJoins'), joinData);
-      console.log('Join data saved:', result);
+      console.log("Saving join data:", joinData);
+      const result = await addDoc(collection(db, "clubJoins"), joinData);
+      console.log("Join data saved:", result);
 
       setSuccess(true);
       setFormData({
-        name: '',
-        rollNo: '',
-        branch: '',
-        year: '',
-        section: '',
-        phone: '',
-        email: ''
+        name: "",
+        rollNo: "",
+        branch: "",
+        year: "",
+        section: "",
+        phone: "",
+        email: ""
       });
     } catch (error) {
-      console.error('Error joining club:', error);
-      setError('Failed to submit application. Please try again.');
+      console.error("Error joining club:", error);
+      setError("Failed to submit application. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -195,7 +195,7 @@ const JoinClub = () => {
               transition={{ delay: 0.3 }}
               className="text-gray-600 dark:text-gray-300 mb-6"
             >
-              Thank you for your interest in joining the HITAM AI Club. We've sent a welcome email with the WhatsApp group link to your email address. We'll review your application and get back to you soon.
+              Thank you for your interest in joining the HITAM AI Club. We"ve sent a welcome email with the WhatsApp group link to your email address. We"ll review your application and get back to you soon.
             </motion.p>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -304,7 +304,7 @@ const JoinClub = () => {
                   <Input
                     label="Full Name"
                     value={formData.name}
-                    onChange={(e) => handleChange('name', e.target.value)}
+                    onChange={(e) => handleChange("name", e.target.value)}
                     placeholder="Enter your full name"
                     required
                   />
@@ -312,7 +312,7 @@ const JoinClub = () => {
                   <Input
                     label="Student Roll Number"
                     value={formData.rollNo}
-                    onChange={(e) => handleChange('rollNo', e.target.value)}
+                    onChange={(e) => handleChange("rollNo", e.target.value)}
                     placeholder="Enter your roll number"
                     required
                   />
@@ -323,7 +323,7 @@ const JoinClub = () => {
                     </label>
                     <select
                       value={formData.branch}
-                      onChange={(e) => handleChange('branch', e.target.value)}
+                      onChange={(e) => handleChange("branch", e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                       required
                     >
@@ -343,7 +343,7 @@ const JoinClub = () => {
                       </label>
                       <select
                         value={formData.year}
-                        onChange={(e) => handleChange('year', e.target.value)}
+                        onChange={(e) => handleChange("year", e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                         required
                       >
@@ -362,7 +362,7 @@ const JoinClub = () => {
                       </label>
                       <select
                         value={formData.section}
-                        onChange={(e) => handleChange('section', e.target.value)}
+                        onChange={(e) => handleChange("section", e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                         required
                       >
@@ -380,7 +380,7 @@ const JoinClub = () => {
                     label="Mobile Number"
                     type="tel"
                     value={formData.phone}
-                    onChange={(e) => handleChange('phone', e.target.value)}
+                    onChange={(e) => handleChange("phone", e.target.value)}
                     placeholder="+91 XXXXXXXXXX"
                     required
                   />
@@ -389,7 +389,7 @@ const JoinClub = () => {
                     label="HITAM Email"
                     type="email"
                     value={formData.email}
-                    onChange={(e) => handleChange('email', e.target.value)}
+                    onChange={(e) => handleChange("email", e.target.value)}
                     placeholder="your.email@hitam.org"
                     required
                   />

@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom';
-import { FiMail, FiMapPin, FiPhone, FiGithub, FiLinkedin, FiInstagram } from 'react-icons/fi';
+import { Link } from "react-router-dom";
+import { FiMail, FiMapPin, FiPhone, FiGithub, FiLinkedin, FiInstagram } from "react-icons/fi";
 
 function Footer() {
   const currentYear = new Date().getFullYear();

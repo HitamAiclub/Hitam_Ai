@@ -1,11 +1,11 @@
-import { useCallback } from 'react';
-import Particles from 'react-tsparticles';
-import { loadSlim } from 'tsparticles-slim';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useCallback } from "react";
+import Particles from "react-tsparticles";
+import { loadSlim } from "tsparticles-slim";
+import { useTheme } from "../../contexts/ThemeContext";
 
 const ParticleBackground = () => {
   const { theme } = useTheme();
-  const isDark = theme === 'dark';
+  const isDark = theme === "dark";
   
   const particlesInit = useCallback(async (engine) => {
     await loadSlim(engine);
@@ -80,13 +80,13 @@ const ParticleBackground = () => {
         detectRetina: true,
       }}
       style={{
-        position: 'fixed',
+        position: "fixed",
         top: 0,
         left: 0,
-        width: '100%',
-        height: '100%',
+        width: "100%",
+        height: "100%",
         zIndex: 0,
-        pointerEvents: 'none',
+        pointerEvents: "none",
         opacity: 0.6,
       }}
     />

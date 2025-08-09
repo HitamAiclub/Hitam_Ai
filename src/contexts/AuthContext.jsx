@@ -1,13 +1,13 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { auth } from '../firebase';
-import { onAuthStateChanged, signInWithEmailAndPassword, signOut, getIdToken } from 'firebase/auth';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { auth } from "../firebase";
+import { onAuthStateChanged, signInWithEmailAndPassword, signOut, getIdToken } from "firebase/auth";
 
 const AuthContext = createContext();
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
@@ -26,9 +26,9 @@ export const AuthProvider = ({ children }) => {
           // Get fresh ID token
           const token = await getIdToken(user, true);
           setAuthToken(token);
-          console.log('User authenticated with fresh token');
+          console.log("User authenticated with fresh token");
         } catch (error) {
-          console.error('Error getting ID token:', error);
+          console.error("Error getting ID token:", error);
           setAuthToken(null);
         }
       } else {

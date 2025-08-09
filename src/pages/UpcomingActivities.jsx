@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage } from '../firebase';
-import { useAuth } from '../contexts/AuthContext';
-import Card from '../components/ui/Card';
-import Button from '../components/ui/Button';
-import Modal from '../components/ui/Modal';
-import Input from '../components/ui/Input';
-import FormBuilder from '../components/FormBuilder/FormBuilder';
-import { Calendar, Users, Plus, Edit, Trash2, Download, Eye, ExternalLink } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { db, storage } from "../firebase";
+import { useAuth } from "../contexts/AuthContext";
+import Card from "../components/ui/Card";
+import Button from "../components/ui/Button";
+import Modal from "../components/ui/Modal";
+import Input from "../components/ui/Input";
+import FormBuilder from "../components/FormBuilder/FormBuilder";
+import { Calendar, Users, Plus, Edit, Trash2, Download, Eye, ExternalLink } from "lucide-react";
 
 const UpcomingActivities = () => {
   const [activities, setActivities] = useState([]);
@@ -21,30 +21,30 @@ const UpcomingActivities = () => {
   const [selectedActivity, setSelectedActivity] = useState(null);
   const [editingActivity, setEditingActivity] = useState(null);
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    registrationStart: '',
-    registrationEnd: '',
-    eventDate: '',
-    maxParticipants: '',
+    title: "",
+    description: "",
+    registrationStart: "",
+    registrationEnd: "",
+    eventDate: "",
+    maxParticipants: "",
     isPaid: false,
-    fee: '',
+    fee: "",
     formSchema: null,
     paymentDetails: {
-      paymentUrl: '',
-      instructions: ''
+      paymentUrl: "",
+      instructions: ""
     }
   });
   const [registrationData, setRegistrationData] = useState({});
   const [submitting, setSubmitting] = useState(false);
-  const [activeTab, setActiveTab] = useState('basic');
+  const [activeTab, setActiveTab] = useState("basic");
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [optimisticActivities, setOptimisticActivities] = useState([]);
   const { user } = useAuth();
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
-      collection(db, 'upcomingActivities'), 
+      collection(db, "upcomingActivities"), 
       async (snapshot) => {
         const activitiesData = snapshot.docs.map(doc => ({
           id: doc.id,
@@ -56,7 +56,7 @@ const UpcomingActivities = () => {
         const registrationsData = {};
         for (const activity of activitiesData) {
           try {
-            const registrationsSnapshot = await getDocs(collection(db, 'upcomingActivities', activity.id, 'registrations'));
+            const registrationsSnapshot = await getDocs(collection(db, "upcomingActivities", activity.id, "registrations"));
             registrationsData[activity.id] = registrationsSnapshot.docs.map(doc => ({
               id: doc.id,
               ...doc.data()
@@ -70,7 +70,7 @@ const UpcomingActivities = () => {
         setLoading(false);
       }, 
       (error) => {
-        console.warn('Activities listener error:', error.message);
+        console.warn("Activities listener error:", error.message);
         setActivities([]);
         setOptimisticActivities([]);
         setLoading(false);
@@ -83,7 +83,7 @@ const UpcomingActivities = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    console.log('Starting activity submission...', formData);
+    console.log("Starting activity submission...", formData);
     setSubmitting(true);
 
     const tempId = Date.now().toString();
@@ -116,13 +116,13 @@ const UpcomingActivities = () => {
         ? formData.formSchema 
         : getDefaultFormSchema();
 
-      console.log('Final form schema:', finalFormSchema);
+      console.log("Final form schema:", finalFormSchema);
 
       // Utility function to remove undefined values recursively
       const removeUndefinedValues = (obj) => {
         if (Array.isArray(obj)) {
           return obj.map(item => removeUndefinedValues(item));
-        } else if (obj !== null && typeof obj === 'object') {
+        } else if (obj !== null && typeof obj === "object") {
           const cleaned = {};
           Object.keys(obj).forEach(key => {
             const value = obj[key];
@@ -138,10 +138,10 @@ const UpcomingActivities = () => {
       // Clean up form data to prevent undefined values in Firestore
       const cleanedFormData = {
         ...formData,
-        maxParticipants: formData.maxParticipants && formData.maxParticipants.trim() !== '' 
+        maxParticipants: formData.maxParticipants && formData.maxParticipants.trim() !== "" 
           ? parseInt(formData.maxParticipants, 10) 
           : null,
-        fee: formData.fee && formData.fee.trim() !== '' 
+        fee: formData.fee && formData.fee.trim() !== "" 
           ? parseFloat(formData.fee) 
           : null
       };
@@ -159,18 +159,18 @@ const UpcomingActivities = () => {
       // Final cleanup of the entire activity data object
       const finalActivityData = removeUndefinedValues(activityData);
 
-      console.log('Saving activity data:', finalActivityData);
+      console.log("Saving activity data:", finalActivityData);
       
       if (editingActivity) {
-        const result = await updateDoc(doc(db, 'upcomingActivities', editingActivity.id), finalActivityData);
-        console.log('Activity updated:', result);
+        const result = await updateDoc(doc(db, "upcomingActivities", editingActivity.id), finalActivityData);
+        console.log("Activity updated:", result);
       } else {
-        const result = await addDoc(collection(db, 'upcomingActivities'), finalActivityData);
-        console.log('Activity added:', result);
+        const result = await addDoc(collection(db, "upcomingActivities"), finalActivityData);
+        console.log("Activity added:", result);
       }
 
     } catch (error) {
-      console.error('Error saving activity:', error);
+      console.error("Error saving activity:", error);
       if (editingActivity) {
         setOptimisticActivities(prev => 
           prev.map(activity => 
@@ -180,7 +180,7 @@ const UpcomingActivities = () => {
       } else {
         setOptimisticActivities(prev => prev.filter(activity => activity.id !== tempId));
       }
-      alert('Failed to save activity. Please try again.');
+      alert("Failed to save activity. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -195,15 +195,15 @@ const UpcomingActivities = () => {
       const missingFields = [];
       
       formSchema.forEach(field => {
-        if (field.required && field.type !== 'label' && field.type !== 'image' && field.type !== 'link') {
-          if (!registrationData[field.id] || registrationData[field.id] === '') {
+        if (field.required && field.type !== "label" && field.type !== "image" && field.type !== "link") {
+          if (!registrationData[field.id] || registrationData[field.id] === "") {
             missingFields.push(field.label);
           }
         }
       });
 
       if (missingFields.length > 0) {
-        alert(`Please fill in the following required fields: ${missingFields.join(', ')}`);
+        alert(`Please fill in the following required fields: ${missingFields.join(", ")}`);
         setSubmitting(false);
         return;
       }
@@ -211,7 +211,7 @@ const UpcomingActivities = () => {
       const processedData = { ...registrationData };
       
       for (const field of formSchema) {
-        if (field.type === 'file' && registrationData[field.id]) {
+        if (field.type === "file" && registrationData[field.id]) {
           try {
             const file = registrationData[field.id];
             if (file instanceof File) {
@@ -226,8 +226,8 @@ const UpcomingActivities = () => {
               };
             }
           } catch (error) {
-            console.error('Error uploading file:', error);
-            alert('Failed to upload file. Please try again.');
+            console.error("Error uploading file:", error);
+            alert("Failed to upload file. Please try again.");
             setSubmitting(false);
             return;
           }
@@ -239,19 +239,19 @@ const UpcomingActivities = () => {
         activityId: selectedActivity.id,
         activityTitle: selectedActivity.title,
         submittedAt: new Date().toISOString(),
-        status: selectedActivity.isPaid ? 'pending_payment' : 'confirmed',
+        status: selectedActivity.isPaid ? "pending_payment" : "confirmed",
         formVersion: selectedActivity.updatedAt || selectedActivity.createdAt
       };
 
-      await addDoc(collection(db, 'upcomingActivities', selectedActivity.id, 'registrations'), registrationDoc);
-      await addDoc(collection(db, 'allRegistrations'), registrationDoc);
+      await addDoc(collection(db, "upcomingActivities", selectedActivity.id, "registrations"), registrationDoc);
+      await addDoc(collection(db, "allRegistrations"), registrationDoc);
       
       setShowRegistrationForm(false);
       setRegistrationData({});
-      alert('Registration submitted successfully!');
+      alert("Registration submitted successfully!");
     } catch (error) {
-      console.error('Error submitting registration:', error);
-      alert('Failed to submit registration. Please try again.');
+      console.error("Error submitting registration:", error);
+      alert("Failed to submit registration. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -260,18 +260,18 @@ const UpcomingActivities = () => {
   const handleEdit = (activity) => {
     setEditingActivity(activity);
     setFormData({
-      title: activity.title || '',
-      description: activity.description || '',
-      registrationStart: activity.registrationStart || '',
-      registrationEnd: activity.registrationEnd || '',
-      eventDate: activity.eventDate || '',
-      maxParticipants: activity.maxParticipants || '',
+      title: activity.title || "",
+      description: activity.description || "",
+      registrationStart: activity.registrationStart || "",
+      registrationEnd: activity.registrationEnd || "",
+      eventDate: activity.eventDate || "",
+      maxParticipants: activity.maxParticipants || "",
       isPaid: activity.isPaid || false,
-      fee: activity.fee || '',
+      fee: activity.fee || "",
       formSchema: activity.formSchema || getDefaultFormSchema(),
       paymentDetails: activity.paymentDetails || {
-        paymentUrl: '',
-        instructions: ''
+        paymentUrl: "",
+        instructions: ""
       }
     });
     setShowModal(true);
@@ -290,7 +290,7 @@ const UpcomingActivities = () => {
 
     try {
       // Delete all registrations for this activity in subcollection
-      const registrationsRef = collection(db, 'upcomingActivities', activityId, 'registrations');
+      const registrationsRef = collection(db, "upcomingActivities", activityId, "registrations");
       const registrationsSnap = await getDocs(registrationsRef);
       const batchOps = [];
       registrationsSnap.forEach((docSnap) => {
@@ -300,7 +300,7 @@ const UpcomingActivities = () => {
 
 
       // Delete all documents in allRegistrations where activityId field matches
-      const allRegistrationsRef = collection(db, 'allRegistrations');
+      const allRegistrationsRef = collection(db, "allRegistrations");
       const allRegistrationsSnap = await getDocs(allRegistrationsRef);
       const deleteAllRegOps = [];
       allRegistrationsSnap.forEach((docSnap) => {
@@ -311,39 +311,39 @@ const UpcomingActivities = () => {
       await Promise.all(deleteAllRegOps);
 
       // Delete only the document in upcomingActivities with id = activityId
-      const activityDocRef = doc(db, 'upcomingActivities', activityId);
+      const activityDocRef = doc(db, "upcomingActivities", activityId);
       try {
         await deleteDoc(activityDocRef);
       } catch (e) {
         // If not found, ignore
       }
     } catch (error) {
-      console.error('Error deleting activity and registrations:', error);
+      console.error("Error deleting activity and registrations:", error);
       if (activityToDelete) {
         setOptimisticActivities(prev => [...prev, activityToDelete]);
       }
-      alert('Failed to delete activity. Please try again.');
+      alert("Failed to delete activity. Please try again.");
     }
   };
 
   const resetForm = () => {
     setEditingActivity(null);
     setFormData({
-      title: '',
-      description: '',
-      registrationStart: '',
-      registrationEnd: '',
-      eventDate: '',
-      maxParticipants: '',
+      title: "",
+      description: "",
+      registrationStart: "",
+      registrationEnd: "",
+      eventDate: "",
+      maxParticipants: "",
       isPaid: false,
-      fee: '',
+      fee: "",
       formSchema: getDefaultFormSchema(),
       paymentDetails: {
-        paymentUrl: '',
-        instructions: ''
+        paymentUrl: "",
+        instructions: ""
       }
     });
-    setActiveTab('basic');
+    setActiveTab("basic");
   };
 
   const isRegistrationOpen = (activity) => {
@@ -356,28 +356,28 @@ const UpcomingActivities = () => {
   const exportRegistrations = (activityId) => {
     const activityRegistrations = registrations[activityId] || [];
     if (activityRegistrations.length === 0) {
-      alert('No registrations to export');
+      alert("No registrations to export");
       return;
     }
 
     const csvContent = activityRegistrations.map(reg => {
       const row = [];
       Object.values(reg).forEach(value => {
-        if (typeof value === 'object' && value !== null) {
+        if (typeof value === "object" && value !== null) {
           row.push(JSON.stringify(value));
         } else {
-          row.push(value || '');
+          row.push(value || "");
         }
       });
-      return row.join(',');
-    }).join('\n');
+      return row.join(",");
+    }).join("\n");
 
-    const headers = Object.keys(activityRegistrations[0]).join(',');
-    const fullContent = headers + '\n' + csvContent;
+    const headers = Object.keys(activityRegistrations[0]).join(",");
+    const fullContent = headers + "\n" + csvContent;
 
-    const blob = new Blob([fullContent], { type: 'text/csv' });
+    const blob = new Blob([fullContent], { type: "text/csv" });
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `registrations_${activityId}.csv`;
     a.click();
@@ -407,81 +407,81 @@ const UpcomingActivities = () => {
 
   const getDefaultFormSchema = () => [
     { 
-      id: 'name', 
-      type: 'text', 
-      label: 'Full Name', 
+      id: "name", 
+      type: "text", 
+      label: "Full Name", 
       required: true, 
-      placeholder: 'Enter your full name' 
+      placeholder: "Enter your full name" 
     },
     { 
-      id: 'rollNo', 
-      type: 'text', 
-      label: 'Roll Number', 
+      id: "rollNo", 
+      type: "text", 
+      label: "Roll Number", 
       required: true, 
-      placeholder: 'Enter your roll number' 
+      placeholder: "Enter your roll number" 
     },
     { 
-      id: 'email', 
-      type: 'email', 
-      label: 'Email Address', 
+      id: "email", 
+      type: "email", 
+      label: "Email Address", 
       required: true, 
-      placeholder: 'your.email@hitam.org' 
+      placeholder: "your.email@hitam.org" 
     },
     { 
-      id: 'phone', 
-      type: 'phone', 
-      label: 'Phone Number', 
+      id: "phone", 
+      type: "phone", 
+      label: "Phone Number", 
       required: true, 
-      placeholder: '+91 XXXXXXXXXX' 
+      placeholder: "+91 XXXXXXXXXX" 
     },
     { 
-      id: 'year', 
-      type: 'select', 
-      label: 'Academic Year', 
+      id: "year", 
+      type: "select", 
+      label: "Academic Year", 
       required: true, 
-      options: ['1st Year', '2nd Year', '3rd Year', '4th Year'] 
+      options: ["1st Year", "2nd Year", "3rd Year", "4th Year"] 
     },
     { 
-      id: 'branch', 
-      type: 'select', 
-      label: 'Branch', 
+      id: "branch", 
+      type: "select", 
+      label: "Branch", 
       required: true, 
       options: [
-         'Computer Science Engineering',
-  'Computer Science Engineering (AI & ML)',
-  'Computer Science Engineering (Data Science)',
-  'Computer Science Engineering (Cyber Security)',
-  'Computer Science Engineering (IoT)',
-  'Electronics and Communication Engineering',
-  'Electrical and Electronics Engineering',
-  'Mechanical Engineering'
+         "Computer Science Engineering",
+  "Computer Science Engineering (AI & ML)",
+  "Computer Science Engineering (Data Science)",
+  "Computer Science Engineering (Cyber Security)",
+  "Computer Science Engineering (IoT)",
+  "Electronics and Communication Engineering",
+  "Electrical and Electronics Engineering",
+  "Mechanical Engineering"
       ]
     }
   ];
 
   const renderFormField = (field) => {
-    if (field.type === 'label' || field.type === 'image' || field.type === 'link') {
+    if (field.type === "label" || field.type === "image" || field.type === "link") {
       return renderContentField(field);
     }
 
     const commonProps = {
       key: field.id,
-      label: field.label + (field.required ? ' *' : ''),
-      value: registrationData[field.id] || '',
+      label: field.label + (field.required ? " *" : ""),
+      value: registrationData[field.id] || "",
       onChange: (e) => setRegistrationData({...registrationData, [field.id]: e.target.value}),
       placeholder: field.placeholder,
       required: field.required
     };
 
     switch (field.type) {
-      case 'textarea':
+      case "textarea":
         return (
           <div key={field.id}>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {field.label} {field.required && '*'}
+              {field.label} {field.required && "*"}
             </label>
             <textarea
-              value={registrationData[field.id] || ''}
+              value={registrationData[field.id] || ""}
               onChange={(e) => setRegistrationData({...registrationData, [field.id]: e.target.value})}
               placeholder={field.placeholder}
               required={field.required}
@@ -491,14 +491,14 @@ const UpcomingActivities = () => {
           </div>
         );
 
-      case 'select':
+      case "select":
         return (
           <div key={field.id}>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {field.label} {field.required && '*'}
+              {field.label} {field.required && "*"}
             </label>
             <select
-              value={registrationData[field.id] || ''}
+              value={registrationData[field.id] || ""}
               onChange={(e) => setRegistrationData({...registrationData, [field.id]: e.target.value})}
               required={field.required}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -513,11 +513,11 @@ const UpcomingActivities = () => {
           </div>
         );
 
-      case 'radio':
+      case "radio":
         return (
           <div key={field.id}>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {field.label} {field.required && '*'}
+              {field.label} {field.required && "*"}
             </label>
             <div className="space-y-2">
               {field.options?.map((option, index) => (
@@ -541,11 +541,11 @@ const UpcomingActivities = () => {
           </div>
         );
 
-      case 'checkbox':
+      case "checkbox":
         return (
           <div key={field.id}>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {field.label} {field.required && '*'}
+              {field.label} {field.required && "*"}
             </label>
             <div className="space-y-2">
               {field.options?.map((option, index) => (
@@ -573,17 +573,17 @@ const UpcomingActivities = () => {
           </div>
         );
 
-      case 'file':
+      case "file":
         return (
           <div key={field.id}>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {field.label} {field.required && '*'}
+              {field.label} {field.required && "*"}
             </label>
             <input
               type="file"
               onChange={(e) => setRegistrationData({...registrationData, [field.id]: e.target.files[0]})}
               required={field.required}
-              accept={field.acceptedFileTypes || '*'}
+              accept={field.acceptedFileTypes || "*"}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             {field.helpText && (
@@ -594,7 +594,7 @@ const UpcomingActivities = () => {
           </div>
         );
 
-      case 'phone':
+      case "phone":
         return <Input {...commonProps} type="tel" />;
 
       default:
@@ -612,67 +612,67 @@ const UpcomingActivities = () => {
 
     const getFontSizeClass = (size) => {
       switch (size) {
-        case 'small': return 'text-sm';
-        case 'large': return 'text-lg';
-        case 'xl': return 'text-xl';
-        default: return 'text-base';
+        case "small": return "text-sm";
+        case "large": return "text-lg";
+        case "xl": return "text-xl";
+        default: return "text-base";
       }
     };
 
     const getAlignmentClass = (alignment) => {
       switch (alignment) {
-        case 'center': return 'text-center';
-        case 'right': return 'text-right';
-        default: return 'text-left';
+        case "center": return "text-center";
+        case "right": return "text-right";
+        default: return "text-left";
       }
     };
 
     switch (field.type) {
-      case 'label':
+      case "label":
         return (
           <div key={field.id} className={`${getAlignmentClass(field.alignment)} mb-4`}>
             <div 
               className={`${getFontSizeClass(field.fontSize)} text-gray-900 dark:text-white`}
               dangerouslySetInnerHTML={{ 
-                __html: renderMarkdownLinks(field.content || '') 
+                __html: renderMarkdownLinks(field.content || "") 
               }}
             />
           </div>
         );
 
-      case 'image':
+      case "image":
         return (
           <div key={field.id} className={`${getAlignmentClass(field.alignment)} mb-4`}>
             {field.imageUrl && (
               <img 
                 src={field.imageUrl} 
-                alt={field.altText || 'Form image'} 
+                alt={field.altText || "Form image"} 
                 className="max-w-full h-auto rounded-lg border border-gray-300 dark:border-gray-600"
                 onError={(e) => {
-                  e.target.style.display = 'none';
+                  e.target.style.display = "none";
                 }}
               />
             )}
           </div>
         );
 
-      case 'link':
+      case "link":
         const buttonClasses = {
-          primary: 'bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 rounded-lg',
-          secondary: 'bg-gray-500 text-white hover:bg-gray-600 px-4 py-2 rounded-lg',
-          outline: 'border border-blue-500 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-4 py-2 rounded-lg',
-          link: 'text-blue-600 dark:text-blue-400 hover:underline'
+          primary: "bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 rounded-lg",
+          secondary: "bg-gray-500 text-white hover:bg-gray-600 px-4 py-2 rounded-lg",
+          outline: "border border-blue-500 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-4 py-2 rounded-lg",
+          link: "text-blue-600 dark:text-blue-400 hover:underline"
         };
 
         return (
           <div key={field.id} className="mb-4">
             <a
-              href={field.linkUrl || '#'}
-              target={field.openInNewTab ? '_blank' : '_self'}
-              rel={field.openInNewTab ? 'noopener noreferrer' : ''}
-              className={`inline-block transition-colors ${buttonClasses[field.buttonStyle || 'primary']}`}
+              href={field.linkUrl || "#"}
+              target={field.openInNewTab ? "_blank" : "_self"}
+              rel={field.openInNewTab ? "noopener noreferrer" : ""}
+              className={`inline-block transition-colors ${buttonClasses[field.buttonStyle || "primary"]}`}
             >
-              {field.linkText || 'Click here'}
+              {field.linkText || "Click here"}
             </a>
           </div>
         );
@@ -725,7 +725,7 @@ const UpcomingActivities = () => {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {optimisticActivities.map((activity, index) => (
               <Card key={activity.id} delay={index * 0.1}>
-                <div className={`p-6 ${activity.isOptimistic ? 'opacity-75' : ''}`}>
+                <div className={`p-6 ${activity.isOptimistic ? "opacity-75" : ""}`}>
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
                     {activity.title}
                   </h3>
@@ -748,16 +748,16 @@ const UpcomingActivities = () => {
                     <div className="flex items-center">
                       <span className={`px-2 py-1 rounded-full text-xs ${
                         canRegister(activity) 
-                          ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                          ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
                           : !isRegistrationOpen(activity)
-                          ? 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
-                          : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300'
+                          ? "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
+                          : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300"
                       }`}>
                         {!isRegistrationOpen(activity) 
-                          ? 'Registration Closed' 
+                          ? "Registration Closed" 
                           : !canRegister(activity)
-                          ? 'Registration Full'
-                          : 'Registration Open'
+                          ? "Registration Full"
+                          : "Registration Open"
                         }
                       </span>
                     </div>
@@ -859,23 +859,23 @@ const UpcomingActivities = () => {
       <Modal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        title={editingActivity ? 'Edit Activity' : 'Add Activity'}
+        title={editingActivity ? "Edit Activity" : "Add Activity"}
         size="lg"
       >
         <div className="space-y-6">
           <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
             {[
-              { id: 'basic', label: 'Basic Info' },
-              { id: 'form', label: 'Registration Form' },
-              { id: 'payment', label: 'Payment Settings' }
+              { id: "basic", label: "Basic Info" },
+              { id: "form", label: "Registration Form" },
+              { id: "payment", label: "Payment Settings" }
             ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
                   activeTab === tab.id
-                    ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
-                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                    ? "bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm"
+                    : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                 }`}
               >
                 {tab.label}
@@ -884,7 +884,7 @@ const UpcomingActivities = () => {
           </div>
 
           <form onSubmit={handleSubmit}>
-            {activeTab === 'basic' && (
+            {activeTab === "basic" && (
               <div className="space-y-6">
                 <Input
                   label="Activity Title"
@@ -941,7 +941,7 @@ const UpcomingActivities = () => {
               </div>
             )}
 
-            {activeTab === 'form' && (
+            {activeTab === "form" && (
               <div className="space-y-6">
                 <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl">
                   <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
@@ -962,7 +962,7 @@ const UpcomingActivities = () => {
               </div>
             )}
 
-            {activeTab === 'payment' && (
+            {activeTab === "payment" && (
               <div className="space-y-6">
                 <div className="flex items-center space-x-2">
                   <input
@@ -1020,7 +1020,7 @@ const UpcomingActivities = () => {
 
             <div className="flex gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">
               <Button type="submit" loading={submitting} className="flex-1">
-                {editingActivity ? 'Update' : 'Create'} Activity
+                {editingActivity ? "Update" : "Create"} Activity
               </Button>
               <Button
                 type="button"
@@ -1062,7 +1062,7 @@ const UpcomingActivities = () => {
 
           <form onSubmit={handleRegistrationSubmit} className="space-y-6">
             {(selectedActivity?.formSchema || getDefaultFormSchema()).map((field) => {
-              if (field.type === 'label' || field.type === 'image' || field.type === 'link') {
+              if (field.type === "label" || field.type === "image" || field.type === "link") {
                 return renderContentField(field);
               }
               return renderFormField(field);
@@ -1119,7 +1119,7 @@ const UpcomingActivities = () => {
                     </label>
                     <input
                       type="text"
-                      value={registrationData.upiTransactionId || ''}
+                      value={registrationData.upiTransactionId || ""}
                       onChange={(e) => setRegistrationData({...registrationData, upiTransactionId: e.target.value})}
                       placeholder="Enter UPI transaction ID"
                       required
@@ -1186,9 +1186,9 @@ const UpcomingActivities = () => {
                     <td className="px-4 py-2">{registration.phone}</td>
                     <td className="px-4 py-2">
                       <span className={`px-2 py-1 rounded-full text-xs ${
-                        registration.status === 'confirmed' 
-                          ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
-                          : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300'
+                        registration.status === "confirmed" 
+                          ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+                          : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300"
                       }`}>
                         {registration.status}
                       </span>

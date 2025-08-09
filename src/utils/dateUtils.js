@@ -5,20 +5,20 @@
  * @returns {string} Formatted date string
  */
 export function formatDate(date, options = {}) {
-  if (!date) return 'TBA';
+  if (!date) return "TBA";
   
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  const dateObj = typeof date === "string" ? new Date(date) : date;
   
-  if (isNaN(dateObj.getTime())) return 'Invalid Date';
+  if (isNaN(dateObj.getTime())) return "Invalid Date";
   
   const defaultOptions = {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+    year: "numeric",
+    month: "long",
+    day: "numeric",
     ...options
   };
   
-  return dateObj.toLocaleDateString('en-US', defaultOptions);
+  return dateObj.toLocaleDateString("en-US", defaultOptions);
 }
 
 /**
@@ -27,15 +27,15 @@ export function formatDate(date, options = {}) {
  * @returns {string} Formatted time string
  */
 export function formatTime(timeString) {
-  if (!timeString) return '';
+  if (!timeString) return "";
   
-  const [hours, minutes] = timeString.split(':').map(Number);
+  const [hours, minutes] = timeString.split(":").map(Number);
   
   if (isNaN(hours) || isNaN(minutes)) return timeString;
   
-  const period = hours >= 12 ? 'PM' : 'AM';
+  const period = hours >= 12 ? "PM" : "AM";
   const displayHours = hours % 12 || 12;
-  const paddedMinutes = minutes.toString().padStart(2, '0');
+  const paddedMinutes = minutes.toString().padStart(2, "0");
   
   return `${displayHours}:${paddedMinutes} ${period}`;
 }
@@ -46,11 +46,11 @@ export function formatTime(timeString) {
  * @returns {string} Relative time string
  */
 export function getRelativeTime(date) {
-  if (!date) return '';
+  if (!date) return "";
   
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  const dateObj = typeof date === "string" ? new Date(date) : date;
   
-  if (isNaN(dateObj.getTime())) return '';
+  if (isNaN(dateObj.getTime())) return "";
   
   const now = new Date();
   const diffMs = dateObj.getTime() - now.getTime();
@@ -60,19 +60,19 @@ export function getRelativeTime(date) {
   const diffDay = Math.round(diffHour / 24);
   
   if (diffDay > 0) {
-    return diffDay === 1 ? 'Tomorrow' : `In ${diffDay} days`;
+    return diffDay === 1 ? "Tomorrow" : `In ${diffDay} days`;
   } else if (diffDay < 0) {
-    return diffDay === -1 ? 'Yesterday' : `${Math.abs(diffDay)} days ago`;
+    return diffDay === -1 ? "Yesterday" : `${Math.abs(diffDay)} days ago`;
   } else if (diffHour > 0) {
-    return `In ${diffHour} ${diffHour === 1 ? 'hour' : 'hours'}`;
+    return `In ${diffHour} ${diffHour === 1 ? "hour" : "hours"}`;
   } else if (diffHour < 0) {
-    return `${Math.abs(diffHour)} ${Math.abs(diffHour) === 1 ? 'hour' : 'hours'} ago`;
+    return `${Math.abs(diffHour)} ${Math.abs(diffHour) === 1 ? "hour" : "hours"} ago`;
   } else if (diffMin > 0) {
-    return `In ${diffMin} ${diffMin === 1 ? 'minute' : 'minutes'}`;
+    return `In ${diffMin} ${diffMin === 1 ? "minute" : "minutes"}`;
   } else if (diffMin < 0) {
-    return `${Math.abs(diffMin)} ${Math.abs(diffMin) === 1 ? 'minute' : 'minutes'} ago`;
+    return `${Math.abs(diffMin)} ${Math.abs(diffMin) === 1 ? "minute" : "minutes"} ago`;
   } else {
-    return 'Just now';
+    return "Just now";
   }
 }
 
@@ -84,7 +84,7 @@ export function getRelativeTime(date) {
 export function isFutureDate(date) {
   if (!date) return false;
   
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  const dateObj = typeof date === "string" ? new Date(date) : date;
   
   if (isNaN(dateObj.getTime())) return false;
   
@@ -101,9 +101,9 @@ export function isFutureDate(date) {
 export function isDateBetween(date, startDate, endDate) {
   if (!date || !startDate || !endDate) return false;
   
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
-  const startObj = typeof startDate === 'string' ? new Date(startDate) : startDate;
-  const endObj = typeof endDate === 'string' ? new Date(endDate) : endDate;
+  const dateObj = typeof date === "string" ? new Date(date) : date;
+  const startObj = typeof startDate === "string" ? new Date(startDate) : startDate;
+  const endObj = typeof endDate === "string" ? new Date(endDate) : endDate;
   
   if (isNaN(dateObj.getTime()) || isNaN(startObj.getTime()) || isNaN(endObj.getTime())) return false;
   

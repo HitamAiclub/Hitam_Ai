@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { auth } from '../firebase/config';
-import { onAuthStateChanged } from 'firebase/auth';
+import { useState, useEffect } from "react";
+import { auth } from "../firebase/config";
+import { onAuthStateChanged } from "firebase/auth";
 
 const ADMIN_UID = "admin-uid-here"; // Replace with actual admin UID
 

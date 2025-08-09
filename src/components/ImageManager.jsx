@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import { getStorage, ref, getDownloadURL, uploadBytes, deleteObject } from "firebase/storage";
 
 function ImageManager({ storagePath }) {
-  const [imageUrl, setImageUrl] = useState('');
+  const [imageUrl, setImageUrl] = useState("");
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
@@ -10,7 +10,7 @@ function ImageManager({ storagePath }) {
     const imageRef = ref(storage, storagePath);
     getDownloadURL(imageRef)
       .then((url) => setImageUrl(url))
-      .catch(() => setImageUrl(''));
+      .catch(() => setImageUrl(""));
   }, [storagePath]);
 
   const handleUpload = async (e) => {
@@ -29,7 +29,7 @@ function ImageManager({ storagePath }) {
     const storage = getStorage();
     const imageRef = ref(storage, storagePath);
     await deleteObject(imageRef);
-    setImageUrl('');
+    setImageUrl("");
   };
 
   return (

@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
-import ParticleBackground from './particles/ParticaleBackground'; // Import the ParticleBackground component
+import { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
+import ParticleBackground from "./particles/ParticaleBackground"; // Import the ParticleBackground component
 
 const Background = () => {
   const [score, setScore] = useState(0);

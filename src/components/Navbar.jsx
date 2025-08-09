@@ -1,11 +1,11 @@
-import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Menu, X, Moon, Sun, LogOut } from 'lucide-react';
-import { useTheme } from '../hooks/useTheme';
-import { useAuth } from '../hooks/useAuth';
-import { signOut } from 'firebase/auth';
-import { auth } from '../firebase/config';
+import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Menu, X, Moon, Sun, LogOut } from "lucide-react";
+import { useTheme } from "../hooks/useTheme";
+import { useAuth } from "../hooks/useAuth";
+import { signOut } from "firebase/auth";
+import { auth } from "../firebase/config";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,24 +13,24 @@ const Navbar = () => {
   const { user, isAdmin } = useAuth();
   const location = useLocation();
 
-  const isAdminRoute = location.pathname.startsWith('/admin');
+  const isAdminRoute = location.pathname.startsWith("/admin");
 
   const navItems = isAdminRoute ? [
-    { name: 'Home', path: '/admin' },
-    { name: 'Events', path: '/admin/events' },
-    { name: 'Community', path: '/admin/community' },
-    { name: 'Joined Club', path: '/admin/joined' },
+    { name: "Home", path: "/admin" },
+    { name: "Events", path: "/admin/events" },
+    { name: "Community", path: "/admin/community" },
+    { name: "Joined Club", path: "/admin/joined" },
   ] : [
-    { name: 'Home', path: '/' },
-    { name: 'Events', path: '/events' },
-    { name: 'Join Club', path: '/join' },
+    { name: "Home", path: "/" },
+    { name: "Events", path: "/events" },
+    { name: "Join Club", path: "/join" },
   ];
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
     } catch (error) {
-      console.error('Error signing out:', error);
+      console.error("Error signing out:", error);
     }
   };
 
@@ -42,7 +42,7 @@ const Navbar = () => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <Link to={isAdminRoute ? '/admin' : '/'} className="flex items-center space-x-2">
+          <Link to={isAdminRoute ? "/admin" : "/"} className="flex items-center space-x-2">
             <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -62,8 +62,8 @@ const Navbar = () => {
                 to={item.path}
                 className={`relative px-3 py-2 text-sm font-medium transition-colors duration-200 ${
                   location.pathname === item.path
-                    ? 'text-purple-600 dark:text-purple-400'
-                    : 'text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400'
+                    ? "text-purple-600 dark:text-purple-400"
+                    : "text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400"
                 }`}
               >
                 {item.name}
@@ -123,7 +123,7 @@ const Navbar = () => {
       {/* Mobile menu */}
       <motion.div
         initial={{ height: 0 }}
-        animate={{ height: isOpen ? 'auto' : 0 }}
+        animate={{ height: isOpen ? "auto" : 0 }}
         className="md:hidden overflow-hidden bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-t border-gray-200/50 dark:border-gray-700/50"
       >
         <div className="px-4 py-4 space-y-2">
@@ -134,8 +134,8 @@ const Navbar = () => {
               onClick={() => setIsOpen(false)}
               className={`block px-3 py-2 text-base font-medium rounded-lg transition-colors ${
                 location.pathname === item.path
-                  ? 'bg-purple-50 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400'
-                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                  ? "bg-purple-50 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400"
+                  : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
               }`}
             >
               {item.name}
