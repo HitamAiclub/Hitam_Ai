@@ -6,7 +6,7 @@ import { testFirebaseConnection } from './firebase.js';
 
 import Navbar from './components/layout/Navbar.jsx';
 import Footer from './components/layout/Footer.jsx';
-import AnimatedBackground from './components/layout/AnimatedBackground.jsx'; // ✅ lowercase layout folder
+import ParticleBackground from './components/particles/ParticaleBackground.jsx';
 import HomePage from './pages/HomePage.jsx';
 import EventsPage from './pages/EventsPage.jsx';
 import UpcomingActivities from './pages/UpcomingActivities.jsx';
@@ -27,7 +27,7 @@ function App() {
       <AuthProvider>
         <Router>
           <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors duration-200 relative">
-            <AnimatedBackground />
+            <ParticleBackground />
             <Navbar />
             <main className="relative z-20 flex-grow">
               <Routes>

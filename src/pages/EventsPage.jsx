@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { db, storage } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
 import Input from '../components/ui/Input';
+import ImageManager from '../components/ImageManager';
 import { Calendar, User, Plus, Edit, Trash2, Image as ImageIcon } from 'lucide-react';
 
 const EventsPage = () => {
@@ -84,10 +85,8 @@ const EventsPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    console.log('Starting event submission...', formData);
     setUploading(true);
-    
+
     // Optimistic update
     const tempId = Date.now().toString();
     const optimisticEvent = {
@@ -117,33 +116,30 @@ const EventsPage = () => {
 
     try {
       let imageUrl = editingEvent?.meta?.imageUrl || '';
-      
-      console.log('Uploading event image...', imageFile);
+      let imageStoragePath = editingEvent?.meta?.imageStoragePath || '';
+
       if (imageFile) {
-        const imageRef = ref(storage, `events/${Date.now()}_${imageFile.name}`);
-        const uploadResult = await uploadBytes(imageRef, imageFile);
-        console.log('Event image uploaded:', uploadResult);
+        // Use a unique storage path for each image
+        imageStoragePath = `events/${Date.now()}_${imageFile.name}`;
+        const imageRef = storageRef(storage, imageStoragePath);
+        await uploadBytes(imageRef, imageFile);
         imageUrl = await getDownloadURL(imageRef);
-        console.log('Event image URL:', imageUrl);
       }
 
       const eventData = {
         meta: {
           ...formData,
           imageUrl,
+          imageStoragePath,
           createdAt: editingEvent?.meta?.createdAt || new Date().toISOString(),
           updatedAt: new Date().toISOString()
         }
       };
 
-      console.log('Saving event data:', eventData);
-      
       if (editingEvent) {
-        const result = await updateDoc(doc(db, 'events', editingEvent.id), eventData);
-        console.log('Event updated:', result);
+        await updateDoc(doc(db, 'events', editingEvent.id), eventData);
       } else {
-        const result = await addDoc(collection(db, 'events'), eventData);
-        console.log('Event added:', result);
+        await addDoc(collection(db, 'events'), eventData);
       }
 
     } catch (error) {
@@ -184,12 +180,17 @@ const EventsPage = () => {
   const confirmDelete = async () => {
     const eventId = deleteConfirm;
     setDeleteConfirm(null);
-    
+
     // Optimistic delete
     const eventToDelete = optimisticEvents.find(e => e.id === eventId);
     setOptimisticEvents(prev => prev.filter(event => event.id !== eventId));
 
     try {
+      // Delete image from storage if exists
+      if (eventToDelete?.meta?.imageStoragePath) {
+        const imageRef = storageRef(storage, eventToDelete.meta.imageStoragePath);
+        await deleteObject(imageRef);
+      }
       await deleteDoc(doc(db, 'events', eventId));
     } catch (error) {
       console.error('Error deleting event:', error);
