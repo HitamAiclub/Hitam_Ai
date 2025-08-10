@@ -34,6 +34,7 @@ const Navbar = () => {
     { name: "Committee Members", path: "/admin/committee" },
     { name: "Form Submissions", path: "/admin/submissions" },
     { name: "Community Members", path: "/admin/community" },
+    { name: "Media Management", path: "/admin/media" },
   ];
 
   const navItems = user ? adminNavItems : publicNavItems;

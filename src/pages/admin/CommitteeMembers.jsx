@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { db, storage, auth } from "../../firebase";
+import { db, auth } from "../../firebase";
+import { uploadCommitteeMemberImage } from "../../utils/cloudinary";
 import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
 import Modal from "../../components/ui/Modal";
@@ -123,13 +123,12 @@ const CommitteeMembers = () => {
       let photoUrl = editingMember?.photoUrl || "";
       
       if (imageFile) {
-        console.log("Uploading image...");
-        // Show upload progress
-        const imageRef = ref(storage, `committee/${Date.now()}_${imageFile.name}`);
-        const uploadResult = await uploadBytes(imageRef, imageFile);
-        console.log("Image uploaded successfully");
-        photoUrl = await getDownloadURL(imageRef);
-        console.log("Image URL obtained");
+        console.log("Uploading image to Cloudinary...");
+        // Upload to Cloudinary
+        const uploadResult = await uploadCommitteeMemberImage(imageFile);
+        console.log("Image uploaded successfully to Cloudinary");
+        photoUrl = uploadResult.url;
+        console.log("Image URL obtained from Cloudinary");
       }
 
       const memberData = {

@@ -1,34 +1,38 @@
 import React, { useState, useEffect } from "react";
-import { getStorage, ref, getDownloadURL, uploadBytes, deleteObject } from "firebase/storage";
+import { uploadToCloudinary } from "../utils/cloudinary";
 
-function ImageManager({ storagePath }) {
+function ImageManager({ storagePath, folder = "hitam_ai" }) {
   const [imageUrl, setImageUrl] = useState("");
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
-    const storage = getStorage();
-    const imageRef = ref(storage, storagePath);
-    getDownloadURL(imageRef)
-      .then((url) => setImageUrl(url))
-      .catch(() => setImageUrl(""));
+    // If storagePath is a URL, use it directly
+    if (storagePath && storagePath.startsWith('http')) {
+      setImageUrl(storagePath);
+    } else {
+      setImageUrl("");
+    }
   }, [storagePath]);
 
   const handleUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     setUploading(true);
-    const storage = getStorage();
-    const imageRef = ref(storage, storagePath);
-    await uploadBytes(imageRef, file);
-    const url = await getDownloadURL(imageRef);
-    setImageUrl(url);
-    setUploading(false);
+    
+    try {
+      const uploadResult = await uploadToCloudinary(file, folder);
+      setImageUrl(uploadResult.url);
+    } catch (error) {
+      console.error("Upload failed:", error);
+      alert("Upload failed: " + error.message);
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleDelete = async () => {
-    const storage = getStorage();
-    const imageRef = ref(storage, storagePath);
-    await deleteObject(imageRef);
+    // Note: Cloudinary deletion requires server-side implementation
+    // For now, we'll just clear the local state
     setImageUrl("");
   };
 

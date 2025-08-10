@@ -418,13 +418,8 @@ const JoinClub = () => {
           </motion.div>
         </div>
 
-        {/* Image Upload Section */}
-        <div className="mt-12">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-            Upload Your Profile Image
-          </h2>
-          <ImageManager storagePath="profiles/user1.jpg" />
-        </div>
+        
+        
       </div>
     </div>
   );

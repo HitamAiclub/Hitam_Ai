@@ -1,23 +1,24 @@
 import { useState, useEffect } from "react";
-import { database } from "../firebase/config";
-import { ref, onValue, off } from "firebase/database";
+import { db } from "../firebase";
+import { collection, onSnapshot, query, orderBy, limit } from "firebase/firestore";
 
-export const useFirebaseData = (path) => {
+export const useFirebaseData = (collectionName) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const dataRef = ref(database, path);
+    const collectionRef = collection(db, collectionName);
+    const q = query(collectionRef, orderBy('createdAt', 'desc'), limit(50));
     
-    const unsubscribe = onValue(dataRef, 
+    const unsubscribe = onSnapshot(q, 
       (snapshot) => {
         setLoading(false);
-        if (snapshot.exists()) {
-          setData(snapshot.val());
-        } else {
-          setData(null);
-        }
+        const documents = {};
+        snapshot.forEach((doc) => {
+          documents[doc.id] = { id: doc.id, ...doc.data() };
+        });
+        setData(documents);
         setError(null);
       },
       (error) => {
@@ -27,8 +28,8 @@ export const useFirebaseData = (path) => {
       }
     );
 
-    return () => off(dataRef, "value", unsubscribe);
-  }, [path]);
+    return () => unsubscribe();
+  }, [collectionName]);
 
   return { data, loading, error };
 };
@@ -38,9 +39,9 @@ export const useEvents = () => {
 };
 
 export const useClubMembers = () => {
-  return useFirebaseData("clubMembers");
+  return useFirebaseData("committeeMembers");
 };
 
 export const useCommunityMembers = () => {
-  return useFirebaseData("communityMembers");
+  return useFirebaseData("clubJoins");
 };

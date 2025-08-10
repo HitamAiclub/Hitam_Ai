@@ -12,9 +12,11 @@ import EventsPage from "./pages/EventsPage.jsx";
 import UpcomingActivities from "./pages/UpcomingActivities.jsx";
 import JoinClub from "./pages/JoinClub.jsx";
 import AdminLogin from "./pages/AdminLogin.jsx";
+import AdminHome from "./pages/admin/AdminHome.jsx";
 import CommitteeMembers from "./pages/admin/CommitteeMembers.jsx";
 import FormSubmissions from "./pages/admin/FormSubmissions.jsx";
 import CommunityMembers from "./pages/admin/CommunityMembers.jsx";
+import MediaManagement from "./pages/admin/MediaManagement.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 function App() {
@@ -37,6 +39,14 @@ function App() {
                 <Route path="/join" element={<JoinClub />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route
+                  path="/admin"
+                  element={
+                    <ProtectedRoute>
+                      <AdminHome />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
                   path="/admin/committee"
                   element={
                     <ProtectedRoute>
@@ -57,6 +67,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <CommunityMembers />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/media"
+                  element={
+                    <ProtectedRoute>
+                      <MediaManagement />
                     </ProtectedRoute>
                   }
                 />

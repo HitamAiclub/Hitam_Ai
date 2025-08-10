@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "firebase/firestore";
-import { ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
-import { db, storage } from "../firebase";
+import { db } from "../firebase";
+import { uploadEventImage } from "../utils/cloudinary";
 import { useAuth } from "../contexts/AuthContext";
 import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
@@ -119,11 +119,10 @@ const EventsPage = () => {
       let imageStoragePath = editingEvent?.meta?.imageStoragePath || "";
 
       if (imageFile) {
-        // Use a unique storage path for each image
-        imageStoragePath = `events/${Date.now()}_${imageFile.name}`;
-        const imageRef = storageRef(storage, imageStoragePath);
-        await uploadBytes(imageRef, imageFile);
-        imageUrl = await getDownloadURL(imageRef);
+        // Upload to Cloudinary
+        const uploadResult = await uploadEventImage(imageFile);
+        imageUrl = uploadResult.url;
+        imageStoragePath = uploadResult.publicId; // Store Cloudinary public ID instead of storage path
       }
 
       const eventData = {

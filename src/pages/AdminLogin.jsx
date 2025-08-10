@@ -24,7 +24,7 @@ const AdminLogin = () => {
 
     try {
       await login(formData.email, formData.password);
-      navigate("/");
+      navigate("/admin/committee");
     } catch (error) {
       setError("Invalid credentials. Please try again.");
     } finally {

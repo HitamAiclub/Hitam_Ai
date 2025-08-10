@@ -1,304 +1,158 @@
-# HITAM AI Club Website
+# HITAM AI Club - Web Application
 
-A modern, responsive website for the HITAM AI Club built with React, Firebase, and Tailwind CSS.
+A modern web application for managing the HITAM AI Club, built with React, Firebase, and Cloudinary.
 
-## 🚀 Features
+## Features
 
-### Public Features
-- **Home Page**: Hero section with animated background, club information, and committee showcase
-- **Events & Workshops**: Filterable events display with detailed information
-- **Upcoming Activities**: Dynamic registration forms for events and workshops
-- **Join the Club**: Student registration with email validation (@hitam.org)
-- **Theme Toggle**: Dark/Light mode with persistent state
+- **Public Pages**: Home, Events, Upcoming Activities, Join Club
+- **Admin Dashboard**: Committee Members, Form Submissions, Community Members, Media Management
+- **Authentication**: Firebase-based admin authentication
+- **Media Management**: Cloudinary integration for image uploads and management
+- **Responsive Design**: Mobile-first design with dark/light theme support
+- **Modern UI**: Built with Tailwind CSS and Framer Motion animations
 
-### Admin Features
-- **Authentication**: Secure Firebase authentication for admin access
-- **Committee Management**: CRUD operations for committee members with photo uploads
-- **Event Management**: Create, edit, and delete events with image uploads
-- **Form Builder**: Google Forms-like interface for creating registration forms
-- **Registration Management**: View, export, and manage all form submissions
-- **Community Management**: Manage club member registrations
+## Tech Stack
 
-## 🛠️ Tech Stack
+- **Frontend**: React 18, Vite, Tailwind CSS, Framer Motion
+- **Backend**: Node.js, Express
+- **Authentication**: Firebase Auth
+- **Database**: Firebase Firestore
+- **Media Storage**: Cloudinary
+- **Deployment**: Vercel (Frontend), Render/Vercel (Backend)
 
-- **Frontend**: React.js, Tailwind CSS, Framer Motion
-- **Backend**: Firebase (Firestore, Authentication, Storage)
-- **Styling**: Tailwind CSS with dark mode support
-- **Animations**: Framer Motion for smooth transitions
-- **Icons**: Lucide React
+## Prerequisites
 
-## 📊 Database Structure
-
-### Collections
-
-#### `upcomingActivities`
-```json
-{
-  "title": "string",
-  "description": "string",
-  "registrationStart": "ISO date string",
-  "registrationEnd": "ISO date string", 
-  "eventDate": "ISO date string",
-  "maxParticipants": "number",
-  "isPaid": "boolean",
-  "fee": "string",
-  "formSchema": [
-    {
-      "id": "string",
-      "type": "text|textarea|email|phone|select|radio|checkbox|file|date|time|url|label|image|link",
-      "label": "string",
-      "required": "boolean",
-      "placeholder": "string",
-      "options": ["array for select/radio/checkbox"],
-      "helpText": "string",
-      "validation": {},
-      "content": "string (for label type)",
-      "imageUrl": "string (for image type)",
-      "linkUrl": "string (for link type)",
-      "linkText": "string (for link type)"
-    }
-  ],
-  "paymentDetails": {
-    "upiId": "string",
-    "qrCodeUrl": "string", 
-    "bankDetails": "string"
-  },
-  "createdAt": "ISO date string",
-  "updatedAt": "ISO date string"
-}
-```
-
-#### `upcomingActivities/{activityId}/registrations`
-```json
-{
-  "activityId": "string",
-  "activityTitle": "string",
-  "submittedAt": "ISO date string",
-  "status": "pending_payment|confirmed",
-  "formVersion": "ISO date string",
-  "[fieldId]": "user response data",
-  "paymentProof": {
-    "fileName": "string",
-    "fileUrl": "string",
-    "fileSize": "number",
-    "fileType": "string"
-  }
-}
-```
-
-#### `allRegistrations`
-Global collection for easier admin access to all registrations across activities.
-
-#### `events`
-```json
-{
-  "meta": {
-    "title": "string",
-    "description": "string",
-    "startDate": "ISO date string",
-    "endDate": "ISO date string",
-    "sessionBy": "string",
-    "type": "event|workshop",
-    "imageUrl": "string",
-    "createdAt": "ISO date string",
-    "updatedAt": "ISO date string"
-  }
-}
-```
-
-#### `committeeMembers`
-```json
-{
-  "name": "string",
-  "role": "string",
-  "branch": "string",
-  "year": "string",
-  "email": "string",
-  "phone": "string",
-  "photoUrl": "string",
-  "createdAt": "ISO date string",
-  "updatedAt": "ISO date string"
-}
-```
-
-#### `clubJoins`
-```json
-{
-  "name": "string",
-  "rollNo": "string",
-  "branch": "string",
-  "year": "string",
-  "section": "string",
-  "email": "string",
-  "joinedAt": "ISO date string",
-  "status": "pending|approved|rejected"
-}
-```
-
-## 🔧 Setup Instructions
-
-### Prerequisites
-- Node.js (v14 or higher)
+- Node.js (v16 or higher)
 - npm or yarn
-- Firebase project with Firestore, Authentication, and Storage enabled
+- Firebase project
+- Cloudinary account
 
-### Installation
+## Setup Instructions
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd hitam-ai-website
-   ```
+### 1. Clone the Repository
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Firebase Configuration**
-   
-   The Firebase configuration is already set up in `src/firebase.js`:
-   ```js
-   const firebaseConfig = {
-     apiKey: "AIzaSyDtaV1gdByf5khP3AatvKMMpMHA8HozuUU",
-     authDomain: "hitam-ai-club.firebaseapp.com",
-     databaseURL: "https://hitam-ai-club-default-rtdb.firebaseio.com/",
-     projectId: "hitam-ai-club",
-     storageBucket: "hitam-ai-club.appspot.com",
-     messagingSenderId: "87157714690",
-     appId: "1:87157714690:web:hitam-ai-club-app"
-   };
-   ```
-
-4. **Firebase Setup**
-   - Enable Authentication with Email/Password
-   - Create Firestore database
-   - Enable Storage for file uploads
-   - Set up security rules (see below)
-
-5. **Start the development server**
-   ```bash
-   npm run dev
-   ```
-
-### Firebase Security Rules
-
-#### Firestore Rules
-```javascript
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    // Allow read access to public collections
-    match /events/{document} {
-      allow read: if true;
-      allow write: if request.auth != null;
-    }
-    
-    match /upcomingActivities/{document} {
-      allow read: if true;
-      allow write: if request.auth != null;
-      
-      match /registrations/{registration} {
-        allow read: if request.auth != null;
-        allow create: if true;
-      }
-    }
-    
-    match /committeeMembers/{document} {
-      allow read: if true;
-      allow write: if request.auth != null;
-    }
-    
-    match /clubJoins/{document} {
-      allow read: if request.auth != null;
-      allow create: if true;
-    }
-    
-    match /allRegistrations/{document} {
-      allow read: if request.auth != null;
-      allow create: if true;
-    }
-  }
-}
+```bash
+git clone <repository-url>
+cd Hitam_Ai
 ```
 
-#### Storage Rules
-```javascript
-rules_version = '2';
-service firebase.storage {
-  match /b/{bucket}/o {
-    match /events/{allPaths=**} {
-      allow read: if true;
-      allow write: if request.auth != null;
-    }
-    
-    match /committee/{allPaths=**} {
-      allow read: if true;
-      allow write: if request.auth != null;
-    }
-    
-    match /registrations/{allPaths=**} {
-      allow read: if request.auth != null;
-      allow write: if true;
-    }
-  }
-}
+### 2. Install Dependencies
+
+```bash
+npm install
 ```
 
-## 🎨 Form Builder Features
+### 3. Environment Variables
 
-### Field Types
-- **Text Fields**: Short text, long text (textarea), email, phone, number, URL
-- **Selection Fields**: Dropdown, radio buttons, checkboxes
-- **File Upload**: With file type restrictions
-- **Date/Time**: Date picker, time picker
-- **Content Elements**: Labels/descriptions, images, links/buttons
+Create a `.env` file in the root directory with the following variables:
 
-### Advanced Features
-- **Drag & Drop**: Reorder form fields
-- **Live Preview**: See how the form will look to users
-- **Validation**: Required fields, custom validation rules
-- **Rich Content**: Markdown links in descriptions
-- **File Handling**: Automatic upload to Firebase Storage
-- **Payment Integration**: UPI and bank details for paid events
+```env
+# Firebase Configuration
+VITE_FIREBASE_API_KEY=your_firebase_api_key_here
+VITE_FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain_here
+VITE_FIREBASE_DATABASE_URL=your_firebase_database_url_here
+VITE_FIREBASE_PROJECT_ID=your_firebase_project_id_here
+VITE_FIREBASE_STORAGE_BUCKET=your_firebase_storage_bucket_here
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_firebase_messaging_sender_id_here
+VITE_FIREBASE_APP_ID=your_firebase_app_id_here
+VITE_FIREBASE_MEASUREMENT_ID=your_firebase_measurement_id_here
 
-## 🚀 Deployment
+# Cloudinary Configuration
+VITE_CLOUDINARY_CLOUD_NAME=dwva5ae36
+VITE_CLOUDINARY_UPLOAD_PRESET=Hitam_ai
+CLOUDINARY_API_KEY=your_cloudinary_api_key_here
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret_here
+CLOUDINARY_CLOUD_NAME=dwva5ae36
 
-### Netlify Deployment
-1. Build the project: `npm run build`
-2. Deploy the `dist` folder to Netlify
-3. Set up environment variables if needed
+# Server Configuration
+PORT=5000
+```
 
-### Firebase Hosting
-1. Install Firebase CLI: `npm install -g firebase-tools`
-2. Login: `firebase login`
-3. Initialize: `firebase init hosting`
-4. Build: `npm run build`
-5. Deploy: `firebase deploy`
+### 4. Firebase Setup
 
-## 📱 Responsive Design
+1. Create a Firebase project at [Firebase Console](https://console.firebase.google.com/)
+2. Enable Authentication (Email/Password)
+3. Create a Firestore database
+4. Get your Firebase configuration from Project Settings
+5. Add the configuration to your `.env` file
 
-The website is fully responsive with breakpoints:
-- **Mobile**: < 480px
-- **Tablet**: 768px
-- **Desktop**: > 1024px
+### 5. Cloudinary Setup
 
-## 🎯 Admin Access
+1. Create a Cloudinary account at [Cloudinary](https://cloudinary.com/)
+2. Get your Cloud Name, API Key, and API Secret
+3. Create an upload preset named "Hitam_ai"
+4. Add the configuration to your `.env` file
 
-To access admin features:
+### 6. Run the Application
+
+#### Development Mode (Frontend + Backend)
+```bash
+npm run dev:full
+```
+
+#### Frontend Only
+```bash
+npm run dev
+```
+
+#### Backend Only
+```bash
+npm run start:server
+```
+
+### 7. Build for Production
+
+```bash
+npm run build
+```
+
+## Project Structure
+
+```
+src/
+├── components/          # Reusable UI components
+│   ├── admin/          # Admin-specific components
+│   ├── auth/           # Authentication components
+│   ├── layout/         # Layout components (Navbar, Footer)
+│   └── ui/             # Generic UI components
+├── contexts/           # React contexts (Auth, Theme)
+├── hooks/              # Custom React hooks
+├── pages/              # Page components
+│   ├── admin/          # Admin pages
+│   └── public/         # Public pages
+├── utils/              # Utility functions
+└── firebase.js         # Firebase configuration
+
+server/
+└── index.js           # Express server with Cloudinary API
+```
+
+## API Endpoints
+
+### Cloudinary Management
+- `GET /api/cloudinary/all-images` - Get all images
+- `GET /api/cloudinary/files?folder=<folder>` - Get files from specific folder
+- `DELETE /api/cloudinary/delete` - Delete image by public ID
+
+## Admin Access
+
 1. Navigate to `/admin/login`
-2. Use Firebase Authentication credentials
-3. Access admin-only pages through the navigation
+2. Use Firebase admin credentials
+3. Access admin dashboard at `/admin`
 
-## 🔒 Security Features
+## Deployment
 
-- **Protected Routes**: Admin pages require authentication
-- **Email Validation**: Club registration restricted to @hitam.org emails
-- **File Upload Security**: File type restrictions and secure storage
-- **Form Validation**: Client and server-side validation
-- **Data Sanitization**: Proper handling of user inputs
+### Frontend (Vercel)
+1. Connect your GitHub repository to Vercel
+2. Set environment variables in Vercel dashboard
+3. Deploy automatically on push to main branch
 
-## 🤝 Contributing
+### Backend (Render/Vercel)
+1. Deploy the server folder to your preferred platform
+2. Set environment variables
+3. Update the proxy configuration in `vite.config.js` for production
+
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch
@@ -306,10 +160,10 @@ To access admin features:
 4. Test thoroughly
 5. Submit a pull request
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License.
 
-## 🆘 Support
+## Support
 
-For support or questions, please contact the HITAM AI Club team.
+For support, please contact the development team or create an issue in the repository.

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { db, storage } from "../firebase";
+import { db } from "../firebase";
+import { uploadFormFile } from "../utils/cloudinary";
 import { useAuth } from "../contexts/AuthContext";
 import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
@@ -29,7 +29,7 @@ const UpcomingActivities = () => {
     maxParticipants: "",
     isPaid: false,
     fee: "",
-    formSchema: null,
+    formSchema: [],
     paymentDetails: {
       paymentUrl: "",
       instructions: ""
@@ -41,6 +41,17 @@ const UpcomingActivities = () => {
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [optimisticActivities, setOptimisticActivities] = useState([]);
   const { user } = useAuth();
+
+  useEffect(() => {
+    // Initialize formSchema with default schema
+    console.log("Initializing formData with default schema");
+    const defaultSchema = getDefaultFormSchema();
+    console.log("Default schema:", defaultSchema);
+    setFormData(prev => ({
+      ...prev,
+      formSchema: defaultSchema
+    }));
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -84,6 +95,41 @@ const UpcomingActivities = () => {
     e.preventDefault();
     
     console.log("Starting activity submission...", formData);
+    console.log("User authentication status:", !!user);
+    console.log("User details:", user);
+    console.log("Form data validation:", {
+      title: !!formData.title,
+      description: !!formData.description,
+      registrationStart: !!formData.registrationStart,
+      registrationEnd: !!formData.registrationEnd,
+      eventDate: !!formData.eventDate,
+      formSchema: !!formData.formSchema,
+      formSchemaLength: formData.formSchema?.length,
+      formSchemaType: typeof formData.formSchema,
+      formSchemaIsArray: Array.isArray(formData.formSchema)
+    });
+    
+    // Additional validation
+    if (!formData.title || !formData.description || !formData.registrationStart || 
+        !formData.registrationEnd || !formData.eventDate) {
+      alert("Please fill in all required fields: Title, Description, Registration Start, Registration End, and Event Date.");
+      setSubmitting(false);
+      return;
+    }
+    
+    if (!formData.formSchema || !Array.isArray(formData.formSchema) || formData.formSchema.length === 0) {
+      console.warn("FormSchema is invalid, using default schema");
+      formData.formSchema = getDefaultFormSchema();
+    }
+
+    // Check if user is authenticated for form creation
+    if (!user) {
+      alert("You must be logged in to create or edit activities. Please log in as an admin.");
+      setSubmitting(false);
+      return;
+    }
+
+    console.log("User is authenticated, proceeding with submission...");
     setSubmitting(true);
 
     const tempId = Date.now().toString();
@@ -112,11 +158,16 @@ const UpcomingActivities = () => {
     resetForm();
 
     try {
-      const finalFormSchema = formData.formSchema && formData.formSchema.length > 0 
-        ? formData.formSchema 
-        : getDefaultFormSchema();
+      // Ensure formSchema is properly initialized
+      let finalFormSchema = formData.formSchema;
+      if (!finalFormSchema || !Array.isArray(finalFormSchema) || finalFormSchema.length === 0) {
+        console.log("FormSchema is empty or invalid, using default schema");
+        finalFormSchema = getDefaultFormSchema();
+      }
 
       console.log("Final form schema:", finalFormSchema);
+      console.log("FormSchema type:", typeof finalFormSchema);
+      console.log("FormSchema is array:", Array.isArray(finalFormSchema));
 
       // Utility function to remove undefined values recursively
       const removeUndefinedValues = (obj) => {
@@ -145,6 +196,8 @@ const UpcomingActivities = () => {
           ? parseFloat(formData.fee) 
           : null
       };
+      
+      console.log("Cleaned form data:", cleanedFormData);
 
       // Clean the form schema to remove undefined values
       const cleanedFormSchema = removeUndefinedValues(finalFormSchema);
@@ -159,18 +212,46 @@ const UpcomingActivities = () => {
       // Final cleanup of the entire activity data object
       const finalActivityData = removeUndefinedValues(activityData);
 
-      console.log("Saving activity data:", finalActivityData);
+      console.log("Final activity data to save:", finalActivityData);
+      console.log("Data type check:", {
+        title: typeof finalActivityData.title,
+        description: typeof finalActivityData.description,
+        formSchema: typeof finalActivityData.formSchema,
+        formSchemaIsArray: Array.isArray(finalActivityData.formSchema)
+      });
       
-      if (editingActivity) {
-        const result = await updateDoc(doc(db, "upcomingActivities", editingActivity.id), finalActivityData);
-        console.log("Activity updated:", result);
-      } else {
-        const result = await addDoc(collection(db, "upcomingActivities"), finalActivityData);
-        console.log("Activity added:", result);
-      }
+              try {
+          console.log("Attempting to save to Firebase with data:", finalActivityData);
+          console.log("Firebase db object:", db);
+          console.log("Collection reference:", collection(db, "upcomingActivities"));
+          
+          if (editingActivity) {
+            console.log("Updating existing activity:", editingActivity.id);
+            const docRef = doc(db, "upcomingActivities", editingActivity.id);
+            console.log("Document reference:", docRef);
+            const result = await updateDoc(docRef, finalActivityData);
+            console.log("Activity updated successfully:", result);
+          } else {
+            console.log("Creating new activity");
+            const colRef = collection(db, "upcomingActivities");
+            console.log("Collection reference:", colRef);
+            const result = await addDoc(colRef, finalActivityData);
+            console.log("Activity added successfully:", result);
+            console.log("New document ID:", result.id);
+          }
+        } catch (firebaseError) {
+          console.error("Firebase error details:", firebaseError);
+          console.error("Firebase error code:", firebaseError.code);
+          console.error("Firebase error message:", firebaseError.message);
+          console.error("Firebase error stack:", firebaseError.stack);
+          throw firebaseError;
+        }
 
     } catch (error) {
       console.error("Error saving activity:", error);
+      console.error("Error stack:", error.stack);
+      
+      // Revert optimistic updates
       if (editingActivity) {
         setOptimisticActivities(prev => 
           prev.map(activity => 
@@ -180,7 +261,18 @@ const UpcomingActivities = () => {
       } else {
         setOptimisticActivities(prev => prev.filter(activity => activity.id !== tempId));
       }
-      alert("Failed to save activity. Please try again.");
+      
+      // Show more specific error message
+      let errorMessage = "Failed to save activity. Please try again.";
+      if (error.code === 'permission-denied') {
+        errorMessage = "Permission denied. Please check if you're logged in as an admin.";
+      } else if (error.code === 'unavailable') {
+        errorMessage = "Firebase is currently unavailable. Please try again later.";
+      } else if (error.message) {
+        errorMessage = `Error: ${error.message}`;
+      }
+      
+      alert(errorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -196,8 +288,24 @@ const UpcomingActivities = () => {
       
       formSchema.forEach(field => {
         if (field.required && field.type !== "label" && field.type !== "image" && field.type !== "link") {
-          if (!registrationData[field.id] || registrationData[field.id] === "") {
-            missingFields.push(field.label);
+          const value = registrationData[field.id];
+          
+          // Handle different field types
+          if (field.type === "checkbox") {
+            // For checkboxes, check if array exists and has at least one item
+            if (!value || !Array.isArray(value) || value.length === 0) {
+              missingFields.push(field.label);
+            }
+          } else if (field.type === "file") {
+            // For files, check if file object exists
+            if (!value || !(value instanceof File)) {
+              missingFields.push(field.label);
+            }
+          } else {
+            // For other fields, check if value exists and is not empty string
+            if (!value || value === "") {
+              missingFields.push(field.label);
+            }
           }
         }
       });
@@ -215,14 +323,14 @@ const UpcomingActivities = () => {
           try {
             const file = registrationData[field.id];
             if (file instanceof File) {
-              const fileRef = ref(storage, `registrations/${selectedActivity.id}/${Date.now()}_${file.name}`);
-              await uploadBytes(fileRef, file);
-              const fileUrl = await getDownloadURL(fileRef);
+              // Upload to Cloudinary in form_register folder with activity title
+              const uploadResult = await uploadFormFile(file, selectedActivity.title);
               processedData[field.id] = {
                 fileName: file.name,
-                fileUrl: fileUrl,
+                fileUrl: uploadResult.url,
                 fileSize: file.size,
-                fileType: file.type
+                fileType: file.type,
+                cloudinaryPublicId: uploadResult.publicId
               };
             }
           } catch (error) {
@@ -953,10 +1061,29 @@ const UpcomingActivities = () => {
                   </p>
                 </div>
                 
+                {/* Debug info */}
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-xl text-sm">
+                  <p><strong>Debug Info:</strong></p>
+                  <p>FormSchema length: {formData.formSchema?.length || 0}</p>
+                  <p>FormSchema type: {typeof formData.formSchema}</p>
+                  <p>FormSchema is array: {Array.isArray(formData.formSchema) ? 'Yes' : 'No'}</p>
+                  <p>FormSchema content: {JSON.stringify(formData.formSchema, null, 2)}</p>
+                </div>
+                
                 <div onClick={(e) => e.stopPropagation()}>
                   <FormBuilder
                     formSchema={formData.formSchema || getDefaultFormSchema()}
-                    onChange={(schema) => setFormData({...formData, formSchema: schema})}
+                    onChange={(schema) => {
+                      console.log("FormBuilder onChange called with schema:", schema);
+                      console.log("Current formData before update:", formData);
+                      if (schema && Array.isArray(schema)) {
+                        const updatedFormData = {...formData, formSchema: schema};
+                        console.log("Updated formData:", updatedFormData);
+                        setFormData(updatedFormData);
+                      } else {
+                        console.warn("FormBuilder onChange received invalid schema:", schema);
+                      }
+                    }}
                   />
                 </div>
               </div>
@@ -1028,6 +1155,36 @@ const UpcomingActivities = () => {
                 onClick={() => setShowModal(false)}
               >
                 Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  console.log("Manual test - Current formData:", formData);
+                  console.log("Manual test - FormSchema:", formData.formSchema);
+                  console.log("Manual test - User:", user);
+                  
+                  // Test with minimal data
+                  const testData = {
+                    title: "Test Activity",
+                    description: "Test Description",
+                    registrationStart: "2025-08-10T10:00",
+                    registrationEnd: "2025-08-15T10:00",
+                    eventDate: "2025-08-20T10:00",
+                    maxParticipants: "10",
+                    isPaid: false,
+                    fee: "",
+                    formSchema: getDefaultFormSchema(),
+                    paymentDetails: {
+                      paymentUrl: "",
+                      instructions: ""
+                    }
+                  };
+                  console.log("Test data:", testData);
+                  setFormData(testData);
+                }}
+              >
+                Debug Form
               </Button>
             </div>
           </form>
