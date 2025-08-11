@@ -49,6 +49,23 @@ cloudinary.config({
     return folderName;
   };
 
+// Helper to map UI folder id to Cloudinary folder name
+const mapUIFolderToCloudinary = (uiFolder) => {
+  switch (uiFolder) {
+    case 'commitymembers':
+      return 'committee_members';
+    case 'events':
+      return 'events';
+    case 'formregister':
+      return 'form_register';
+    case 'profiles':
+      return 'user_profiles';
+    case 'general':
+    default:
+      return 'general';
+  }
+};
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -142,6 +159,58 @@ app.delete("/api/cloudinary/delete", async (req, res) => {
   } catch (error) {
     console.error('Error deleting image:', error);
     res.status(500).json({ error: 'Failed to delete image' });
+  }
+});
+
+// Update (rename/move) a Cloudinary resource
+app.patch("/api/cloudinary/update", async (req, res) => {
+  try {
+    const { publicId, name, folder } = req.body || {};
+
+    if (!publicId) {
+      return res.status(400).json({ error: 'Public ID is required' });
+    }
+
+    const publicIdParts = publicId.split('/');
+    const currentName = publicIdParts[publicIdParts.length - 1];
+
+    // Determine target folder path in Cloudinary (keep existing if none provided)
+    let targetCloudinaryFolder = '';
+    if (folder) {
+      const cloudFolder = mapUIFolderToCloudinary(folder);
+      targetCloudinaryFolder = `hitam_ai/${cloudFolder}`;
+    } else {
+      // Try to preserve existing folder path
+      if (publicIdParts.length > 1) {
+        targetCloudinaryFolder = publicIdParts.slice(0, -1).join('/');
+      } else {
+        targetCloudinaryFolder = 'hitam_ai/general';
+      }
+    }
+
+    // Determine target name (keep existing if none provided)
+    const targetName = name && typeof name === 'string' && name.trim() !== '' ? name.trim() : currentName;
+
+    const newPublicId = `${targetCloudinaryFolder}/${targetName}`;
+
+    const result = await cloudinary.uploader.rename(publicId, newPublicId, { overwrite: true });
+
+    return res.json({
+      id: result.public_id,
+      url: result.secure_url,
+      publicId: result.public_id,
+      name: result.public_id.split('/').pop(),
+      folder: mapFolderToUI(result.public_id),
+      size: result.bytes,
+      width: result.width,
+      height: result.height,
+      format: result.format,
+      createdAt: result.created_at,
+      originalFolder: result.public_id.split('/')[1] || 'general',
+    });
+  } catch (error) {
+    console.error('Error updating image:', error);
+    return res.status(500).json({ error: 'Failed to update image' });
   }
 });
 

@@ -6,7 +6,7 @@ import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import Input from '../../components/ui/Input';
 import CloudinaryUpload from '../../components/ui/CloudinaryUpload';
-import { uploadToCloudinary, getAllCloudinaryImages, getFilesFromFolder, deleteFromCloudinary } from "../../utils/cloudinary";
+import { uploadToCloudinary, getAllCloudinaryImages, getFilesFromFolder, deleteFromCloudinary, updateCloudinaryResource } from "../../utils/cloudinary";
 
 const MediaManagement= () => {
   const [images, setImages] = useState([]);
@@ -133,20 +133,29 @@ const MediaManagement= () => {
     setShowEditModal(true);
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!editingImage) return;
 
-    setImages(prev => 
-      prev.map(img => 
-        img.id === editingImage.id 
-          ? { ...img, name: editingImage.name, folder: editingImage.folder }
-          : img
-      )
-    );
+    try {
+      // Call backend to rename/move resource
+      await updateCloudinaryResource({
+        publicId: editingImage.publicId,
+        name: editingImage.name,
+        folder: editingImage.folder,
+      });
 
-    setShowEditModal(false);
-    setEditingImage(null);
-    alert('Image updated successfully!');
+      // Refresh state from source of truth
+      const allImagesData = await getAllCloudinaryImages();
+      setAllImages(allImagesData);
+      await loadImages();
+
+      setShowEditModal(false);
+      setEditingImage(null);
+      alert('Image updated successfully!');
+    } catch (error) {
+      console.error('Failed to update image:', error);
+      alert('Failed to update image. Please try again.');
+    }
   };
 
   const filteredImages = images.filter(image => {
