@@ -41,12 +41,17 @@ export const uploadToCloudinary = async (file, folder = 'hitam_ai') => {
 
     const data = await response.json();
     return {
+      id: data.public_id,
       url: data.secure_url,
       publicId: data.public_id,
-      folder: data.folder,
-      originalName: file.name,
+      name: data.public_id.split('/').pop(),
+      folder: data.folder?.split('/').pop() || 'general',
+      originalFolder: data.folder || 'hitam_ai/general',
       size: file.size,
+      width: data.width,
+      height: data.height,
       format: data.format,
+      createdAt: new Date().toISOString(),
       uploadedAt: new Date().toISOString()
     };
   } catch (error) {
@@ -90,6 +95,26 @@ export const getFilesFromFolder = async (folder = 'hitam_ai') => {
   } catch (error) {
     console.error('Cloudinary fetch error:', error);
     throw new Error('Failed to fetch files from Cloudinary');
+  }
+};
+
+// Update name/folder of a file
+export const updateCloudinaryResource = async ({ publicId, name, folder }) => {
+  try {
+    const response = await fetch(`/api/cloudinary/update`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ publicId, name, folder })
+    });
+
+    if (!response.ok) {
+      throw new Error('Update failed');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Cloudinary update error:', error);
+    throw new Error('Failed to update file on Cloudinary');
   }
 };
 
