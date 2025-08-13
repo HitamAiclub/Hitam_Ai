@@ -36,6 +36,7 @@ function App() {
                 <Route path="/" element={<HomePage />} />
                 <Route path="/events" element={<EventsPage />} />
                 <Route path="/upcoming" element={<UpcomingActivities />} />
+                <Route path="/upcoming-test" element={<div className="min-h-screen pt-16 flex items-center justify-center"><h1 className="text-4xl">Upcoming Test Page Works!</h1></div>} />
                 <Route path="/join" element={<JoinClub />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route

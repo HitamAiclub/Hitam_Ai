@@ -134,3 +134,8 @@ export const uploadGeneralImage = async (file) => {
 export const uploadFormBuilderImage = async (file) => {
   return await uploadToSubfolder(file, 'form_builder');
 };
+export const uploadFormFiles = async (files, formTitle) => {
+  const folder = `hitam_ai/form_register/${formTitle}`;
+  const uploadPromises = files.map(file => uploadToCloudinary(file, folder));
+  return await Promise.all(uploadPromises,'form_builder');
+};

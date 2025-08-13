@@ -5,11 +5,13 @@ import { db } from "../firebase";
 import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
 import { Calendar, Users, Trophy, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const HomePage = () => {
   const [committeeMembers, setCommitteeMembers] = useState([]);
   const [featuredEvent, setFeaturedEvent] = useState(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchData();
@@ -81,22 +83,36 @@ const HomePage = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="flex flex-col sm:flex-row gap-4 justify-center relative z-10"
           >
-            <a href="/events" className="btn-secondary flex items-center">
-            <Button size="lg" className="group">
+            {/* Solid blue button with arrow */}
+            <Button
+              size="lg"
+              className="bg-blue-700 hover:bg-blue-800 text-white font-semibold shadow-lg flex items-center px-8 py-4 rounded-xl transition"
+              onClick={() => navigate("/events")}
+            >
               Explore Events
-              <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="ml-3 w-5 h-5" />
             </Button>
-            </a>
-            <a href="/join-club" className="btn-secondary flex items-center">
-              <Button variant="outline" size="lg">
-                Join Our Community
-              </Button>
-            </a>
-            <a href="/upcoming" className="btn-tertiary flex items-center">
-              <Button variant="outline" size="lg">
-                View Upcoming Activities
-              </Button>
-            </a>
+
+            {/* Outlined purple button with users icon */}
+            <Button
+              variant="outline"
+              size="lg"
+              className="border-2 border-purple-600 text-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900 font-semibold flex items-center px-8 py-4 rounded-xl transition"
+              onClick={() => navigate("/community")}
+            >
+              <Users className="mr-3 w-5 h-5" />
+              Join Our Community
+            </Button>
+
+            {/* Soft glassmorphism button with calendar icon */}
+            <Button
+              size="lg"
+              className="bg-gradient-to-r from-purple-500 to-blue-400 text-white font-semibold shadow-md flex items-center px-8 py-4 rounded-xl transition hover:from-purple-600 hover:to-blue-500 hover:shadow-lg"
+              onClick={() => navigate("/upcoming")}
+            >
+              <Calendar className="mr-3 w-6 h-6" />
+              View Upcoming Activities
+            </Button>
           </motion.div>
         </div>
       </section>

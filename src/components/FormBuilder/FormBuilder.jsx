@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Trash2, GripVertical, Eye, Settings, Link, Image as ImageIcon, Type, Copy, ArrowUp, ArrowDown } from "lucide-react";
+import { Plus, Trash2, GripVertical, Eye, Settings, Link, Image as ImageIcon, Type, Copy, ArrowUp, ArrowDown, ArrowRight, Download, Play, CheckCircle, Info } from "lucide-react";
+import { uploadFormBuilderImage,uploadFormFiles} from "../../utils/cloudinary";
+
 import Button from "../ui/Button";
 import Input from "../ui/Input";
 import Modal from "../ui/Modal";
@@ -13,8 +15,14 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
   const [previewMode, setPreviewMode] = useState(false);
   const [draggedField, setDraggedField] = useState(null);
 
+  // Debug logging
+  console.log("FormBuilder rendered with schema:", formSchema);
+  console.log("FormBuilder fields state:", fields);
+  console.log("Content Elements count:", formSchema?.filter(f => ["label", "image", "link"].includes(f.type)).length || 0);
+
   // Update fields when formSchema prop changes
   useEffect(() => {
+    console.log("FormBuilder useEffect - formSchema changed:", formSchema);
     setFields(formSchema);
   }, [formSchema]);
 
@@ -52,14 +60,30 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
       acceptedFileTypes: type === "file" ? "*" : undefined,
       // Content field properties
       content: type === "label" ? "Add your description here. You can use [links](https://example.com) in your text." : "",
+      contentType: type === "label" ? "markdown" : "text",
       imageUrl: type === "image" ? "https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=400" : undefined,
       altText: type === "image" ? "Sample image" : undefined,
       linkUrl: type === "link" ? "https://example.com" : undefined,
       linkText: type === "link" ? "Click here" : undefined,
       openInNewTab: type === "link" ? true : undefined,
       buttonStyle: type === "link" ? "primary" : undefined,
+      buttonSize: type === "link" ? "md" : undefined,
+      buttonWidth: type === "link" ? "auto" : undefined,
+      showIcon: type === "link" ? false : undefined,
+      iconType: type === "link" ? "arrow" : undefined,
+      iconPosition: type === "link" ? "right" : undefined,
       fontSize: type === "label" ? "medium" : undefined,
-      alignment: (type === "label" || type === "image") ? "left" : undefined
+      alignment: (type === "label" || type === "image" || type === "link") ? "left" : undefined,
+      textColor: type === "label" ? "default" : undefined,
+      fontWeight: type === "label" ? "normal" : undefined,
+      italic: type === "label" ? false : undefined,
+      underline: type === "label" ? false : undefined,
+      imageSize: type === "image" ? "auto" : undefined,
+      borderStyle: type === "image" ? "rounded" : undefined,
+      shadow: type === "image" ? "none" : undefined,
+      clickable: type === "image" ? false : undefined,
+      clickUrl: type === "image" ? "" : undefined,
+      useFileUpload: type === "image" ? false : undefined
     };
     
     const updatedFields = [...fields, newField];
@@ -143,9 +167,9 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
           return (
             <div className={`${getAlignmentClass(field.alignment)} mb-4`}>
               <div 
-                className={`${getFontSizeClass(field.fontSize)} text-gray-900 dark:text-white`}
+                className={`${getFontSizeClass(field.fontSize)} ${getTextColorClass(field.textColor)} ${field.fontWeight === "bold" ? "font-bold" : field.fontWeight === "semibold" ? "font-semibold" : field.fontWeight === "medium" ? "font-medium" : ""} ${field.italic ? "italic" : ""} ${field.underline ? "underline" : ""}`}
                 dangerouslySetInnerHTML={{ 
-                  __html: renderMarkdownLinks(field.content || "Add your description here...") 
+                  __html: field.contentType === "markdown" ? renderMarkdownLinks(field.content || "Add your description here...") : field.content || "Add your description here..." 
                 }}
               />
             </div>
@@ -158,7 +182,7 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
                 <img 
                   src={field.imageUrl} 
                   alt={field.altText || "Form image"} 
-                  className="max-w-full h-32 object-cover rounded-lg border border-gray-300 dark:border-gray-600"
+                  className={`${getImageSizeClass(field.imageSize)} ${getBorderStyleClass(field.borderStyle)} ${getShadowClass(field.shadow)} border border-gray-300 dark:border-gray-600`}
                   onError={(e) => {
                     e.target.src = "https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=400";
                   }}
@@ -172,17 +196,16 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
           );
 
         case "link":
-          const buttonClasses = {
-            primary: "bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 rounded-lg inline-block",
-            secondary: "bg-gray-500 text-white hover:bg-gray-600 px-4 py-2 rounded-lg inline-block",
-            outline: "border border-blue-500 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-4 py-2 rounded-lg inline-block",
-            link: "text-blue-600 dark:text-blue-400 hover:underline inline-block"
-          };
-
           return (
-            <div className="mb-4">
-              <span className={`transition-colors cursor-pointer ${buttonClasses[field.buttonStyle || "primary"]}`}>
+            <div className={`${getAlignmentClass(field.alignment)} mb-4`}>
+              <span className={`transition-colors cursor-pointer ${getButtonStyleClass(field.buttonStyle)} ${getButtonSizeClass(field.buttonSize)} ${getButtonWidthClass(field.buttonWidth)} ${field.showIcon ? "inline-flex items-center gap-2" : ""}`}>
+                {field.showIcon && field.iconPosition === "left" && (
+                  <span className="text-sm">{getIcon(field.iconType)}</span>
+                )}
                 {field.linkText || "Click here"}
+                {field.showIcon && field.iconPosition === "right" && (
+                  <span className="text-sm">{getIcon(field.iconType)}</span>
+                )}
               </span>
             </div>
           );
@@ -412,14 +435,19 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
     const [formData, setFormData] = useState({});
 
     const renderField = (field) => {
+      // Debug logging for content fields
+      if (["label", "image", "link"].includes(field.type)) {
+        console.log(`Rendering ${field.type} field:`, field);
+      }
+
       // Handle content fields
       if (field.type === "label") {
         return (
           <div key={field.id} className={`${getAlignmentClass(field.alignment)} mb-6`}>
             <div 
-              className={`${getFontSizeClass(field.fontSize)} text-gray-900 dark:text-white`}
+              className={`${getFontSizeClass(field.fontSize)} ${getTextColorClass(field.textColor)} ${field.fontWeight === "bold" ? "font-bold" : field.fontWeight === "semibold" ? "font-semibold" : field.fontWeight === "medium" ? "font-medium" : ""} ${field.italic ? "italic" : ""} ${field.underline ? "underline" : ""}`}
               dangerouslySetInnerHTML={{ 
-                __html: renderMarkdownLinks(field.content || "") 
+                __html: field.contentType === "markdown" ? renderMarkdownLinks(field.content || "") : field.content || "" 
               }}
             />
           </div>
@@ -430,36 +458,48 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
         return (
           <div key={field.id} className={`${getAlignmentClass(field.alignment)} mb-6`}>
             {field.imageUrl && (
-              <img 
-                src={field.imageUrl} 
-                alt={field.altText || "Form image"} 
-                className="max-w-full h-auto rounded-lg border border-gray-300 dark:border-gray-600"
-                onError={(e) => {
-                  e.target.src = "https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=400";
-                }}
-              />
+              <div className="relative">
+                <img 
+                  src={field.imageUrl} 
+                  alt={field.altText || "Form image"} 
+                  className={`${getImageSizeClass(field.imageSize)} ${getBorderStyleClass(field.borderStyle)} ${getShadowClass(field.shadow)} border border-gray-300 dark:border-gray-600 ${field.clickable ? "cursor-pointer hover:opacity-80 transition-opacity" : ""}`}
+                  onError={(e) => {
+                    e.target.src = "https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=400";
+                  }}
+                  onClick={() => {
+                    if (field.clickable) {
+                      const url = field.clickUrl || field.imageUrl;
+                      if (url) window.open(url, '_blank');
+                    }
+                  }}
+                />
+                {field.clickable && (
+                  <div className="absolute top-2 right-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+                    🔗
+                  </div>
+                )}
+              </div>
             )}
           </div>
         );
       }
 
       if (field.type === "link") {
-        const buttonClasses = {
-          primary: "bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 rounded-lg",
-          secondary: "bg-gray-500 text-white hover:bg-gray-600 px-4 py-2 rounded-lg",
-          outline: "border border-blue-500 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-4 py-2 rounded-lg",
-          link: "text-blue-600 dark:text-blue-400 hover:underline"
-        };
-
         return (
-          <div key={field.id} className="mb-6">
+          <div key={field.id} className={`${getAlignmentClass(field.alignment)} mb-6`}>
             <a
               href={field.linkUrl || "#"}
               target={field.openInNewTab ? "_blank" : "_self"}
               rel={field.openInNewTab ? "noopener noreferrer" : ""}
-              className={`inline-block transition-colors ${buttonClasses[field.buttonStyle || "primary"]}`}
+              className={`inline-block transition-colors ${getButtonStyleClass(field.buttonStyle)} ${getButtonSizeClass(field.buttonSize)} ${getButtonWidthClass(field.buttonWidth)} ${field.showIcon ? "inline-flex items-center gap-2" : ""}`}
             >
+              {field.showIcon && field.iconPosition === "left" && (
+                <span className="text-sm">{getIcon(field.iconType)}</span>
+              )}
               {field.linkText || "Click here"}
+              {field.showIcon && field.iconPosition === "right" && (
+                <span className="text-sm">{getIcon(field.iconType)}</span>
+              )}
             </a>
           </div>
         );
@@ -663,9 +703,13 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
 
   const getFontSizeClass = (size) => {
     switch (size) {
-      case "small": return "text-sm";
-      case "large": return "text-lg";
+      case "xs": return "text-xs";
+      case "sm": return "text-sm";
+      case "medium": return "text-base";
+      case "lg": return "text-lg";
       case "xl": return "text-xl";
+      case "2xl": return "text-2xl";
+      case "3xl": return "text-3xl";
       default: return "text-base";
     }
   };
@@ -675,6 +719,95 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
       case "center": return "text-center";
       case "right": return "text-right";
       default: return "text-left";
+    }
+  };
+
+  const getTextColorClass = (color) => {
+    switch (color) {
+      case "primary": return "text-blue-600 dark:text-blue-400";
+      case "secondary": return "text-gray-700 dark:text-gray-300";
+      case "success": return "text-green-600 dark:text-green-400";
+      case "warning": return "text-yellow-600 dark:text-yellow-400";
+      case "danger": return "text-red-600 dark:text-red-400";
+      case "muted": return "text-gray-500 dark:text-gray-400";
+      default: return "text-gray-900 dark:text-white";
+    }
+  };
+
+  const getImageSizeClass = (size) => {
+    switch (size) {
+      case "auto": return "max-w-full h-auto";
+      case "small": return "max-w-sm h-auto";
+      case "medium": return "max-w-md h-auto";
+      case "large": return "max-w-lg h-auto";
+      case "full": return "max-w-full h-auto";
+      default: return "max-w-full h-auto";
+    }
+  };
+
+  const getBorderStyleClass = (style) => {
+    switch (style) {
+      case "rounded": return "rounded-md";
+      case "rounded-lg": return "rounded-lg";
+      case "rounded-full": return "rounded-full";
+      case "square": return "rounded-none";
+      default: return "rounded-md";
+    }
+  };
+
+  const getShadowClass = (shadow) => {
+    switch (shadow) {
+      case "sm": return "shadow-sm";
+      case "md": return "shadow-md";
+      case "lg": return "shadow-lg";
+      case "xl": return "shadow-xl";
+      default: return "shadow-none";
+    }
+  };
+
+  const getButtonStyleClass = (style) => {
+    switch (style) {
+      case "primary": return "bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 rounded-lg inline-block";
+      case "secondary": return "bg-gray-500 text-white hover:bg-gray-600 px-4 py-2 rounded-lg inline-block";
+      case "outline": return "border border-blue-500 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-4 py-2 rounded-lg inline-block";
+      case "link": return "text-blue-600 dark:text-blue-400 hover:underline inline-block";
+      case "ghost": return "bg-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 px-4 py-2 rounded-lg inline-block";
+      case "danger": return "bg-red-500 text-white hover:bg-red-600 px-4 py-2 rounded-lg inline-block";
+      case "success": return "bg-green-500 text-white hover:bg-green-600 px-4 py-2 rounded-lg inline-block";
+      default: return "bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 rounded-lg inline-block";
+    }
+  };
+
+  const getButtonSizeClass = (size) => {
+    switch (size) {
+      case "xs": return "text-xs px-2 py-1";
+      case "sm": return "text-sm px-3 py-1";
+      case "md": return "text-base px-4 py-2";
+      case "lg": return "text-lg px-5 py-2";
+      case "xl": return "text-xl px-6 py-3";
+      default: return "text-base px-4 py-2";
+    }
+  };
+
+  const getButtonWidthClass = (width) => {
+    switch (width) {
+      case "auto": return "";
+      case "full": return "w-full";
+      case "fit": return "w-fit";
+      default: return "";
+    }
+  };
+
+  const getIcon = (type) => {
+    switch (type) {
+      case "arrow": return <ArrowRight className="w-4 h-4" />;
+      case "external": return <Link className="w-4 h-4" />;
+      case "download": return <Download className="w-4 h-4" />;
+      case "play": return <Play className="w-4 h-4" />;
+      case "plus": return <Plus className="w-4 h-4" />;
+      case "check": return <CheckCircle className="w-4 h-4" />;
+      case "info": return <Info className="w-4 h-4" />;
+      default: return <ArrowRight className="w-4 h-4" />;
     }
   };
 
@@ -868,35 +1001,56 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
             {editingFieldDraft.type === "label" && (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Content/Description
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Content Type
+                  </label>
+                  <select
+                    value={editingFieldDraft.contentType || "text"}
+                    onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, contentType: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="text">Plain Text</option>
+                    <option value="markdown">Markdown (with links)</option>
+                    <option value="html">HTML</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Content Text
                   </label>
                   <textarea
                     value={editingFieldDraft.content || ""}
                     onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, content: e.target.value })}
-                    placeholder="Enter description, instructions, or any text content..."
+                    placeholder="Enter your content here. For markdown, you can use [link text](https://example.com)"
                     rows={4}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
-                  <p className="text-xs text-gray-500 mt-1">
-                    You can include links using markdown: [Link Text](https://example.com)
-                  </p>
+                  {editingFieldDraft.contentType === "markdown" && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      💡 Use [link text](https://example.com) to create clickable links
+                    </p>
+                  )}
                 </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Font Size
                     </label>
-                    <select
-                      value={editingFieldDraft.fontSize || "medium"}
-                      onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, fontSize: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="small">Small</option>
-                      <option value="medium">Medium</option>
-                      <option value="large">Large</option>
-                      <option value="xl">Extra Large</option>
-                    </select>
+                      <select
+                        value={editingFieldDraft.fontSize || "medium"}
+                        onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, fontSize: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="xs">Extra Small</option>
+                        <option value="sm">Small</option>
+                        <option value="medium">Medium</option>
+                        <option value="lg">Large</option>
+                        <option value="xl">Extra Large</option>
+                        <option value="2xl">2XL</option>
+                        <option value="3xl">3XL</option>
+                      </select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -913,6 +1067,79 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
                     </select>
                   </div>
                 </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Text Color
+                    </label>
+                    <select
+                      value={editingFieldDraft.textColor || "default"}
+                      onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, textColor: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="default">Default</option>
+                      <option value="primary">Primary (Blue)</option>
+                      <option value="secondary">Secondary (Gray)</option>
+                      <option value="success">Success (Green)</option>
+                      <option value="warning">Warning (Yellow)</option>
+                      <option value="danger">Danger (Red)</option>
+                      <option value="muted">Muted</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Font Weight
+                    </label>
+                    <select
+                      value={editingFieldDraft.fontWeight || "normal"}
+                      onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, fontWeight: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="normal">Normal</option>
+                      <option value="medium">Medium</option>
+                      <option value="semibold">Semi Bold</option>
+                      <option value="bold">Bold</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id={`italic-${editingFieldDraft.id}`}
+                    checked={editingFieldDraft.italic || false}
+                    onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, italic: e.target.checked })}
+                    className="rounded border-gray-300 dark:border-gray-600"
+                  />
+                  <label htmlFor={`italic-${editingFieldDraft.id}`} className="text-sm text-gray-700 dark:text-gray-300">
+                    Italic text
+                  </label>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id={`underline-${editingFieldDraft.id}`}
+                    checked={editingFieldDraft.underline || false}
+                    onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, underline: e.target.checked })}
+                    className="rounded border-gray-300 dark:border-gray-600"
+                  />
+                  <label htmlFor={`underline-${editingFieldDraft.id}`} className="text-sm text-gray-700 dark:text-gray-300">
+                    Underlined text
+                  </label>
+                </div>
+
+                {/* Preview */}
+                <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Preview:</p>
+                  <div 
+                    className={`${getFontSizeClass(editingFieldDraft.fontSize || "medium")} ${getAlignmentClass(editingFieldDraft.alignment || "left")} ${getTextColorClass(editingFieldDraft.textColor || "default")} ${editingFieldDraft.fontWeight === "bold" ? "font-bold" : editingFieldDraft.fontWeight === "semibold" ? "font-semibold" : editingFieldDraft.fontWeight === "medium" ? "font-medium" : ""} ${editingFieldDraft.italic ? "italic" : ""} ${editingFieldDraft.underline ? "underline" : ""}`}
+                    dangerouslySetInnerHTML={{ 
+                      __html: editingFieldDraft.contentType === "markdown" ? renderMarkdownLinks(editingFieldDraft.content || "") : editingFieldDraft.content || "Preview text will appear here" 
+                    }}
+                  />
+                </div>
               </div>
             )}
 
@@ -926,14 +1153,14 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
                     <div className="flex items-center space-x-2">
                     <input
                       type="radio"
-                      id="imageUrl"
-                      name="imageSource"
+                      id={`imageUrl-${editingFieldDraft.id}`}
+                      name={`imageSource-${editingFieldDraft.id}`}
                       value="url"
                       checked={!editingFieldDraft.useFileUpload}
                       onChange={() => setEditingFieldDraft({ ...editingFieldDraft, useFileUpload: false })}
                       className="text-blue-600"
                     />
-                      <label htmlFor="imageUrl" className="text-sm text-gray-700 dark:text-gray-300">
+                      <label htmlFor={`imageUrl-${editingFieldDraft.id}`} className="text-sm text-gray-700 dark:text-gray-300">
                         Use Image URL/Link
                       </label>
                     </div>
@@ -941,14 +1168,14 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
                     <div className="flex items-center space-x-2">
                     <input
                       type="radio"
-                      id="imageUpload"
-                      name="imageSource"
+                      id={`imageUpload-${editingFieldDraft.id}`}
+                      name={`imageSource-${editingFieldDraft.id}`}
                       value="upload"
                       checked={editingFieldDraft.useFileUpload}
                       onChange={() => setEditingFieldDraft({ ...editingFieldDraft, useFileUpload: true })}
                       className="text-blue-600"
                     />
-                      <label htmlFor="imageUpload" className="text-sm text-gray-700 dark:text-gray-300">
+                      <label htmlFor={`imageUpload-${editingFieldDraft.id}`} className="text-sm text-gray-700 dark:text-gray-300">
                         Upload Image File
                       </label>
                     </div>
@@ -974,15 +1201,22 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
                         const file = e.target.files[0];
                         if (file) {
                           try {
-                            const { ref, uploadBytes, getDownloadURL } = await import("firebase/storage");
-                            const { storage } = await import("../../firebase");
-                            const imageRef = ref(storage, `form-images/${Date.now()}_${file.name}`);
-                            await uploadBytes(imageRef, file);
-                            const imageUrl = await getDownloadURL(imageRef);
-                            setEditingFieldDraft({ ...editingFieldDraft, imageUrl });
+                            console.log("Uploading image file:", file.name, file.size, file.type);
+                            // Use your Cloudinary upload utility
+                            const uploadResult = await uploadFormBuilderImage(file); // This should return the Cloudinary URL
+                            console.log("Upload result:", uploadResult);
+                            
+                            if (uploadResult && uploadResult.url) {
+                              setEditingFieldDraft({ ...editingFieldDraft, imageUrl: uploadResult.url });
+                            } else if (typeof uploadResult === 'string') {
+                              // Handle case where function returns just the URL string
+                              setEditingFieldDraft({ ...editingFieldDraft, imageUrl: uploadResult });
+                            } else {
+                              throw new Error("Invalid upload result format");
+                            }
                           } catch (error) {
                             console.error("Error uploading image:", error);
-                            alert("Failed to upload image. Please try again.");
+                            alert(`Failed to upload image: ${error.message}. Please try again.`);
                           }
                         }
                       }}
@@ -993,37 +1227,123 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
                     </p>
                   </div>
                 )}
+                
                 <Input
-                  label="Alt Text (Optional)"
+                  label="Alt Text (Accessibility)"
                   value={editingFieldDraft.altText || ""}
                   onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, altText: e.target.value })}
-                  placeholder="Description of the image"
+                  placeholder="Description of the image for screen readers"
                 />
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Alignment
-                  </label>
-                  <select
-                    value={editingFieldDraft.alignment || "center"}
-                    onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, alignment: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="left">Left</option>
-                    <option value="center">Center</option>
-                    <option value="right">Right</option>
-                  </select>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Image Size
+                    </label>
+                    <select
+                      value={editingFieldDraft.imageSize || "auto"}
+                      onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, imageSize: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="auto">Auto (Original)</option>
+                      <option value="small">Small (200px)</option>
+                      <option value="medium">Medium (400px)</option>
+                      <option value="large">Large (600px)</option>
+                      <option value="full">Full Width</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Alignment
+                    </label>
+                    <select
+                      value={editingFieldDraft.alignment || "center"}
+                      onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, alignment: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="left">Left</option>
+                      <option value="center">Center</option>
+                      <option value="right">Right</option>
+                    </select>
+                  </div>
                 </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Border Style
+                    </label>
+                    <select
+                      value={editingFieldDraft.borderStyle || "rounded"}
+                      onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, borderStyle: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="none">No Border</option>
+                      <option value="rounded">Rounded</option>
+                      <option value="rounded-lg">Large Rounded</option>
+                      <option value="rounded-full">Circular</option>
+                      <option value="square">Square</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Shadow Effect
+                    </label>
+                    <select
+                      value={editingFieldDraft.shadow || "none"}
+                      onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, shadow: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="none">No Shadow</option>
+                      <option value="sm">Small Shadow</option>
+                      <option value="md">Medium Shadow</option>
+                      <option value="lg">Large Shadow</option>
+                      <option value="xl">Extra Large Shadow</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id={`clickable-${editingFieldDraft.id}`}
+                    checked={editingFieldDraft.clickable || false}
+                    onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, clickable: e.target.checked })}
+                    className="rounded border-gray-300 dark:border-gray-600"
+                  />
+                  <label htmlFor={`clickable-${editingFieldDraft.id}`} className="text-sm text-gray-700 dark:text-gray-300">
+                    Make image clickable (opens in new tab)
+                  </label>
+                </div>
+
+                {editingFieldDraft.clickable && (
+                  <Input
+                    label="Click URL (Optional)"
+                    value={editingFieldDraft.clickUrl || ""}
+                    onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, clickUrl: e.target.value })}
+                    placeholder="https://example.com (leave empty to use image URL)"
+                  />
+                )}
+
                 {editingFieldDraft.imageUrl && (
                   <div className="mt-4">
                     <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Preview:</p>
-                    <img 
-                      src={editingFieldDraft.imageUrl} 
-                      alt={editingFieldDraft.altText || "Preview"} 
-                      className="max-w-full h-32 object-cover rounded-lg border border-gray-300 dark:border-gray-600"
-                      onError={(e) => {
-                        e.target.src = "https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=400";
-                      }}
-                    />
+                    <div className={`${getAlignmentClass(editingFieldDraft.alignment || "center")}`}>
+                      <img 
+                        src={editingFieldDraft.imageUrl} 
+                        alt={editingFieldDraft.altText || "Preview"} 
+                        className={`${getImageSizeClass(editingFieldDraft.imageSize || "auto")} ${getBorderStyleClass(editingFieldDraft.borderStyle || "rounded")} ${getShadowClass(editingFieldDraft.shadow || "none")} border border-gray-300 dark:border-gray-600 ${editingFieldDraft.clickable ? "cursor-pointer hover:opacity-80 transition-opacity" : ""}`}
+                        onError={(e) => {
+                          e.target.src = "https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=400";
+                        }}
+                        onClick={() => {
+                          if (editingFieldDraft.clickable) {
+                            const url = editingFieldDraft.clickUrl || editingFieldDraft.imageUrl;
+                            if (url) window.open(url, '_blank');
+                          }
+                        }}
+                      />
+                    </div>
                   </div>
                 )}
               </div>
@@ -1031,18 +1351,89 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
 
             {editingFieldDraft.type === "link" && (
               <div className="space-y-4">
-                <Input
-                  label="Link URL"
-                  value={editingFieldDraft.linkUrl || ""}
-                  onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, linkUrl: e.target.value })}
-                  placeholder="https://example.com"
-                />
-                <Input
-                  label="Link Text"
-                  value={editingFieldDraft.linkText || ""}
-                  onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, linkText: e.target.value })}
-                  placeholder="Click here"
-                />
+                <div className="grid grid-cols-2 gap-4">
+                  <Input
+                    label="Link URL"
+                    value={editingFieldDraft.linkUrl || ""}
+                    onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, linkUrl: e.target.value })}
+                    placeholder="https://example.com"
+                  />
+                  <Input
+                    label="Link Text"
+                    value={editingFieldDraft.linkText || ""}
+                    onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, linkText: e.target.value })}
+                    placeholder="Click here"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Button Style
+                    </label>
+                    <select
+                      value={editingFieldDraft.buttonStyle || "primary"}
+                      onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, buttonStyle: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="primary">Primary Button</option>
+                      <option value="secondary">Secondary Button</option>
+                      <option value="outline">Outline Button</option>
+                      <option value="link">Text Link</option>
+                      <option value="ghost">Ghost Button</option>
+                      <option value="danger">Danger Button</option>
+                      <option value="success">Success Button</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Button Size
+                    </label>
+                    <select
+                      value={editingFieldDraft.buttonSize || "md"}
+                      onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, buttonSize: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="xs">Extra Small</option>
+                      <option value="sm">Small</option>
+                      <option value="md">Medium</option>
+                      <option value="lg">Large</option>
+                      <option value="xl">Extra Large</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Alignment
+                    </label>
+                    <select
+                      value={editingFieldDraft.alignment || "left"}
+                      onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, alignment: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="left">Left</option>
+                      <option value="center">Center</option>
+                      <option value="right">Right</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Width
+                    </label>
+                    <select
+                      value={editingFieldDraft.buttonWidth || "auto"}
+                      onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, buttonWidth: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="auto">Auto Width</option>
+                      <option value="full">Full Width</option>
+                      <option value="fit">Fit Content</option>
+                    </select>
+                  </div>
+                </div>
+
                 <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"
@@ -1055,20 +1446,82 @@ const FormBuilder = ({ formSchema = [], onChange }) => {
                     Open in new tab
                   </label>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Button Style
+
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id={`icon-${editingFieldDraft.id}`}
+                    checked={editingFieldDraft.showIcon || false}
+                    onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, showIcon: e.target.checked })}
+                    className="rounded border-gray-300 dark:border-gray-600"
+                  />
+                  <label htmlFor={`icon-${editingFieldDraft.id}`} className="text-sm text-gray-700 dark:text-gray-300">
+                    Show icon
                   </label>
-                  <select
-                    value={editingFieldDraft.buttonStyle || "primary"}
-                    onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, buttonStyle: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="primary">Primary Button</option>
-                    <option value="secondary">Secondary Button</option>
-                    <option value="outline">Outline Button</option>
-                    <option value="link">Text Link</option>
-                  </select>
+                </div>
+
+                {editingFieldDraft.showIcon && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Icon Type
+                      </label>
+                      <select
+                        value={editingFieldDraft.iconType || "arrow"}
+                        onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, iconType: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="arrow">Arrow Right</option>
+                        <option value="external">External Link</option>
+                        <option value="download">Download</option>
+                        <option value="play">Play</option>
+                        <option value="plus">Plus</option>
+                        <option value="check">Check</option>
+                        <option value="info">Info</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Icon Position
+                      </label>
+                      <select
+                        value={editingFieldDraft.iconPosition || "right"}
+                        onChange={(e) => setEditingFieldDraft({ ...editingFieldDraft, iconPosition: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="left">Left</option>
+                        <option value="right">Right</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
+
+                {/* Preview */}
+                <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Preview:</p>
+                  <div className={`${getAlignmentClass(editingFieldDraft.alignment || "left")}`}>
+                    <button
+                      className={`${getButtonStyleClass(editingFieldDraft.buttonStyle || "primary")} ${getButtonSizeClass(editingFieldDraft.buttonSize || "md")} ${getButtonWidthClass(editingFieldDraft.buttonWidth || "auto")} ${editingFieldDraft.showIcon ? "inline-flex items-center gap-2" : ""}`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (editingFieldDraft.linkUrl) {
+                          if (editingFieldDraft.openInNewTab) {
+                            window.open(editingFieldDraft.linkUrl, '_blank');
+                          } else {
+                            window.location.href = editingFieldDraft.linkUrl;
+                          }
+                        }
+                      }}
+                    >
+                      {editingFieldDraft.showIcon && editingFieldDraft.iconPosition === "left" && (
+                        <span className="text-sm">{getIcon(editingFieldDraft.iconType || "arrow")}</span>
+                      )}
+                      {editingFieldDraft.linkText || "Preview Button"}
+                      {editingFieldDraft.showIcon && editingFieldDraft.iconPosition === "right" && (
+                        <span className="text-sm">{getIcon(editingFieldDraft.iconType || "arrow")}</span>
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
             )}

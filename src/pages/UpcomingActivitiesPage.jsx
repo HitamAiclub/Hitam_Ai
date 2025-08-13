@@ -1,20 +1,22 @@
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { collection, getDocs, query, where, orderBy, addDoc, Timestamp } from "firebase/firestore";
 import { db } from "../firebase";
 import Modal from "../components/ui/Modal";
 import Input from "../components/ui/Input";
 import { useAuth } from "../contexts/AuthContext";
+import { useEffect, useState } from "react";
 import { FiCalendar, FiUser, FiMapPin, FiPlus, FiExternalLink } from "react-icons/fi";
 import PageHeader from "../components/ui/PageHeader";
 import AnimatedSection from "../components/ui/AnimatedSection";
 import LoadingSpinner from "../components/ui/LoadingSpinner";
 import { formatDate, isFutureDate } from "../utils/dateUtils";
+import { uploadFormBuilderImage, uploadFormFiles } from "../../utils/cloudinary";
+
 
 function UpcomingActivitiesPage() {
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { isAdmin } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [showAddModal, setShowAddModal] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
@@ -35,7 +37,7 @@ function UpcomingActivitiesPage() {
   const [regSaving, setRegSaving] = useState(false);
   const [regForm, setRegForm] = useState({ name: "", email: "", phone: "" });
   const [regError, setRegError] = useState("");
-  
+
   useEffect(() => {
     fetchActivities();
   }, []);
@@ -152,8 +154,39 @@ function UpcomingActivitiesPage() {
               <Input label="Presenter" value={form.presenter} onChange={e => setForm(f => ({ ...f, presenter: e.target.value }))} />
             </div>
             <div className="flex gap-4">
-              <Input label="Location" value={form.location} onChange={e => setForm(f => ({ ...f, location: e.target.value }))} className="flex-1" />
-              <Input label="Image URL" value={form.imageUrl} onChange={e => setForm(f => ({ ...f, imageUrl: e.target.value }))} className="flex-1" />
+              <Input
+                label="Location"
+                value={form.location}
+                onChange={e => setForm(f => ({ ...f, location: e.target.value }))}
+                className="flex-1"
+              />
+              <div className="flex-1">
+                <label className="block text-sm font-medium mb-1">Image</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={async (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      try {
+                        // Upload to Cloudinary
+                        const url = await uploadFormBuilderImage(file);
+                        setForm(f => ({ ...f, imageUrl: url }));
+                      } catch (error) {
+                        alert("Image upload failed. Please try again.");
+                      }
+                    }
+                  }}
+                  className="w-full px-3 py-2 border rounded"
+                />
+                {form.imageUrl && (
+                  <img
+                    src={form.imageUrl}
+                    alt="Preview"
+                    className="mt-2 rounded h-24 object-cover border"
+                  />
+                )}
+              </div>
             </div>
             <div className="flex gap-4">
               <div className="flex-1">
@@ -186,12 +219,19 @@ function UpcomingActivitiesPage() {
             }
             setRegSaving(true);
             try {
+              let fileUrl = "";
+              if (regForm.file) {
+                // Upload to Cloudinary
+                const uploadResult = await uploadFormFiles(regForm.file);
+                fileUrl = uploadResult.url;
+              }
               await addDoc(collection(db, `events/${regActivity.id}/registrations`), {
                 ...regForm,
+                fileUrl, // Save the Cloudinary URL in Firestore
                 submittedAt: new Date().toISOString()
               });
               setShowRegModal(false);
-              setRegForm({ name: "", email: "", phone: "" });
+              setRegForm({ name: "", email: "", phone: "", file: null });
               alert("Registration submitted!");
             } catch (err) {
               setRegError("Failed to submit registration. Please try again.");
@@ -202,6 +242,14 @@ function UpcomingActivitiesPage() {
             <Input label="Name" value={regForm.name} onChange={e => setRegForm(f => ({ ...f, name: e.target.value }))} required />
             <Input label="Email" value={regForm.email} onChange={e => setRegForm(f => ({ ...f, email: e.target.value }))} required />
             <Input label="Phone" value={regForm.phone} onChange={e => setRegForm(f => ({ ...f, phone: e.target.value }))} required />
+            {/* File input for image or document */}
+            <label className="block text-sm font-medium mb-1">Upload File (optional)</label>
+            <input
+              type="file"
+              accept="image/*,application/pdf"
+              onChange={e => setRegForm(f => ({ ...f, file: e.target.files[0] }))}
+              className="w-full px-3 py-2 border rounded"
+            />
             {regError && <div className="text-red-500 text-sm">{regError}</div>}
             <div className="flex justify-end gap-2">
               <button type="button" className="btn-outline" onClick={() => setShowRegModal(false)} disabled={regSaving}>Cancel</button>

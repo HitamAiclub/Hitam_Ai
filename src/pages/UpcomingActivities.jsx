@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase";
-import { uploadFormFile } from "../utils/cloudinary";
+import { uploadFormFile , } from "../utils/cloudinary";
 import { useAuth } from "../contexts/AuthContext";
 import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
@@ -12,9 +12,24 @@ import FormBuilder from "../components/FormBuilder/FormBuilder";
 import { Calendar, Users, Plus, Edit, Trash2, Download, Eye, ExternalLink } from "lucide-react";
 
 const UpcomingActivities = () => {
+  console.log("🚀 UpcomingActivities component is loading...");
+  
+  // Add error handling for useAuth
+  let user = null;
+  try {
+    const authResult = useAuth();
+    user = authResult?.user;
+    console.log("✅ useAuth hook successful, user:", user);
+  } catch (authError) {
+    console.error("❌ useAuth hook failed:", authError);
+    user = null;
+  }
+  
   const [activities, setActivities] = useState([]);
   const [registrations, setRegistrations] = useState({});
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [componentError, setComponentError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [showRegistrationForm, setShowRegistrationForm] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
@@ -40,27 +55,233 @@ const UpcomingActivities = () => {
   const [activeTab, setActiveTab] = useState("basic");
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [optimisticActivities, setOptimisticActivities] = useState([]);
-  const { user } = useAuth();
+
+  // Test Firebase connectivity and permissions
+  const testFirebaseConnection = async () => {
+    try {
+      console.log("Testing Firebase connection...");
+      console.log("User authentication status:", !!user);
+      console.log("User details:", user);
+      
+      // Test basic read access
+      const testRead = await getDocs(collection(db, "upcomingActivities"));
+      console.log("✅ Read access to upcomingActivities: OK");
+      
+      // Test write access to allRegistrations (this is where registrations should be saved)
+      const testWrite = await addDoc(collection(db, "allRegistrations"), {
+        test: true,
+        timestamp: new Date().toISOString(),
+        message: "Testing write permissions"
+      });
+      console.log("✅ Write access to allRegistrations: OK", testWrite.id);
+      
+      // Clean up test document
+      await deleteDoc(doc(db, "allRegistrations", testWrite.id));
+      console.log("✅ Delete access to allRegistrations: OK");
+      
+      return true;
+    } catch (error) {
+      console.error("❌ Firebase connection test failed:", error);
+      console.error("Error code:", error.code);
+      console.error("Error message:", error.message);
+      return false;
+    }
+  };
+
+  // Test function to verify form functionality
+  const testFormFunctionality = async () => {
+    try {
+      console.log("=== TESTING FORM FUNCTIONALITY ===");
+      
+      // Test 1: Check form data structure
+      console.log("1. Testing form data structure...");
+      console.log("Current formData:", formData);
+      console.log("FormSchema:", formData.formSchema);
+      console.log("FormSchema is array:", Array.isArray(formData.formSchema));
+      
+      // Test 2: Check default schema
+      console.log("2. Testing default schema...");
+      const defaultSchema = getDefaultFormSchema();
+      console.log("Default schema:", defaultSchema);
+      console.log("Default schema length:", defaultSchema.length);
+      console.log("Content elements in default:", defaultSchema.filter(f => ["label", "image", "link"].includes(f.type)));
+      
+      // Test 3: Check Firebase connection
+      console.log("3. Testing Firebase connection...");
+      const testResult = await testFirebaseConnection();
+      console.log("Firebase test result:", testResult);
+      
+      // Test 4: Check form validation
+      console.log("4. Testing form validation...");
+      const testFormData = {
+        title: "Test Activity",
+        description: "Test Description",
+        registrationStart: new Date().toISOString(),
+        registrationEnd: new Date(Date.now() + 86400000).toISOString(),
+        eventDate: new Date(Date.now() + 172800000).toISOString(),
+        formSchema: defaultSchema
+      };
+      console.log("Test form data:", testFormData);
+      
+      // Test 5: Check maxParticipants handling
+      console.log("5. Testing maxParticipants handling...");
+      const testMaxParticipants = "50";
+      const parsedMaxParticipants = testMaxParticipants && testMaxParticipants !== "" 
+        ? parseInt(testMaxParticipants, 10) 
+        : undefined;
+      console.log("Original:", testMaxParticipants, "Parsed:", parsedMaxParticipants, "Type:", typeof parsedMaxParticipants);
+      
+      console.log("=== FORM FUNCTIONALITY TEST COMPLETE ===");
+      return true;
+    } catch (error) {
+      console.error("Form functionality test failed:", error);
+      return false;
+    }
+  };
+
+  // Debug information display
+  const DebugInfo = () => {
+    if (!user) return null;
+    
+    const testRegistration = async () => {
+      try {
+        console.log("Testing basic registration...");
+        const testData = {
+          name: "Test User",
+          email: "test@hitam.org",
+          phone: "1234567890",
+          rollNo: "TEST001",
+          year: "1st Year",
+          branch: "Computer Science Engineering",
+          activityId: "test-activity",
+          activityTitle: "Test Activity",
+          submittedAt: new Date().toISOString(),
+          status: "confirmed",
+          test: true
+        };
+        
+        console.log("Test data:", testData);
+        
+        // Try to save to allRegistrations first
+        const result = await addDoc(collection(db, "allRegistrations"), testData);
+        console.log("✅ Test registration saved successfully:", result.id);
+        
+        // Clean up test data
+        await deleteDoc(doc(db, "allRegistrations", result.id));
+        console.log("✅ Test registration cleaned up");
+        
+        alert("✅ Test registration successful! Firebase write permissions are working.");
+      } catch (error) {
+        console.error("❌ Test registration failed:", error);
+        alert(`❌ Test registration failed: ${error.message}\n\nError code: ${error.code}`);
+      }
+    };
+    
+    return (
+      <div className="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+        <h4 className="font-medium text-yellow-900 dark:text-yellow-100 mb-2">
+          🔧 Debug Information
+        </h4>
+        <div className="text-sm text-yellow-700 dark:text-yellow-300 space-y-1">
+          <p><strong>User ID:</strong> {user.uid}</p>
+          <p><strong>User Email:</strong> {user.email}</p>
+          <p><strong>Firebase Project:</strong> {import.meta.env.VITE_FIREBASE_PROJECT_ID || 'Not set'}</p>
+          <p><strong>Cloudinary Cloud:</strong> {import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'Not set'}</p>
+          <p><strong>Activities Count:</strong> {activities.length}</p>
+          <p><strong>Total Registrations:</strong> {Object.values(registrations).flat().length}</p>
+        </div>
+        <div className="flex gap-2 mt-2">
+          <button 
+            onClick={testFirebaseConnection}
+            className="px-3 py-1 bg-yellow-600 text-white text-xs rounded hover:bg-yellow-700"
+          >
+            Test Connection
+          </button>
+          <button 
+            onClick={testRegistration}
+            className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700"
+          >
+            Test Registration
+          </button>
+          <button 
+            onClick={testFormFunctionality}
+            className="px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700"
+          >
+            Test Form
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   useEffect(() => {
+    console.log("🔄 useEffect triggered - starting initialization");
+    const initializeComponent = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        console.log("🔥 Testing Firebase connection...");
+        // Test Firebase connection
+        await testFirebaseConnection();
+        console.log("✅ Firebase connection test completed");
+        
     // Initialize formSchema with default schema
-    console.log("Initializing formData with default schema");
+        try {
+          console.log("📋 Getting default schema...");
+          // Don't call getDefaultFormSchema here - it's not defined yet
+          const defaultSchema = []; // Start with empty array
+          console.log("📋 Default schema initialized as empty array");
+          setFormData(prev => ({
+            ...prev,
+            formSchema: defaultSchema
+          }));
+          console.log("✅ Form schema initialized");
+        } catch (schemaError) {
+          console.error("❌ Error initializing default schema:", schemaError);
+          setError("Failed to initialize form schema");
+        }
+        
+        setLoading(false);
+        console.log("✅ Component initialization completed successfully");
+      } catch (error) {
+        console.error("❌ Component initialization failed:", error);
+        setError("Failed to initialize component");
+        setLoading(false);
+      }
+    };
+    
+    console.log("🚀 Calling initializeComponent...");
+    initializeComponent();
+  }, []);
+
+  // Set default form schema after component is fully mounted
+  useEffect(() => {
+    try {
+      console.log("📋 Setting default form schema after mount...");
     const defaultSchema = getDefaultFormSchema();
-    console.log("Default schema:", defaultSchema);
+      console.log("📋 Default schema set:", defaultSchema.length, "items");
     setFormData(prev => ({
       ...prev,
       formSchema: defaultSchema
     }));
+    } catch (error) {
+      console.error("❌ Error setting default schema:", error);
+    }
   }, []);
 
   useEffect(() => {
+    console.log("🔄 Second useEffect triggered - setting up Firebase listener");
     const unsubscribe = onSnapshot(
       collection(db, "upcomingActivities"), 
       async (snapshot) => {
+        console.log("📊 Firebase snapshot received:", snapshot.docs.length, "documents");
+        try {
         const activitiesData = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         }));
+          console.log("📋 Activities data processed:", activitiesData.length, "activities");
         setActivities(activitiesData);
         setOptimisticActivities(activitiesData);
 
@@ -79,21 +300,69 @@ const UpcomingActivities = () => {
         }
         setRegistrations(registrationsData);
         setLoading(false);
+          console.log("✅ Firebase listener setup completed");
+        } catch (error) {
+          console.error("❌ Error processing activities data:", error);
+          setError("Failed to load activities data");
+          setLoading(false);
+        }
       }, 
       (error) => {
-        console.warn("Activities listener error:", error.message);
+        console.error("❌ Activities listener error:", error);
+        setError("Failed to connect to database");
         setActivities([]);
         setOptimisticActivities([]);
         setLoading(false);
       }
     );
 
-    return () => unsubscribe();
+    return () => {
+      console.log("🧹 Cleaning up Firebase listener");
+      unsubscribe();
+    };
   }, []);
+
+  // Function to fetch registrations for a specific activity
+  const fetchRegistrations = async (activityId) => {
+    try {
+      console.log(`Fetching registrations for activity: ${activityId}`);
+      const registrationsSnapshot = await getDocs(collection(db, "upcomingActivities", activityId, "registrations"));
+      const registrationsData = registrationsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      
+      setRegistrations(prev => ({
+        ...prev,
+        [activityId]: registrationsData
+      }));
+      
+      console.log(`Fetched ${registrationsData.length} registrations for activity ${activityId}`);
+    } catch (error) {
+      console.error(`Error fetching registrations for activity ${activityId}:`, error);
+      // Try to fetch from allRegistrations as fallback
+      try {
+        const allRegsSnapshot = await getDocs(collection(db, "allRegistrations"));
+        const filteredRegs = allRegsSnapshot.docs
+          .map(doc => ({ id: doc.id, ...doc.data() }))
+          .filter(reg => reg.activityId === activityId);
+        
+        setRegistrations(prev => ({
+          ...prev,
+          [activityId]: filteredRegs
+        }));
+        
+        console.log(`Fetched ${filteredRegs.length} registrations from fallback collection for activity ${activityId}`);
+      } catch (fallbackError) {
+        console.error(`Fallback fetch also failed for activity ${activityId}:`, fallbackError);
+      }
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    console.log("=== FORM SUBMISSION DEBUG ===");
     console.log("Starting activity submission...", formData);
     console.log("User authentication status:", !!user);
     console.log("User details:", user);
@@ -189,12 +458,10 @@ const UpcomingActivities = () => {
       // Clean up form data to prevent undefined values in Firestore
       const cleanedFormData = {
         ...formData,
-        maxParticipants: formData.maxParticipants && formData.maxParticipants.trim() !== "" 
+        maxParticipants: formData.maxParticipants && formData.maxParticipants !== "" 
           ? parseInt(formData.maxParticipants, 10) 
-          : null,
-        fee: formData.fee && formData.fee.trim() !== "" 
-          ? parseFloat(formData.fee) 
-          : null
+          : undefined,
+        formSchema: finalFormSchema
       };
       
       console.log("Cleaned form data:", cleanedFormData);
@@ -283,12 +550,25 @@ const UpcomingActivities = () => {
     setSubmitting(true);
 
     try {
+      console.log("=== REGISTRATION SUBMISSION DEBUG ===");
+      console.log("Starting registration submission...");
+      console.log("Selected activity:", selectedActivity);
+      console.log("Registration data:", registrationData);
+      console.log("Registration data keys:", Object.keys(registrationData));
+      console.log("Payment proof type:", typeof registrationData.paymentProof);
+      console.log("Payment proof instanceof File:", registrationData.paymentProof instanceof File);
+      
       const formSchema = selectedActivity?.formSchema || getDefaultFormSchema();
+      console.log("Form schema:", formSchema);
+      console.log("Form schema length:", formSchema?.length);
+      console.log("Content elements:", formSchema?.filter(f => ["label", "image", "link"].includes(f.type)));
+      
       const missingFields = [];
       
       formSchema.forEach(field => {
         if (field.required && field.type !== "label" && field.type !== "image" && field.type !== "link") {
           const value = registrationData[field.id];
+          console.log(`Field ${field.id} (${field.label}):`, value, "Required:", field.required);
           
           // Handle different field types
           if (field.type === "checkbox") {
@@ -311,20 +591,40 @@ const UpcomingActivities = () => {
       });
 
       if (missingFields.length > 0) {
+        console.log("Missing required fields:", missingFields);
         alert(`Please fill in the following required fields: ${missingFields.join(", ")}`);
         setSubmitting(false);
         return;
       }
 
+      // Additional validation for paid events
+      if (selectedActivity?.isPaid) {
+        if (!registrationData.paymentProof || !(registrationData.paymentProof instanceof File)) {
+          alert("Payment proof is required for paid events. Please upload a screenshot or PDF of your payment.");
+          setSubmitting(false);
+          return;
+        }
+        if (!registrationData.upiTransactionId || registrationData.upiTransactionId.trim() === "") {
+          alert("UPI Transaction ID is required for paid events. Please enter your transaction ID.");
+          setSubmitting(false);
+          return;
+        }
+      }
+
+      console.log("All required fields are filled, processing data...");
       const processedData = { ...registrationData };
       
+      // Process file uploads from form schema
       for (const field of formSchema) {
         if (field.type === "file" && registrationData[field.id]) {
           try {
+            console.log(`Processing file upload for field: ${field.id}`);
             const file = registrationData[field.id];
             if (file instanceof File) {
               // Upload to Cloudinary in form_register folder with activity title
+              console.log("Uploading file to Cloudinary:", file.name);
               const uploadResult = await uploadFormFile(file, selectedActivity.title);
+              console.log("File upload successful:", uploadResult);
               processedData[field.id] = {
                 fileName: file.name,
                 fileUrl: uploadResult.url,
@@ -335,15 +635,80 @@ const UpcomingActivities = () => {
             }
           } catch (error) {
             console.error("Error uploading file:", error);
-            alert("Failed to upload file. Please try again.");
+            let errorMessage = `Failed to upload file for field "${field.label}". Please try again.`;
+            if (error.message) {
+              errorMessage += `\n\nError: ${error.message}`;
+            }
+            if (error.code) {
+              errorMessage += `\n\nError Code: ${error.code}`;
+            }
+            alert(errorMessage);
             setSubmitting(false);
             return;
           }
         }
       }
+      
+      // Process payment proof file specifically (not part of form schema)
+      if (registrationData.paymentProof && registrationData.paymentProof instanceof File) {
+        try {
+          console.log("Processing payment proof file upload");
+          const file = registrationData.paymentProof;
+          console.log("Uploading payment proof to Cloudinary:", file.name);
+          const uploadResult = await uploadFormFile(file, selectedActivity.title);
+          console.log("Payment proof upload successful:", uploadResult);
+          processedData.paymentProof = {
+            fileName: file.name,
+            fileUrl: uploadResult.url,
+            fileSize: file.size,
+            fileType: file.type,
+            cloudinaryPublicId: uploadResult.publicId,
+            uploadedAt: new Date().toISOString()
+          };
+        } catch (error) {
+          console.error("Error uploading payment proof:", error);
+          let errorMessage = "Failed to upload payment proof. Please try again.";
+          if (error.message) {
+            errorMessage += `\n\nError: ${error.message}`;
+          }
+          if (error.code) {
+            errorMessage += `\n\nError Code: ${error.code}`;
+          }
+          alert(errorMessage);
+          setSubmitting(false);
+          return;
+        }
+      }
+
+      // Clean the processed data to remove any remaining File objects or non-serializable data
+      const cleanDataForFirebase = (data) => {
+        const cleaned = {};
+        Object.keys(data).forEach(key => {
+          const value = data[key];
+          if (value instanceof File) {
+            console.warn(`Found File object in field ${key}, removing to prevent Firebase error`);
+            return; // Skip File objects
+          } else if (value && typeof value === 'object' && !Array.isArray(value)) {
+            // Recursively clean nested objects
+            cleaned[key] = cleanDataForFirebase(value);
+          } else if (Array.isArray(value)) {
+            // Clean arrays
+            cleaned[key] = value.map(item => 
+              item instanceof File ? null : (item && typeof item === 'object' ? cleanDataForFirebase(item) : item)
+            ).filter(item => item !== null);
+          } else {
+            // Keep primitive values
+            cleaned[key] = value;
+          }
+        });
+        return cleaned;
+      };
+      
+      const finalProcessedData = cleanDataForFirebase(processedData);
+      console.log("Final cleaned data for Firebase:", finalProcessedData);
 
       const registrationDoc = {
-        ...processedData,
+        ...finalProcessedData,
         activityId: selectedActivity.id,
         activityTitle: selectedActivity.title,
         submittedAt: new Date().toISOString(),
@@ -351,15 +716,60 @@ const UpcomingActivities = () => {
         formVersion: selectedActivity.updatedAt || selectedActivity.createdAt
       };
 
-      await addDoc(collection(db, "upcomingActivities", selectedActivity.id, "registrations"), registrationDoc);
-      await addDoc(collection(db, "allRegistrations"), registrationDoc);
+      console.log("Registration document to save:", registrationDoc);
+      console.log("Attempting to save to Firebase...");
+
+      // Try to save to both locations for redundancy
+      try {
+        console.log("Saving to upcomingActivities subcollection...");
+        const subcollectionRef = await addDoc(
+          collection(db, "upcomingActivities", selectedActivity.id, "registrations"), 
+          registrationDoc
+        );
+        console.log("Saved to subcollection with ID:", subcollectionRef.id);
+      } catch (subcollectionError) {
+        console.warn("Failed to save to subcollection:", subcollectionError);
+        console.log("This might be due to permission issues, continuing with main collection...");
+      }
+
+      try {
+        console.log("Saving to allRegistrations collection...");
+        const mainCollectionRef = await addDoc(collection(db, "allRegistrations"), registrationDoc);
+        console.log("Saved to main collection with ID:", mainCollectionRef.id);
+      } catch (mainCollectionError) {
+        console.error("Failed to save to main collection:", mainCollectionError);
+        throw new Error(`Failed to save registration: ${mainCollectionError.message}`);
+      }
       
+      console.log("Registration saved successfully!");
       setShowRegistrationForm(false);
       setRegistrationData({});
       alert("Registration submitted successfully!");
+      
+      // Refresh the registrations data
+      if (selectedActivity) {
+        fetchRegistrations(selectedActivity.id);
+      }
+      
     } catch (error) {
       console.error("Error submitting registration:", error);
-      alert("Failed to submit registration. Please try again.");
+      console.error("Error details:", {
+        message: error.message,
+        code: error.code,
+        stack: error.stack
+      });
+      
+      // Provide more specific error messages
+      let errorMessage = "Failed to submit registration. Please try again.";
+      if (error.code === 'permission-denied') {
+        errorMessage = "Permission denied. Please check if you're logged in or contact an administrator.";
+      } else if (error.code === 'unavailable') {
+        errorMessage = "Service temporarily unavailable. Please try again later.";
+      } else if (error.message) {
+        errorMessage = `Error: ${error.message}`;
+      }
+      
+      alert(errorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -514,6 +924,22 @@ const UpcomingActivities = () => {
   };
 
   const getDefaultFormSchema = () => [
+    // Content Elements
+    { 
+      id: "welcome_label", 
+      type: "label", 
+      label: "Welcome Message",
+      content: "Welcome to our event! Please fill out the registration form below.",
+      contentType: "text",
+      fontSize: "lg",
+      textColor: "primary",
+      fontWeight: "semibold",
+      alignment: "center",
+      italic: false,
+      underline: false
+    },
+    
+    // Basic Form Fields
     { 
       id: "name", 
       type: "text", 
@@ -564,6 +990,21 @@ const UpcomingActivities = () => {
   "Electrical and Electronics Engineering",
   "Mechanical Engineering"
       ]
+    },
+    
+    // Closing Content Element
+    { 
+      id: "terms_label", 
+      type: "label", 
+      label: "Terms and Conditions",
+      content: "By submitting this form, you agree to our terms and conditions. For questions, contact us at [admin@hitam.org](mailto:admin@hitam.org).",
+      contentType: "markdown",
+      fontSize: "sm",
+      textColor: "muted",
+      fontWeight: "normal",
+      alignment: "left",
+      italic: false,
+      underline: false
     }
   ];
 
@@ -720,9 +1161,13 @@ const UpcomingActivities = () => {
 
     const getFontSizeClass = (size) => {
       switch (size) {
-        case "small": return "text-sm";
-        case "large": return "text-lg";
+        case "xs": return "text-xs";
+        case "sm": return "text-sm";
+        case "medium": return "text-base";
+        case "lg": return "text-lg";
         case "xl": return "text-xl";
+        case "2xl": return "text-2xl";
+        case "3xl": return "text-3xl";
         default: return "text-base";
       }
     };
@@ -735,14 +1180,102 @@ const UpcomingActivities = () => {
       }
     };
 
+    const getTextColorClass = (color) => {
+      switch (color) {
+        case "primary": return "text-blue-600 dark:text-blue-400";
+        case "secondary": return "text-gray-700 dark:text-gray-300";
+        case "success": return "text-green-600 dark:text-green-400";
+        case "warning": return "text-yellow-600 dark:text-yellow-400";
+        case "danger": return "text-red-600 dark:text-red-400";
+        case "muted": return "text-gray-500 dark:text-gray-400";
+        default: return "text-gray-900 dark:text-white";
+      }
+    };
+
+    const getImageSizeClass = (size) => {
+      switch (size) {
+        case "small": return "max-w-sm h-auto";
+        case "medium": return "max-w-md h-auto";
+        case "large": return "max-w-lg h-auto";
+        case "full": return "max-w-full h-auto";
+        default: return "max-w-full h-auto";
+      }
+    };
+
+    const getBorderStyleClass = (style) => {
+      switch (style) {
+        case "rounded": return "rounded-md";
+        case "rounded-lg": return "rounded-lg";
+        case "rounded-full": return "rounded-full";
+        case "square": return "rounded-none";
+        default: return "rounded-md";
+      }
+    };
+
+    const getShadowClass = (shadow) => {
+      switch (shadow) {
+        case "sm": return "shadow-sm";
+        case "md": return "shadow-md";
+        case "lg": return "shadow-lg";
+        case "xl": return "shadow-xl";
+        default: return "shadow-none";
+      }
+    };
+
+    const getButtonStyleClass = (style) => {
+      switch (style) {
+        case "primary": return "bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 rounded-lg";
+        case "secondary": return "bg-gray-500 text-white hover:bg-gray-600 px-4 py-2 rounded-lg";
+        case "outline": return "border border-blue-500 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-4 py-2 rounded-lg";
+        case "link": return "text-blue-600 dark:text-blue-400 hover:underline";
+        case "ghost": return "bg-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 px-4 py-2 rounded-lg";
+        case "danger": return "bg-red-500 text-white hover:bg-red-600 px-4 py-2 rounded-lg";
+        case "success": return "bg-green-500 text-white hover:bg-green-600 px-4 py-2 rounded-lg";
+        default: return "bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 rounded-lg";
+      }
+    };
+
+    const getButtonSizeClass = (size) => {
+      switch (size) {
+        case "xs": return "text-xs px-2 py-1";
+        case "sm": return "text-sm px-3 py-1";
+        case "md": return "text-base px-4 py-2";
+        case "lg": return "text-lg px-5 py-2";
+        case "xl": return "text-xl px-6 py-3";
+        default: return "text-base px-4 py-2";
+      }
+    };
+
+    const getButtonWidthClass = (width) => {
+      switch (width) {
+        case "auto": return "";
+        case "full": return "w-full";
+        case "fit": return "w-fit";
+        default: return "";
+      }
+    };
+
+    const getIcon = (type) => {
+      switch (type) {
+        case "arrow": return "→";
+        case "external": return "🔗";
+        case "download": return "⬇️";
+        case "play": return "▶️";
+        case "plus": return "➕";
+        case "check": return "✓";
+        case "info": return "ℹ️";
+        default: return "→";
+      }
+    };
+
     switch (field.type) {
       case "label":
         return (
           <div key={field.id} className={`${getAlignmentClass(field.alignment)} mb-4`}>
             <div 
-              className={`${getFontSizeClass(field.fontSize)} text-gray-900 dark:text-white`}
+              className={`${getFontSizeClass(field.fontSize)} ${getTextColorClass(field.textColor)} ${field.fontWeight === "bold" ? "font-bold" : field.fontWeight === "semibold" ? "font-semibold" : field.fontWeight === "medium" ? "font-medium" : ""} ${field.italic ? "italic" : ""} ${field.underline ? "underline" : ""}`}
               dangerouslySetInnerHTML={{ 
-                __html: renderMarkdownLinks(field.content || "") 
+                __html: field.contentType === "markdown" ? renderMarkdownLinks(field.content || "") : field.content || "" 
               }}
             />
           </div>
@@ -752,35 +1285,47 @@ const UpcomingActivities = () => {
         return (
           <div key={field.id} className={`${getAlignmentClass(field.alignment)} mb-4`}>
             {field.imageUrl && (
+              <div className="relative">
               <img 
                 src={field.imageUrl} 
                 alt={field.altText || "Form image"} 
-                className="max-w-full h-auto rounded-lg border border-gray-300 dark:border-gray-600"
+                  className={`${getImageSizeClass(field.imageSize)} ${getBorderStyleClass(field.borderStyle)} ${getShadowClass(field.shadow)} border border-gray-300 dark:border-gray-600 ${field.clickable ? "cursor-pointer hover:opacity-80 transition-opacity" : ""}`}
                 onError={(e) => {
                   e.target.style.display = "none";
                 }}
-              />
+                  onClick={() => {
+                    if (field.clickable) {
+                      const url = field.clickUrl || field.imageUrl;
+                      if (url) window.open(url, '_blank');
+                    }
+                  }}
+                />
+                {field.clickable && (
+                  <div className="absolute top-2 right-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+                    🔗
+                  </div>
+                )}
+              </div>
             )}
           </div>
         );
 
       case "link":
-        const buttonClasses = {
-          primary: "bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 rounded-lg",
-          secondary: "bg-gray-500 text-white hover:bg-gray-600 px-4 py-2 rounded-lg",
-          outline: "border border-blue-500 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-4 py-2 rounded-lg",
-          link: "text-blue-600 dark:text-blue-400 hover:underline"
-        };
-
         return (
-          <div key={field.id} className="mb-4">
+          <div key={field.id} className={`${getAlignmentClass(field.alignment)} mb-4`}>
             <a
               href={field.linkUrl || "#"}
               target={field.openInNewTab ? "_blank" : "_self"}
               rel={field.openInNewTab ? "noopener noreferrer" : ""}
-              className={`inline-block transition-colors ${buttonClasses[field.buttonStyle || "primary"]}`}
+              className={`inline-block transition-colors ${getButtonStyleClass(field.buttonStyle)} ${getButtonSizeClass(field.buttonSize)} ${getButtonWidthClass(field.buttonWidth)} ${field.showIcon ? "inline-flex items-center gap-2" : ""}`}
             >
+              {field.showIcon && field.iconPosition === "left" && (
+                <span className="text-sm">{getIcon(field.iconType)}</span>
+              )}
               {field.linkText || "Click here"}
+              {field.showIcon && field.iconPosition === "right" && (
+                <span className="text-sm">{getIcon(field.iconType)}</span>
+              )}
             </a>
           </div>
         );
@@ -791,6 +1336,59 @@ const UpcomingActivities = () => {
   };
 
   return (
+    <>
+      {/* Emergency Fallback UI - Should Always Show */}
+      <div style={{
+        position: 'fixed', 
+        top: 0, 
+        left: 0, 
+        right: 0, 
+        background: 'red', 
+        color: 'white', 
+        padding: '20px', 
+        zIndex: 9999,
+        textAlign: 'center',
+        fontSize: '18px',
+        fontWeight: 'bold'
+      }}>
+        🚨 UPCOMING ACTIVITIES COMPONENT IS RENDERING - IF YOU SEE THIS, COMPONENT IS WORKING
+      </div>
+      
+      {/* Error Display */}
+      {componentError && (
+        <div style={{
+          position: 'fixed',
+          top: 80,
+          left: 20,
+          right: 20,
+          background: 'darkred',
+          color: 'white',
+          padding: '20px',
+          zIndex: 9997,
+          fontSize: '16px'
+        }}>
+          <h3>🚨 Component Error:</h3>
+          <p>{componentError.message}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            style={{
+              background: 'white',
+              color: 'darkred',
+              padding: '10px 20px',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              marginTop: '10px'
+            }}
+          >
+            Reload Page
+          </button>
+        </div>
+      )}
+      
+      
+      
+      {/* Main Component */}
     <div className="min-h-screen pt-16">
       <div className="max-w-6xl mx-auto px-4 py-8">
         <motion.div
@@ -805,6 +1403,7 @@ const UpcomingActivities = () => {
             Register for our upcoming events and workshops
           </p>
         </motion.div>
+
 
         {user && (
           <div className="flex justify-end mb-8">
@@ -1070,8 +1669,17 @@ const UpcomingActivities = () => {
                   <p>FormSchema content: {JSON.stringify(formData.formSchema, null, 2)}</p>
                 </div>
                 
+                <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <p className="text-sm text-blue-700 dark:text-blue-300">
+                    <strong>FormBuilder Debug:</strong> Schema length: {formData.formSchema?.length || 0}
+                  </p>
+                  <p className="text-xs text-blue-600 dark:text-blue-400">
+                    Content Elements: {formData.formSchema?.filter(f => ["label", "image", "link"].includes(f.type)).length || 0}
+                  </p>
+                </div>
+                
                 <div onClick={(e) => e.stopPropagation()}>
-                  <FormBuilder
+                    <FormBuilder
                     formSchema={formData.formSchema || getDefaultFormSchema()}
                     onChange={(schema) => {
                       console.log("FormBuilder onChange called with schema:", schema);
@@ -1391,6 +1999,7 @@ const UpcomingActivities = () => {
         </div>
       </Modal>
     </div>
+    </>
   );
 };
 
