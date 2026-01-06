@@ -43,7 +43,7 @@ const Navbar = () => {
     <motion.nav 
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200/20 dark:border-gray-700/20"
+      className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
@@ -52,13 +52,34 @@ const Navbar = () => {
             animate={{ opacity: 1, x: 0 }}
             className="flex items-center space-x-2"
           >
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">AI</span>
+            <div className="relative w-8 h-8 rounded-lg overflow-hidden">
+              <img
+                src="/logo.jpg"
+                alt="Hitam AI Club"
+                className="w-full h-full object-cover"
+                onLoad={(e) => {
+                  try {
+                    const fb = e.currentTarget.nextElementSibling;
+                    if (fb) fb.style.display = "none";
+                  } catch (err) {
+                    /* ignore */
+                  }
+                }}
+                onError={(e) => {
+                  try {
+                    e.currentTarget.style.display = "none";
+                  } catch (err) {
+                    /* ignore */
+                  }
+                }}
+              />
+              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
+                <span className="text-white font-bold text-sm">AI</span>
+              </div>
             </div>
             <Link to="/" className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               HITAM AI CLUB
             </Link>
-            
           </motion.div>
           
 

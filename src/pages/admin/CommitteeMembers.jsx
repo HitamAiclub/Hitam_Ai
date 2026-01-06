@@ -8,6 +8,7 @@ import Button from "../../components/ui/Button";
 import Modal from "../../components/ui/Modal";
 import Input from "../../components/ui/Input";
 import { Plus, Edit, Trash2, Upload, User } from "lucide-react";
+import { COMMITTEE_ROLES, organizeMembersByRole, groupCoreTeamByLevel, shouldUseLevelWiseDisplay, isValidRole } from "../../utils/committeeRoles";
 
 const CommitteeMembers = () => {
   const [members, setMembers] = useState([]);
@@ -27,19 +28,8 @@ const CommitteeMembers = () => {
   const [optimisticMembers, setOptimisticMembers] = useState([]);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
 
-  const roles = [
-    "President",
-    "Vice President",
-    "Secretary",
-    "Treasurer",
-    "Technical Lead",
-    "Event Coordinator",
-    "Marketing Head",
-    "Design Head",
-    "Content Writer",
-    "Social Media Manager",
-    "Committee Member"
-  ];
+  // Committee roles (updated to match specification)
+  const roles = Object.values(COMMITTEE_ROLES);
 
   const branches = [
      "Computer Science Engineering",
@@ -90,6 +80,12 @@ const CommitteeMembers = () => {
       return;
     }
     
+    // Validate role strictly
+    if (!formData.role || !isValidRole(formData.role)) {
+      alert("Please select a valid role from the allowed roles.");
+      return;
+    }
+
     setUploading(true);
     
     // Optimistic update for faster UI response
@@ -304,79 +300,183 @@ const CommitteeMembers = () => {
             ))}
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {optimisticMembers.map((member, index) => (
-              <Card key={member.id} delay={index * 0.1}>
-                <div className={`p-6 ${member.isOptimistic ? "opacity-75" : ""}`}>
-                  <div className="flex items-center space-x-4 mb-4">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center overflow-hidden">
-                      {member.photoUrl ? (
-                        <img 
-                          src={member.photoUrl} 
-                          alt={member.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <User className="w-8 h-8 text-white" />
-                      )}
+          <div className="space-y-12">
+            {/* Core Team Section */}
+            {(() => {
+              const { coreTeam, committeeMembers } = organizeMembersByRole(optimisticMembers);
+              const coreTeamByLevel = groupCoreTeamByLevel(coreTeam);
+
+              return (
+                <>
+                  {coreTeam.length > 0 && (
+                    <div>
+                      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+                        Core Team
+                      </h2>
+                      <div className="space-y-6">
+                        {Object.entries(coreTeamByLevel).map(([role, members]) => 
+                          members.length > 0 && (
+                            <div key={role}>
+                              <h3 className="text-lg font-semibold text-blue-600 dark:text-blue-400 mb-4">
+                                {role}
+                              </h3>
+                              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                {members.map((member, index) => (
+                                  <Card key={member.id} delay={index * 0.1}>
+                                    <div className={`p-6 ${member.isOptimistic ? "opacity-75" : ""}`}>
+                                      <div className="flex items-center space-x-4 mb-4">
+                                        <div className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center overflow-hidden">
+                                          {member.photoUrl ? (
+                                            <img 
+                                              src={member.photoUrl} 
+                                              alt={member.name}
+                                              className="w-full h-full object-cover"
+                                            />
+                                          ) : (
+                                            <User className="w-8 h-8 text-white" />
+                                          )}
+                                        </div>
+                                        <div className="flex-1">
+                                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                            {member.name}
+                                          </h3>
+                                          <p className="text-blue-600 dark:text-blue-400 font-medium">
+                                            {member.role}
+                                          </p>
+                                        </div>
+                                      </div>
+                                      
+                                      <div className="space-y-2 text-sm text-gray-600 dark:text-gray-300 mb-4">
+                                        {member.branch && (
+                                          <p><strong>Branch:</strong> {member.branch}</p>
+                                        )}
+                                        {member.year && (
+                                          <p><strong>Year:</strong> {member.year}</p>
+                                        )}
+                                        {member.email && (
+                                          <p><strong>Email:</strong> {member.email}</p>
+                                        )}
+                                        {member.phone && (
+                                          <p><strong>Phone:</strong> {member.phone}</p>
+                                        )}
+                                      </div>
+
+                                      <div className="flex gap-2">
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() => handleEdit(member)}
+                                          className="flex-1"
+                                          disabled={member.isOptimistic}
+                                        >
+                                          <Edit className="w-4 h-4 mr-1" />
+                                          Edit
+                                        </Button>
+                                        <Button
+                                          variant="danger"
+                                          size="sm"
+                                          onClick={() => handleDelete(member.id)}
+                                          disabled={member.isOptimistic}
+                                        >
+                                          <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  </Card>
+                                ))}
+                              </div>
+                            </div>
+                          )
+                        )}
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                        {member.name}
-                      </h3>
-                      <p className="text-blue-600 dark:text-blue-400 font-medium">
-                        {member.role}
+                  )}
+
+                  {/* Committee Members Section */}
+                  {committeeMembers.length > 0 && (
+                    <div>
+                      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+                        Committee Members
+                      </h2>
+                      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {committeeMembers.map((member, index) => (
+                          <Card key={member.id} delay={index * 0.1}>
+                            <div className={`p-6 ${member.isOptimistic ? "opacity-75" : ""}`}>
+                              <div className="flex items-center space-x-4 mb-4">
+                                <div className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center overflow-hidden">
+                                  {member.photoUrl ? (
+                                    <img 
+                                      src={member.photoUrl} 
+                                      alt={member.name}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  ) : (
+                                    <User className="w-8 h-8 text-white" />
+                                  )}
+                                </div>
+                                <div className="flex-1">
+                                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                    {member.name}
+                                  </h3>
+                                  <p className="text-blue-600 dark:text-blue-400 font-medium">
+                                    {member.role}
+                                  </p>
+                                </div>
+                              </div>
+                              
+                              <div className="space-y-2 text-sm text-gray-600 dark:text-gray-300 mb-4">
+                                {member.branch && (
+                                  <p><strong>Branch:</strong> {member.branch}</p>
+                                )}
+                                {member.year && (
+                                  <p><strong>Year:</strong> {member.year}</p>
+                                )}
+                                {member.email && (
+                                  <p><strong>Email:</strong> {member.email}</p>
+                                )}
+                                {member.phone && (
+                                  <p><strong>Phone:</strong> {member.phone}</p>
+                                )}
+                              </div>
+
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleEdit(member)}
+                                  className="flex-1"
+                                  disabled={member.isOptimistic}
+                                >
+                                  <Edit className="w-4 h-4 mr-1" />
+                                  Edit
+                                </Button>
+                                <Button
+                                  variant="danger"
+                                  size="sm"
+                                  onClick={() => handleDelete(member.id)}
+                                  disabled={member.isOptimistic}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {optimisticMembers.length === 0 && (
+                    <div className="text-center py-12">
+                      <User className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-500 dark:text-gray-400">
+                        No committee members found. Add your first member to get started.
                       </p>
                     </div>
-                  </div>
-                  
-                  <div className="space-y-2 text-sm text-gray-600 dark:text-gray-300 mb-4">
-                    {member.branch && (
-                      <p><strong>Branch:</strong> {member.branch}</p>
-                    )}
-                    {member.year && (
-                      <p><strong>Year:</strong> {member.year}</p>
-                    )}
-                    {member.email && (
-                      <p><strong>Email:</strong> {member.email}</p>
-                    )}
-                    {member.phone && (
-                      <p><strong>Phone:</strong> {member.phone}</p>
-                    )}
-                  </div>
-
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEdit(member)}
-                      className="flex-1"
-                      disabled={member.isOptimistic}
-                    >
-                      <Edit className="w-4 h-4 mr-1" />
-                      Edit
-                    </Button>
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      onClick={() => handleDelete(member.id)}
-                      disabled={member.isOptimistic}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        )}
-
-        {optimisticMembers.length === 0 && !loading && (
-          <div className="text-center py-12">
-            <User className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-500 dark:text-gray-400">
-              No committee members found. Add your first member to get started.
-            </p>
+                  )}
+                </>
+              );
+            })()}
           </div>
         )}
       </div>

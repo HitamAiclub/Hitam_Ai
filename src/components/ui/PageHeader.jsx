@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 
 function PageHeader({ title, subtitle }) {
   return (
-    <div className="bg-gradient-to-r from-primary-600 to-secondary-600 py-16 md:py-24">
+    <div className="bg-gradient-to-r from-blue-600 to-purple-600 py-16 md:py-24">
       <div className="container mx-auto px-4 text-center text-white">
         <motion.h1 
           className="text-4xl md:text-5xl font-bold mb-4"

@@ -167,3 +167,9 @@ This project is licensed under the MIT License.
 ## Support
 
 For support, please contact the development team or create an issue in the repository.
+
+## Club Logo (Developer note)
+
+- To display the club logo in the site header and on the homepage, place your logo image file as `public/logo.jpg` (the dev server serves files in `public/` at the site root). The navbar and homepage will automatically use `/logo.jpg` if present, otherwise they fall back to the existing gradient icon.
+
+- Example: save the attached image as `public/logo.jpg`.

@@ -118,7 +118,7 @@ function UpcomingActivitiesPage() {
   }
   
   return (
-    <div>
+    <div className="border-none">
       <PageHeader 
         title="Upcoming Activities" 
         subtitle="Stay informed about our upcoming events and workshops"

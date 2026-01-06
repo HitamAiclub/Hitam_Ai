@@ -1337,22 +1337,7 @@ const UpcomingActivities = () => {
 
   return (
     <>
-      {/* Emergency Fallback UI - Should Always Show */}
-      <div style={{
-        position: 'fixed', 
-        top: 0, 
-        left: 0, 
-        right: 0, 
-        background: 'red', 
-        color: 'white', 
-        padding: '20px', 
-        zIndex: 9999,
-        textAlign: 'center',
-        fontSize: '18px',
-        fontWeight: 'bold'
-      }}>
-        🚨 UPCOMING ACTIVITIES COMPONENT IS RENDERING - IF YOU SEE THIS, COMPONENT IS WORKING
-      </div>
+      {/* Emergency Fallback UI - Removed Debug Message */}
       
       {/* Error Display */}
       {componentError && (

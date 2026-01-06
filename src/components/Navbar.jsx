@@ -38,21 +38,20 @@ const Navbar = () => {
     <motion.nav
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-700/50"
+      className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Link to={isAdminRoute ? "/admin" : "/"} className="flex items-center space-x-2">
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center"
-            >
-              <span className="text-white font-bold text-sm">H</span>
-            </motion.div>
-            <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 dark:from-purple-400 dark:to-blue-400 bg-clip-text text-transparent">
-              Hitam AI Club
-            </span>
+              <div className="relative w-8 h-8 rounded-lg overflow-hidden">
+                <img src="/logo.jpg" alt="Hitam AI Club" className="w-full h-full object-cover" onError={(e)=>{e.currentTarget.style.display='none'}} />
+                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-purple-500 to-blue-500">
+                  <span className="text-white font-bold text-sm">H</span>
+                </div>
+              </div>
+              <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 dark:from-purple-400 dark:to-blue-400 bg-clip-text text-transparent">
+                Hitam AI Club
+              </span>
           </Link>
 
           <div className="hidden md:flex items-center space-x-8">

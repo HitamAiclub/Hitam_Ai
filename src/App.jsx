@@ -28,10 +28,10 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <Router>
-          <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors duration-200 relative">
+          <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors duration-200 relative border-none outline-none">
             <ParticleBackground />
             <Navbar />
-            <main className="relative z-20 flex-grow">
+            <main className="relative z-20 flex-grow border-none outline-none">
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/events" element={<EventsPage />} />

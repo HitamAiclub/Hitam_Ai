@@ -6,6 +6,7 @@ import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
 import { Calendar, Users, Trophy, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { organizeMembersByRole, groupCoreTeamByLevel, CORE_TEAM_ROLES, shouldUseLevelWiseDisplay } from "../utils/committeeRoles";
 
 const HomePage = () => {
   const [committeeMembers, setCommitteeMembers] = useState([]);
@@ -69,9 +70,12 @@ const HomePage = () => {
             transition={{ duration: 0.8 }}
             className="relative z-10"
           >
-            <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-teal-600 bg-clip-text text-transparent mb-6">
-              HITAM AI
-            </h1>
+            <div className="flex flex-col items-center">
+              <img src="/logo.jpg" alt="Hitam AI Logo" className="w-56 h-56 md:w-64 md:h-64 object-cover object-center mb-8 rounded-lg shadow-2xl" />
+              <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-teal-600 bg-clip-text text-transparent mb-6">
+                HITAM AI
+              </h1>
+            </div>
             <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
               Empowering the next generation of AI innovators at HITAM
             </p>
@@ -269,32 +273,158 @@ const HomePage = () => {
               ))}
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {committeeMembers.map((member, index) => (
-                <Card key={member.id} delay={index * 0.1}>
-                  <div className="p-6 text-center">
-                    <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
-                      {member.photoUrl ? (
-                        <img 
-                          src={member.photoUrl} 
-                          alt={member.name}
-                          className="w-full h-full rounded-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-white text-2xl font-bold">
-                          {member.name?.charAt(0)}
-                        </span>
-                      )}
-                    </div>
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                      {member.name}
-                    </h3>
-                    <p className="text-blue-600 dark:text-blue-400 font-medium">
-                      {member.role}
-                    </p>
-                  </div>
-                </Card>
-              ))}
+            <div className="space-y-12">
+              {(() => {
+                const { coreTeam, committeeMembers: nonCoreMembers } = organizeMembersByRole(committeeMembers);
+                const coreTeamByLevel = groupCoreTeamByLevel(coreTeam);
+                const useLevelWise = shouldUseLevelWiseDisplay(coreTeam);
+
+                return (
+                  <>
+                    {/* Core Team Section */}
+                    {coreTeam.length > 0 && (
+                      <div>
+                        <h3 className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-8">
+                          Core Team
+                        </h3>
+
+                        {/* Level-wise hierarchical, center aligned (Rule B) */}
+                        {useLevelWise ? (
+                          <div className="space-y-8">
+                            {CORE_TEAM_ROLES.map((role) => {
+                              const members = coreTeamByLevel[role] || [];
+                              return members.length > 0 ? (
+                                <div key={role}>
+                                  <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-4 text-center">
+                                    {role}
+                                  </h4>
+                                  <div className="flex flex-wrap justify-center gap-8">
+                                    {members.map((member, index) => (
+                                      <div key={member.id} className="w-64">
+                                        <Card delay={index * 0.05}>
+                                          <div className="p-6 text-center">
+                                            <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center overflow-hidden">
+                                              {member.photoUrl ? (
+                                                <img 
+                                                  src={member.photoUrl} 
+                                                  alt={member.name}
+                                                  className="w-full h-full object-cover"
+                                                />
+                                              ) : (
+                                                <span className="text-white text-2xl font-bold">
+                                                  {member.name?.charAt(0)}
+                                                </span>
+                                              )}
+                                            </div>
+                                            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                                              {member.name}
+                                            </h3>
+                                            <p className="text-blue-600 dark:text-blue-400 font-medium">
+                                              {member.role}
+                                            </p>
+                                          </div>
+                                        </Card>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              ) : null;
+                            })}
+                          </div>
+                        ) : (
+                          /* Left-to-right display (Rule A) */
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                            {CORE_TEAM_ROLES.map((role) => {
+                              const members = coreTeamByLevel[role] || [];
+                              return (
+                                <div key={role}>
+                                  <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-4 ml-2">
+                                    {role}
+                                  </h4>
+                                  <div className="space-y-6">
+                                    {members.map((member, index) => (
+                                      <Card key={member.id} delay={index * 0.05}>
+                                        <div className="p-6 text-center">
+                                          <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center overflow-hidden">
+                                            {member.photoUrl ? (
+                                              <img 
+                                                src={member.photoUrl} 
+                                                alt={member.name}
+                                                className="w-full h-full object-cover"
+                                              />
+                                            ) : (
+                                              <span className="text-white text-2xl font-bold">
+                                                {member.name?.charAt(0)}
+                                              </span>
+                                            )}
+                                          </div>
+                                          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                                            {member.name}
+                                          </h3>
+                                          <p className="text-blue-600 dark:text-blue-400 font-medium">
+                                            {member.role}
+                                          </p>
+                                        </div>
+                                      </Card>
+                                    ))}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Committee Members Section (always full-width below Core Team) */}
+                    {nonCoreMembers.length > 0 && (
+                      <div className="w-full mt-12 clear-both">
+                        <h3 className="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-8">
+                          Committee Members
+                        </h3>
+                        <div className="w-full">
+                          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {nonCoreMembers.map((member, index) => (
+                              <Card key={member.id} delay={index * 0.1}>
+                                <div className="p-6 text-center">
+                                  <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center overflow-hidden">
+                                    {member.photoUrl ? (
+                                      <img 
+                                        src={member.photoUrl} 
+                                        alt={member.name}
+                                        className="w-full h-full object-cover"
+                                      />
+                                    ) : (
+                                      <span className="text-white text-2xl font-bold">
+                                        {member.name?.charAt(0)}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                                    {member.name}
+                                  </h3>
+                                  <p className="text-blue-600 dark:text-blue-400 font-medium">
+                                    {member.role}
+                                  </p>
+                                </div>
+                              </Card>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {coreTeam.length === 0 && nonCoreMembers.length === 0 && (
+                      <div className="text-center py-12">
+                        <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-500 dark:text-gray-400">
+                          No committee members found yet.
+                        </p>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </div>
           )}
         </div>
