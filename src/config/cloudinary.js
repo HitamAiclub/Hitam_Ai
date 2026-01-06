@@ -1,8 +1,8 @@
 // Cloudinary Configuration
 export const CLOUDINARY_CONFIG = {
-  cloud_name: import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dwva5ae36',
-  api_key: import.meta.env.VITE_CLOUDINARY_API_KEY || '139229544196252',
-  upload_preset: import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'hitam_ai_club',
+  cloud_name: import.meta.env.VITE_CLOUDINARY_CLOUD_NAME,
+  api_key: import.meta.env.VITE_CLOUDINARY_API_KEY,
+  upload_preset: import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET,
   folders: {
     events: 'events',
     formregister: 'formregister',
