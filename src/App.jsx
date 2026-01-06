@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "./contexts/ThemeContext.jsx";
 import { AuthProvider } from "./contexts/AuthContext.jsx";
 import { testFirebaseConnection } from "./firebase.js";
@@ -27,69 +27,76 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <Router>
-          <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors duration-200 relative border-none outline-none">
-            <ParticleBackground />
-            <Navbar />
-            <main className="relative z-20 flex-grow border-none outline-none">
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/events" element={<EventsPage />} />
-                <Route path="/upcoming" element={<UpcomingActivities />} />
-                <Route path="/upcoming-test" element={<div className="min-h-screen pt-16 flex items-center justify-center"><h1 className="text-4xl">Upcoming Test Page Works!</h1></div>} />
-                <Route path="/join" element={<JoinClub />} />
-                <Route path="/admin/login" element={<AdminLogin />} />
-                <Route
-                  path="/admin"
-                  element={
-                    <ProtectedRoute>
-                      <AdminHome />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/admin/committee"
-                  element={
-                    <ProtectedRoute>
-                      <CommitteeMembers />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/admin/submissions"
-                  element={
-                    <ProtectedRoute>
-                      <FormSubmissions />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/admin/community"
-                  element={
-                    <ProtectedRoute>
-                      <CommunityMembers />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/admin/media"
-                  element={
-                    <ProtectedRoute>
-                      <MediaManagement />
-                    </ProtectedRoute>
-                  }
-                />
-              </Routes>
-            </main>
-            <footer className="relative z-10" >
-              <Footer />
-            </footer>
-          </div>
-        </Router>
+        <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors duration-200 relative border-none outline-none">
+          <ParticleBackground />
+          <Navbar />
+
+          <main className="relative z-20 flex-grow border-none outline-none">
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/events" element={<EventsPage />} />
+              <Route path="/upcoming" element={<UpcomingActivities />} />
+              <Route
+                path="/upcoming-test"
+                element={
+                  <div className="min-h-screen pt-16 flex items-center justify-center">
+                    <h1 className="text-4xl">Upcoming Test Page Works!</h1>
+                  </div>
+                }
+              />
+              <Route path="/join" element={<JoinClub />} />
+              <Route path="/admin/login" element={<AdminLogin />} />
+
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute>
+                    <AdminHome />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/committee"
+                element={
+                  <ProtectedRoute>
+                    <CommitteeMembers />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/submissions"
+                element={
+                  <ProtectedRoute>
+                    <FormSubmissions />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/community"
+                element={
+                  <ProtectedRoute>
+                    <CommunityMembers />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/media"
+                element={
+                  <ProtectedRoute>
+                    <MediaManagement />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </main>
+
+          <footer className="relative z-10">
+            <Footer />
+          </footer>
+        </div>
       </AuthProvider>
     </ThemeProvider>
   );
 }
 
 export default App;
- 
