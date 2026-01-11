@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 import { ThemeProvider } from "./contexts/ThemeContext.jsx";
 import { AuthProvider } from "./contexts/AuthContext.jsx";
 import { testFirebaseConnection } from "./firebase.js";
@@ -27,6 +28,7 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
+        <SpeedInsights />
         <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors duration-200 relative border-none outline-none">
           <ParticleBackground />
           <Navbar />
